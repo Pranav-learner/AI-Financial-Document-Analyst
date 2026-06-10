@@ -18,6 +18,12 @@ from app.ingestion.services.report_ingestion_service import ReportIngestionServi
 from app.models.enums import ReportType
 from app.repositories.report_repository import ReportRepository
 from app.schemas.report import (
+    ChunkListResponse,
+    ChunkMapItem,
+    ChunkMapResponse,
+    ChunkSectionStat,
+    ChunkStatsResponse,
+    ChunkSummary,
     ReportDetail,
     ReportListItem,
     ReportListResponse,
@@ -183,3 +189,114 @@ async def get_section(
     if section is None or section.report_id != report_id:
         raise NotFoundError("Section not found", details={"section_id": str(section_id)})
     return SectionOut.model_validate(section)
+
+
+# ---- Phase 1C: chunks --------------------------------------------------------
+
+
+@router.get(
+    "/{report_id}/chunks",
+    response_model=ChunkListResponse,
+    summary="List chunks for a report (no text)",
+)
+async def list_chunks(
+    report_id: uuid.UUID,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+) -> ChunkListResponse:
+    repo = ReportRepository(db)
+    if await repo.get_report(report_id) is None:
+        raise NotFoundError("Report not found", details={"report_id": str(report_id)})
+    chunks, total = await repo.get_chunks(report_id, limit=limit, offset=offset)
+    return ChunkListResponse(
+        report_id=report_id,
+        total=total,
+        limit=limit,
+        offset=offset,
+        items=[
+            ChunkSummary(
+                id=c.id,
+                chunk_index=c.chunk_index,
+                section_id=c.section_id,
+                normalized_section_name=c.chunk_metadata.get("normalized_section_name"),
+                token_count=c.token_count,
+                start_page=c.start_page,
+                end_page=c.end_page,
+            )
+            for c in chunks
+        ],
+    )
+
+
+@router.get(
+    "/{report_id}/chunk-map",
+    response_model=ChunkMapResponse,
+    summary="Chunk boundary map (debug)",
+)
+async def chunk_map(
+    report_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> ChunkMapResponse:
+    repo = ReportRepository(db)
+    if await repo.get_report(report_id) is None:
+        raise NotFoundError("Report not found", details={"report_id": str(report_id)})
+    chunks = await repo.get_all_chunks(report_id)
+    return ChunkMapResponse(
+        report_id=report_id,
+        total_chunks=len(chunks),
+        items=[
+            ChunkMapItem(
+                chunk_index=c.chunk_index,
+                section_id=c.section_id,
+                normalized_section_name=c.chunk_metadata.get("normalized_section_name"),
+                token_count=c.token_count,
+                start_page=c.start_page,
+                end_page=c.end_page,
+            )
+            for c in chunks
+        ],
+    )
+
+
+@router.get(
+    "/{report_id}/chunk-stats",
+    response_model=ChunkStatsResponse,
+    summary="Chunk-quality stats (token distribution per section)",
+)
+async def chunk_stats(
+    report_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> ChunkStatsResponse:
+    repo = ReportRepository(db)
+    if await repo.get_report(report_id) is None:
+        raise NotFoundError("Report not found", details={"report_id": str(report_id)})
+    chunks = await repo.get_all_chunks(report_id)
+    tokens = [c.token_count for c in chunks]
+
+    by_section: dict[str, list[int]] = {}
+    for c in chunks:
+        name = c.chunk_metadata.get("normalized_section_name") or "Unknown"
+        by_section.setdefault(name, []).append(c.token_count)
+
+    section_stats = [
+        ChunkSectionStat(
+            normalized_section_name=name,
+            chunk_count=len(toks),
+            total_tokens=sum(toks),
+            min_tokens=min(toks),
+            max_tokens=max(toks),
+            avg_tokens=round(sum(toks) / len(toks), 1),
+        )
+        for name, toks in sorted(by_section.items())
+    ]
+
+    return ChunkStatsResponse(
+        report_id=report_id,
+        total_chunks=len(chunks),
+        total_tokens=sum(tokens),
+        min_tokens=min(tokens) if tokens else 0,
+        max_tokens=max(tokens) if tokens else 0,
+        avg_tokens=round(sum(tokens) / len(tokens), 1) if tokens else 0.0,
+        sections=section_stats,
+    )

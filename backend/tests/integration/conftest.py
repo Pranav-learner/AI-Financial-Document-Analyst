@@ -43,7 +43,7 @@ def _clean_tables() -> Generator[None, None, None]:
     with sync_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE report_sections, report_pages, reports, companies "
+                "TRUNCATE document_chunks, report_sections, report_pages, reports, companies "
                 "RESTART IDENTITY CASCADE"
             )
         )
@@ -69,9 +69,11 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
         def delay(self, report_id: str) -> None:  # no broker in tests
             return None
 
-    # Stub both tasks: upload enqueues process_report, which would chain detect_sections.
+    # Stub the pipeline tasks: upload→process_report→detect_sections→generate_chunks
+    # are chained via .delay(); tests invoke each task directly instead of via a broker.
     monkeypatch.setattr("app.tasks.ingestion.process_report", _Task())
     monkeypatch.setattr("app.tasks.ingestion.detect_sections", _Task())
+    monkeypatch.setattr("app.tasks.ingestion.generate_chunks", _Task())
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)

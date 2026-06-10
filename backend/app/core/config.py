@@ -91,6 +91,16 @@ class Settings(BaseSettings):
     # (app/ingestion/section_detection/taxonomy.json).
     section_taxonomy_path: str = ""
 
+    # ---- Chunking (Phase 1C) ----
+    # Token-based, section-aware recursive chunking. See docs/05_RETRIEVAL_DESIGN.md §2.
+    chunk_target_tokens: int = 700      # preferred chunk size
+    chunk_max_tokens: int = 800         # hard upper bound
+    chunk_min_tokens: int = 50          # below this → flagged as "too small"
+    chunk_overlap_tokens: int = 75      # carried context between adjacent chunks
+    # Tokenizer backend: "heuristic" (regex word/punct) | "char" (chars/4 estimate).
+    # Pluggable so a real tokenizer (e.g. tiktoken) can be swapped in later.
+    tokenizer: str = "heuristic"
+
     # ---- Object storage ----
     storage_backend: str = "local"
     storage_local_path: str = "./data/uploads"

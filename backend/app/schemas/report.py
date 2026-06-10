@@ -132,3 +132,76 @@ class SectionMapItem(BaseModel):
 class SectionMapResponse(BaseModel):
     report_id: uuid.UUID
     sections: list[SectionMapItem]
+
+
+# ---- Phase 1C: chunks --------------------------------------------------------
+
+
+class ChunkOut(BaseModel):
+    """A single chunk including its text and metadata."""
+
+    id: uuid.UUID
+    report_id: uuid.UUID
+    section_id: uuid.UUID | None
+    chunk_index: int
+    chunk_text: str
+    token_count: int
+    start_page: int | None
+    end_page: int | None
+    metadata: dict
+
+
+class ChunkSummary(BaseModel):
+    """A chunk without its text (for list/map views)."""
+
+    id: uuid.UUID
+    chunk_index: int
+    section_id: uuid.UUID | None
+    normalized_section_name: str | None
+    token_count: int
+    start_page: int | None
+    end_page: int | None
+
+
+class ChunkListResponse(BaseModel):
+    report_id: uuid.UUID
+    total: int
+    limit: int
+    offset: int
+    items: list[ChunkSummary]
+
+
+class ChunkMapItem(BaseModel):
+    chunk_index: int
+    section_id: uuid.UUID | None
+    normalized_section_name: str | None
+    token_count: int
+    start_page: int | None
+    end_page: int | None
+
+
+class ChunkMapResponse(BaseModel):
+    report_id: uuid.UUID
+    total_chunks: int
+    items: list[ChunkMapItem]
+
+
+class ChunkSectionStat(BaseModel):
+    normalized_section_name: str
+    chunk_count: int
+    total_tokens: int
+    min_tokens: int
+    max_tokens: int
+    avg_tokens: float
+
+
+class ChunkStatsResponse(BaseModel):
+    """Chunk-quality inspection: counts, sizes, token distribution per section."""
+
+    report_id: uuid.UUID
+    total_chunks: int
+    total_tokens: int
+    min_tokens: int
+    max_tokens: int
+    avg_tokens: float
+    sections: list[ChunkSectionStat]

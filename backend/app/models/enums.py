@@ -22,4 +22,6 @@ class ReportStatus(str, Enum):
     PROCESSED = "PROCESSED"      # pages extracted and persisted (Phase 1A done)
     SECTIONING = "SECTIONING"    # worker is detecting sections (Phase 1B)
     SECTIONED = "SECTIONED"      # sections detected and persisted (Phase 1B done)
+    CHUNKING = "CHUNKING"        # worker is generating chunks (Phase 1C)
+    CHUNKED = "CHUNKED"          # chunks generated and persisted (Phase 1C done)
     FAILED = "FAILED"            # a processing step failed (see error_message / logs)

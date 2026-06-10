@@ -6,9 +6,10 @@ citation-backed analysis: metric extraction, YoY/QoQ comparison, risk extraction
 and evolution tracking, management tone analysis, competitor benchmarking,
 investment memo generation, and conversational financial Q&A.
 
-> **Status:** Phase 1B complete — financial section intelligence (rule-based
-> section detection → normalization → storage) on top of the Phase 1A ingestion
-> pipeline. See `docs/06_IMPLEMENTATION_ROADMAP.md`.
+> **Status:** Phase 1C complete — knowledge preparation layer (section-aware
+> recursive chunking → metadata → validation → `document_chunks`) on top of the
+> 1A ingestion and 1B section-intelligence pipeline. Embeddings/pgvector are
+> Phase 2. See `docs/06_IMPLEMENTATION_ROADMAP.md`.
 
 ## Tech stack
 

@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.models.company import Company
+from app.models.document_chunk import DocumentChunk
 from app.models.enums import ReportStatus, ReportType
 from app.models.report import Report
 from app.models.report_page import ReportPage
@@ -120,6 +121,43 @@ class ReportRepository:
     async def get_section(self, section_id: uuid.UUID) -> ReportSection | None:
         return await self.session.get(ReportSection, section_id)
 
+    # ---- Phase 1C: chunks ----------------------------------------------------
+
+    async def get_chunks(
+        self, report_id: uuid.UUID, *, limit: int, offset: int
+    ) -> tuple[list[DocumentChunk], int]:
+        total = (
+            await self.session.scalar(
+                select(func.count())
+                .select_from(DocumentChunk)
+                .where(DocumentChunk.report_id == report_id)
+            )
+            or 0
+        )
+        rows = (
+            await self.session.scalars(
+                select(DocumentChunk)
+                .where(DocumentChunk.report_id == report_id)
+                .order_by(DocumentChunk.chunk_index.asc())
+                .limit(limit)
+                .offset(offset)
+            )
+        ).all()
+        return list(rows), int(total)
+
+    async def get_all_chunks(self, report_id: uuid.UUID) -> list[DocumentChunk]:
+        rows = (
+            await self.session.scalars(
+                select(DocumentChunk)
+                .where(DocumentChunk.report_id == report_id)
+                .order_by(DocumentChunk.chunk_index.asc())
+            )
+        ).all()
+        return list(rows)
+
+    async def get_chunk(self, chunk_id: uuid.UUID) -> DocumentChunk | None:
+        return await self.session.get(DocumentChunk, chunk_id)
+
 
 class SyncReportRepository:
     """Sync repository for the Celery worker's processing task."""
@@ -195,5 +233,45 @@ class SyncReportRepository:
 
     def mark_sectioned(self, report: Report) -> None:
         report.status = ReportStatus.SECTIONED
+        report.processing_completed_at = datetime.now(timezone.utc)
+        self.session.commit()
+
+    # ---- Phase 1C: chunk generation -----------------------------------------
+
+    def get_company(self, company_id: uuid.UUID | None) -> Company | None:
+        if company_id is None:
+            return None
+        return self.session.get(Company, company_id)
+
+    def get_sections_ordered(self, report_id: uuid.UUID) -> list[ReportSection]:
+        return list(
+            self.session.query(ReportSection)
+            .filter(ReportSection.report_id == report_id)
+            .order_by(ReportSection.start_page.asc())
+            .all()
+        )
+
+    def mark_chunking(self, report: Report) -> None:
+        report.status = ReportStatus.CHUNKING
+        report.error_message = None
+        self.session.commit()
+
+    def replace_chunks(self, report_id: uuid.UUID, chunks: list[dict]) -> int:
+        """Delete existing chunks for the report and insert the new set.
+
+        Idempotent. Each item is a dict with keys: section_id, chunk_index,
+        chunk_text, token_count, start_page, end_page, chunk_metadata.
+        """
+        self.session.query(DocumentChunk).filter(
+            DocumentChunk.report_id == report_id
+        ).delete()
+        self.session.add_all(
+            [DocumentChunk(report_id=report_id, **c) for c in chunks]
+        )
+        self.session.commit()
+        return len(chunks)
+
+    def mark_chunked(self, report: Report) -> None:
+        report.status = ReportStatus.CHUNKED
         report.processing_completed_at = datetime.now(timezone.utc)
         self.session.commit()

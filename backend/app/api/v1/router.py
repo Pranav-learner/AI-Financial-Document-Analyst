@@ -9,15 +9,16 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health, reports
+from app.api.v1.endpoints import chunks, health, reports
 
 api_router = APIRouter()
 
 # Operational endpoints (Phase 0.5).
 api_router.include_router(health.router)
 
-# Report ingestion (Phase 1A).
+# Report ingestion + sections + chunks (Phase 1A/1B/1C).
 api_router.include_router(reports.router, prefix="/reports", tags=["reports"])
+api_router.include_router(chunks.router, prefix="/chunks", tags=["chunks"])
 
 # --- Business routers (added per phase) ---------------------------------------
 # api_router.include_router(search.router,    prefix="/search",    tags=["search"])     # Phase 2

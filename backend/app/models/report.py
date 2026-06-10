@@ -26,6 +26,7 @@ from app.models.enums import ReportStatus, ReportType
 
 if TYPE_CHECKING:
     from app.models.company import Company
+    from app.models.document_chunk import DocumentChunk
     from app.models.report_page import ReportPage
     from app.models.report_section import ReportSection
 
@@ -87,6 +88,12 @@ class Report(UUIDMixin, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by="ReportSection.start_page",
+    )
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
+        back_populates="report",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="DocumentChunk.chunk_index",
     )
 
     __table_args__ = (

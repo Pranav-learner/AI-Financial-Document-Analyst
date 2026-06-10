@@ -28,6 +28,7 @@ from app.db.base import Base
 from app.models.base import UUIDMixin
 
 if TYPE_CHECKING:
+    from app.models.document_chunk import DocumentChunk
     from app.models.report import Report
 
 
@@ -54,6 +55,11 @@ class ReportSection(UUIDMixin, Base):
     )
 
     report: Mapped["Report"] = relationship(back_populates="sections")
+    chunks: Mapped[list["DocumentChunk"]] = relationship(
+        back_populates="section",
+        passive_deletes=True,
+        order_by="DocumentChunk.chunk_index",
+    )
 
     __table_args__ = (
         CheckConstraint("confidence_score BETWEEN 0 AND 1", name="ck_report_sections_confidence"),

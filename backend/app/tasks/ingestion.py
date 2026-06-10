@@ -14,6 +14,7 @@ import uuid
 
 from app.core.logging import get_logger
 from app.db.session import SyncSessionLocal
+from app.ingestion.chunking import ChunkGenerator, ReportContext, SectionInput
 from app.ingestion.pdf_parser import parse_pdf
 from app.ingestion.section_detection import SectionDetector
 from app.ingestion.storage import get_storage
@@ -117,10 +118,87 @@ def detect_sections(report_id: str) -> dict:
             repo.mark_sectioned(report)
 
             log.info("sectioning.success", report_id=report_id, sections=count)
+
+            # Chain into Phase 1C chunk generation.
+            generate_chunks.delay(report_id)
+
             return {"report_id": report_id, "status": "SECTIONED", "sections": count}
 
         except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
             log.error("sectioning.failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(name="app.tasks.ingestion.generate_chunks", acks_late=True)
+def generate_chunks(report_id: str) -> dict:
+    """Generate retrieval-ready chunks from a report's sections (Phase 1C).
+
+    Workflow: load report → CHUNKING → load sections → section-aware recursive
+    chunking + metadata + validation → store chunks → CHUNKED. On error: FAILED +
+    recorded reason. Deterministic and LLM-free (no embeddings, no retrieval).
+    """
+    rid = uuid.UUID(report_id)
+    log.info("chunking.start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("chunking.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            sections = repo.get_sections_ordered(rid)
+            if not sections:
+                raise ValueError("no sections to chunk (report not sectioned?)")
+
+            repo.mark_chunking(report)
+
+            company = repo.get_company(report.company_id)
+            report_ctx = ReportContext(
+                report_id=str(report.id),
+                report_type=str(report.report_type.value),
+                year=report.year,
+                quarter=report.quarter,
+                company=(company.ticker or company.name) if company else None,
+            )
+            section_inputs = [
+                SectionInput(
+                    section_id=str(s.id),
+                    section_name=s.section_name,
+                    normalized_section_name=s.normalized_section_name,
+                    start_page=s.start_page,
+                    end_page=s.end_page,
+                    content=s.content,
+                )
+                for s in sections
+            ]
+
+            generated = ChunkGenerator().generate(report_ctx, section_inputs)
+            rows = [
+                {
+                    "section_id": uuid.UUID(g.section_id) if g.section_id else None,
+                    "chunk_index": g.chunk_index,
+                    "chunk_text": g.chunk_text,
+                    "token_count": g.token_count,
+                    "start_page": g.start_page,
+                    "end_page": g.end_page,
+                    "chunk_metadata": g.metadata,
+                }
+                for g in generated
+            ]
+            count = repo.replace_chunks(rid, rows)
+            repo.mark_chunked(report)
+
+            log.info("chunking.success", report_id=report_id, chunks=count)
+            return {"report_id": report_id, "status": "CHUNKED", "chunks": count}
+
+        except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
+            log.error("chunking.failure", report_id=report_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:

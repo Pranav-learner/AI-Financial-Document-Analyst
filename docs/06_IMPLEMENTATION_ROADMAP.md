@@ -17,6 +17,7 @@
    - ⭐ [Phase 0.5 — Repository Foundation](#phase-05--repository-foundation)
    - ⭐ [Phase 1A — Document Ingestion Foundation](#phase-1a--document-ingestion-foundation)
    - ⭐ [Phase 1B Completion Report — Financial Section Intelligence](#phase-1b-completion-report--financial-section-intelligence)
+   - ⭐ [Phase 1C Completion Report — Knowledge Preparation Layer](#phase-1c-completion-report--knowledge-preparation-layer)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -58,7 +59,7 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **0.5** | **Repository Foundation** | Scaffold & infra | Monorepo structure, Docker stack, config/logging/health, Celery + Alembic + SQLAlchemy patterns, `docs/07–09` | Stack boots; health endpoints green (see §below) |
 | **1A** | **Document Ingestion** ✅ | Upload + raw PDF extraction | Upload/store/queue, PyMuPDF parser, `companies`/`reports`/`report_pages`, report APIs | PDF→pages persisted; status tracked (DONE) |
 | **1B** | **Section Intelligence** ✅ | Rule-based section detection | `report_sections`, detection engine + configurable taxonomy, section APIs, status lifecycle | Sections detected/normalized/stored for 10-K/10-Q/transcript (DONE) |
-| **1C** | **Chunking** | Section-aware chunking | Chunker over `report_sections` boundaries | Section-aware chunks produced |
+| **1C** | **Knowledge Preparation** ✅ | Section-aware recursive chunking | `document_chunks` (+metadata, no vectors), chunking engine, token counter, validation, chunk APIs | Validated chunks + metadata stored for 10-K/10-Q/transcript (DONE) |
 | **2** | **Knowledge Base** | Chunk + embed + store | Chunker, Gemini embedding pipeline, pgvector + HNSW, `/upload`,`/search` | Semantic search returns relevant cited chunks |
 | **3** | **Financial Metric Extraction** | Typed KPIs + deltas | Metric Extraction Agent, `financial_metrics`, YoY/QoQ, `/metrics` | ≥95% extraction accuracy on gold set |
 | **4** | **Risk Intelligence** | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling |
@@ -387,6 +388,149 @@ phases (chunking, metric/risk extraction) build on.
 
 ---
 
+## Phase 1C Completion Report — Knowledge Preparation Layer
+
+### Overview
+Phase 1C converts the structured sections from Phase 1B into **retrieval-ready
+knowledge chunks** with rich metadata, stored in a new `document_chunks` table.
+This is a **preparation** layer — it performs **no AI reasoning, no embeddings, no
+retrieval**. It solves the problem of turning whole sections (often too large for a
+model context or too coarse for precise retrieval) into clean, coherent, metadata-
+stamped units that Phase 2 will embed and Phase 6 will retrieve. Deterministic,
+repeatable, explainable, debuggable.
+
+### Features Implemented
+- **Section-aware recursive chunking** (the official strategy — not fixed-size).
+- **Configurable token counting** (pluggable backends; stored per chunk).
+- **Metadata generation** (company, period, section, pages, ids) per chunk.
+- **Chunk validation** (empty / too-small / too-large / broken-metadata / duplicate).
+- **Section-specific strategies** (Risk Factors, Financial Statements, transcript, …).
+- **Deterministic chunk storage** with sequential `chunk_index` and idempotent rebuild.
+- **Celery `generate_chunks` task** with `CHUNKING`/`CHUNKED` status lifecycle.
+- **APIs**: list chunks, single chunk, chunk-map, and a chunk-stats inspection tool.
+- Pipeline chaining: `detect_sections` → enqueues `generate_chunks`.
+
+### Architecture Changes
+- **New package** `app/ingestion/chunking/`: `token_counter.py` (pluggable),
+  `config.py` (strategy + per-section overrides), `section_chunker.py` (recursive
+  splitter), `metadata_builder.py`, `chunk_validation.py`, `chunker.py` (orchestrator).
+  *Why:* isolates deterministic knowledge-prep as a reusable, testable unit.
+- **New table** `document_chunks` (+ migration `0003_phase1c`). **No embedding/vector
+  column** — added in Phase 2 (ADR-007 + deferred embedding dimension).
+- **Extended `ReportStatus`** with `CHUNKING`/`CHUNKED` (+ CHECK constraint update).
+- **New Celery task** `app.tasks.ingestion.generate_chunks` (ingestion queue).
+- **New `/api/v1/chunks` router** + report-scoped chunk endpoints; repository
+  extensions (async chunk reads; sync chunk writes for the worker).
+
+### Technical Decisions
+- **Decision:** Section-aware recursive chunking (target ~700 tokens, range 500–800,
+  overlap ~75). **Alternatives:** fixed-size chunking; sentence-window; semantic
+  (embedding-based) chunking. **Reason chosen:** preserves semantic coherence and
+  section boundaries, keeps financial context intact, and is fully deterministic;
+  fixed-size shatters tables/risks and semantic chunking needs embeddings (out of
+  scope). **Tradeoffs:** token-target heuristics need tuning per section type.
+  (See **ADR-012**.)
+- **Decision:** Pluggable token counter (default heuristic regex; `char` fallback).
+  **Reason:** deterministic and dependency-free now; a real tokenizer (tiktoken/model)
+  can be swapped via config later without code changes. (See **TDL-013**.)
+- **Decision:** Per-section chunk strategies (Risk Factors smaller target; Financial
+  Statements larger + line-first separators + smaller overlap). **Reason:** keep
+  individual risks granular; avoid shredding tables.
+- **Decision:** Per-chunk page span = parent section's span. **Reason:** Phase 1A
+  concatenates page text without per-page offsets; finer mapping deferred (limitation).
+- **Decision:** Content-hash duplicate detection scoped per report. **Reason:** boilerplate
+  repeated across sections shouldn't create redundant chunks.
+
+### Files Created
+- `app/models/document_chunk.py`
+- `app/ingestion/chunking/__init__.py`, `token_counter.py`, `config.py`,
+  `section_chunker.py`, `metadata_builder.py`, `chunk_validation.py`, `chunker.py`
+- `app/api/v1/endpoints/chunks.py`
+- `migrations/versions/20260610_0003_phase1c_chunks.py`
+- `tests/unit/test_token_counter.py`, `test_chunking.py`, `test_chunk_validation.py`,
+  `test_chunk_generator.py`, `test_metadata_builder.py`
+- `tests/integration/test_chunks_api.py`
+
+### Files Modified
+- `app/core/config.py` (chunk target/max/min/overlap + tokenizer settings)
+- `app/models/enums.py` (CHUNKING/CHUNKED), `app/models/report.py` & `report_section.py`
+  (chunks relationships), `app/models/__init__.py` (register DocumentChunk)
+- `app/repositories/report_repository.py` (async chunk reads; sync chunk writes)
+- `app/schemas/report.py` (chunk schemas)
+- `app/api/v1/endpoints/reports.py` (chunks/chunk-map/chunk-stats), `app/api/v1/router.py`
+- `app/tasks/ingestion.py` (`generate_chunks`; chained from `detect_sections`)
+- `tests/integration/conftest.py` (truncate `document_chunks`; stub chained task)
+
+### Database Changes
+- **New table** `document_chunks`: id, report_id (FK→reports `CASCADE`), section_id
+  (FK→report_sections `SET NULL`), chunk_index, chunk_text, token_count, start_page,
+  end_page, **metadata (JSONB)**, created_at, updated_at.
+- **Constraints:** unique `(report_id, chunk_index)`; `token_count ≥ 0`; `chunk_index ≥ 0`.
+- **Indexes:** `ix_document_chunks_report_id`, `ix_document_chunks_section_id`,
+  `ix_document_chunks_metadata` (**GIN** on JSONB for future metadata filtering).
+- **No embedding/vector column, no pgvector index** (Phase 2).
+- **Altered** `reports.status` CHECK to add `CHUNKING`/`CHUNKED`.
+- **Migration** `0003_phase1c` (down_revision `0002_phase1b`) with working downgrade.
+
+### API Changes
+- `GET /api/v1/reports/{id}/chunks` — paginated chunk summaries (no text).
+- `GET /api/v1/chunks/{chunk_id}` — single chunk with text + metadata.
+- `GET /api/v1/reports/{id}/chunk-map` — chunk boundaries (debug).
+- `GET /api/v1/reports/{id}/chunk-stats` — per-section count + token distribution (inspection tool).
+
+### Testing Summary
+- **Unit (24 new; 67 total passing):** token counting, recursive splitting (small/
+  empty/long/oversized-paragraph/overlap/determinism), section strategies, validation
+  (empty/duplicate/broken-metadata/too-small/too-large), generator (sequential index,
+  complete metadata, dedupe, determinism).
+- **Integration (DB-backed, CI):** full upload→process→sectioning→chunking→APIs;
+  no-sections→FAILED; unknown-id→MISSING; 404; **idempotency**; explicit assertion that
+  no `embedding`/`vector` field is exposed.
+- Success **and** failure paths; deterministic (no external calls).
+
+### Lessons Learned
+- `metadata` is a **reserved attribute** on SQLAlchemy's declarative base — mapped the
+  JSONB column via attribute `chunk_metadata` to the DB column `metadata`.
+- Token-target packing with whole-paragraph atoms keeps chunks coherent while staying
+  under the max; closing at the *target* (not max) keeps sizes consistent.
+- Per-section strategies matter: a single global size shredded tables and merged risks;
+  small overrides fixed both.
+
+### Risks Discovered
+- **Per-chunk page precision:** chunks inherit the section page span (no intra-section
+  page offsets yet) — acceptable now, but citation granularity in later phases will
+  want finer mapping.
+- **Heuristic token counts** approximate real tokenizer output; Phase 2 embedding/token
+  budgets may need the pluggable counter swapped for the model's tokenizer.
+- **Table fidelity:** tabular sections are chunked as text; structural table handling is
+  a future improvement.
+
+### Future Phase Dependencies
+- **Phase 2 (embeddings + pgvector)** depends on `document_chunks` — it will ALTER the
+  table to add the `vector(EMBEDDING_DIM)` column + HNSW index and embed `chunk_text`.
+- **Phase 6 (hybrid retrieval)** depends on the chunk `metadata` (GIN-indexed) for the
+  metadata pre-filter.
+- **Phases 3–5** consume chunk metadata (`normalized_section_name`) to target sections.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| Chunks generated successfully | ✅ |
+| Section-aware chunking implemented | ✅ (recursive, not fixed-size) |
+| Metadata generated correctly | ✅ (all required keys) |
+| Token counts stored | ✅ (`token_count` per chunk) |
+| Chunks stored in database | ✅ (`document_chunks`, ordered) |
+| APIs expose chunks | ✅ (list / detail / map / stats) |
+| Validation layer operational | ✅ (fatal + warning rules) |
+| Tests pass | ✅ (67 unit; integration for CI) |
+| Documentation updated | ✅ (this report + ADR-012 / TDL-013) |
+| Works for 10-K / 10-Q / transcript | ✅ / ✅ / ✅ |
+
+### Final Status
+> **PHASE 1C COMPLETED.** Phase 2 (embeddings / pgvector) NOT started — strictly out of scope.
+
+---
+
 ## 3. Technology Decisions Log
 
 > Template: **Decision · Alternatives Considered · Chosen Because · Tradeoffs · Expected Impact**
@@ -474,6 +618,13 @@ phases (chunking, metric/risk extraction) build on.
 - **Chosen because:** tune/extend section vocabularies without code changes; keeps policy (taxonomy) separate from mechanism (detection); trivially testable
 - **Tradeoffs:** a malformed JSON fails fast at load; schema is convention-based (no formal validation yet)
 - **Expected impact:** maintainable, configurable detection that evolves with new filing styles
+
+### TDL-013 — Pluggable token counter (Phase 1C)
+- **Decision:** Abstract token counting behind a `TokenCounter` protocol; default `heuristic` (regex word/punct), with a `char` fallback; selectable via `TOKENIZER` setting
+- **Alternatives:** hardcode tiktoken; hardcode a transformers tokenizer; count whitespace words only
+- **Chosen because:** deterministic and dependency-free for Phase 1C, while allowing a model-accurate tokenizer (e.g. tiktoken) to be swapped in for Phase 2 without touching the chunker
+- **Tradeoffs:** heuristic counts approximate real subword token counts
+- **Expected impact:** stable chunk sizing now; easy migration to exact token budgets later
 
 ---
 
@@ -575,6 +726,14 @@ phases (chunking, metric/risk extraction) build on.
 - **Reasoning:** **deterministic, fast, cheap, explainable, easy to debug** — and financial filings/transcripts follow strong heading conventions (SEC items, standard statement titles), so rules cover the high-value cases well. Aligns with the "deterministic structure, no LLM" mandate and ADR-007 (structured intelligence kept separate from RAG data).
 - **Consequences:** less flexible than ML for unusual/foreign layouts or TOC-only documents; depends on heading conventions. Confidence scores + the fallback section keep low-quality detections visible and non-fatal. An ML/LLM-assisted detector may be added later strictly as an *augmentation*, not on the deterministic path.
 
+### ADR-012 — Section-Aware Recursive Chunking (No Fixed-Size, No AI)  *(Accepted — Phase 1C)*
+- **Context:** Sections must be split into retrieval-ready units before embedding/retrieval, on every document, deterministically.
+- **Problem:** How to chunk so units are semantically coherent, keep financial context, and respect section boundaries — without AI.
+- **Options:** fixed-size character/token windows · sentence-window · **section-aware recursive** (treat each section as a document, recursively split on a separator hierarchy, then merge to a token target with overlap) · semantic/embedding-based chunking.
+- **Decision:** **Section-aware recursive chunking** — target ~700 tokens (range 500–800), ~75-token overlap, per-section strategy overrides.
+- **Reasoning:** preserves paragraph/risk/statement boundaries and coherence; deterministic, repeatable, debuggable; fixed-size shreds tables and merges unrelated risks; semantic chunking requires embeddings (out of scope, and couples prep to a model).
+- **Consequences:** token-target heuristics need occasional tuning; per-chunk page precision is section-level for now. Aligns with ADR-007 (knowledge prep separate from RAG vectors) — the embedding column is added later in Phase 2.
+
 ---
 
 ## 5. Implementation Log
@@ -603,7 +762,12 @@ phases (chunking, metric/risk extraction) build on.
 | — | 1B | `detect_sections` task + APIs | nickg | Celery task (SECTIONING/SECTIONED) chained from `process_report`; list/detail/section-map endpoints | ✅ Completed |
 | — | 1B | Tests + docs | nickg | 24 new unit tests (43 total pass); integration suite; Phase 1B Completion Report + ADR-011 | ✅ Completed |
 | — | 1B | **Phase 1B COMPLETE** | nickg | All exit criteria met; 1C not started | ✅ Completed |
-| — | 1C | Section-aware chunking | | Chunker over `report_sections` boundaries | ⬜ Todo |
+| — | 1C | Chunking engine | nickg | Section-aware recursive chunker + pluggable token counter + per-section strategies + validation (`app/ingestion/chunking/`) | ✅ Completed |
+| — | 1C | `document_chunks` + migration | nickg | New table (metadata JSONB, GIN; no vectors) + migration `0003_phase1c`; extended status enum | ✅ Completed |
+| — | 1C | `generate_chunks` task + APIs | nickg | Celery task (CHUNKING/CHUNKED) chained from `detect_sections`; chunks/chunk/chunk-map/chunk-stats endpoints | ✅ Completed |
+| — | 1C | Tests + docs | nickg | 24 new unit tests (67 total pass); integration suite; Phase 1C Completion Report + ADR-012/TDL-013 | ✅ Completed |
+| — | 1C | **Phase 1C COMPLETE** | nickg | All exit criteria met; Phase 2 not started | ✅ Completed |
+| — | 2 | Embeddings + pgvector | | Add `vector(EMBEDDING_DIM)` column + HNSW; embed chunk_text | ⬜ Todo |
 
 > _Add a row per meaningful change. Mark status: ⬜ Todo · 🟡 In progress · ✅ Completed · ⛔ Blocked._
 
@@ -647,6 +811,8 @@ phases (chunking, metric/risk extraction) build on.
 | Detection (1B) | SEC item numbers are not uniform — modeled per document-type **and** 10-Q Part to avoid mislabeling (Item 2 = MD&A in 10-Q, Properties in 10-K). | — |
 | Detection (1B) | TOC entries (dot-leaders / trailing page numbers) are the main false-start source; skipping them materially improved boundary precision. | — |
 | Config (1B) | Externalizing the taxonomy to JSON kept detection tunable and tests data-driven (no code edits to add a section alias). | — |
+| ORM (1C) | `metadata` is reserved on SQLAlchemy's declarative base — mapped the JSONB via attribute `chunk_metadata` to DB column `metadata`. | — |
+| Chunking (1C) | Closing chunks at the *target* (not the max) and packing whole paragraphs keeps sizes consistent and coherent; per-section overrides prevent table-shredding/risk-merging. | — |
 
 ---
 
