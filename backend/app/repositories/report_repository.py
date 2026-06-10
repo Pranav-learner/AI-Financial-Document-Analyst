@@ -22,6 +22,7 @@ from app.models.company import Company
 from app.models.enums import ReportStatus, ReportType
 from app.models.report import Report
 from app.models.report_page import ReportPage
+from app.models.report_section import ReportSection
 
 
 class ReportRepository:
@@ -106,6 +107,19 @@ class ReportRepository:
         ).all()
         return list(rows), int(total)
 
+    async def get_sections(self, report_id: uuid.UUID) -> list[ReportSection]:
+        rows = (
+            await self.session.scalars(
+                select(ReportSection)
+                .where(ReportSection.report_id == report_id)
+                .order_by(ReportSection.start_page.asc())
+            )
+        ).all()
+        return list(rows)
+
+    async def get_section(self, section_id: uuid.UUID) -> ReportSection | None:
+        return await self.session.get(ReportSection, section_id)
+
 
 class SyncReportRepository:
     """Sync repository for the Celery worker's processing task."""
@@ -143,5 +157,43 @@ class SyncReportRepository:
     def mark_failed(self, report: Report, *, message: str) -> None:
         report.status = ReportStatus.FAILED
         report.error_message = message[:2000]
+        report.processing_completed_at = datetime.now(timezone.utc)
+        self.session.commit()
+
+    # ---- Phase 1B: section detection ----------------------------------------
+
+    def get_pages_ordered(self, report_id: uuid.UUID) -> list[tuple[int, str]]:
+        """Return (page_number, page_text) for a report, ordered by page."""
+        rows = (
+            self.session.query(ReportPage.page_number, ReportPage.page_text)
+            .filter(ReportPage.report_id == report_id)
+            .order_by(ReportPage.page_number.asc())
+            .all()
+        )
+        return [(n, t) for n, t in rows]
+
+    def mark_sectioning(self, report: Report) -> None:
+        report.status = ReportStatus.SECTIONING
+        report.error_message = None
+        self.session.commit()
+
+    def replace_sections(self, report_id: uuid.UUID, sections: list[dict]) -> int:
+        """Delete existing sections for the report and insert the new set.
+
+        Idempotent: re-running detection rebuilds sections cleanly. Each item is a
+        dict with keys: section_name, normalized_section_name, start_page,
+        end_page, content, confidence_score.
+        """
+        self.session.query(ReportSection).filter(
+            ReportSection.report_id == report_id
+        ).delete()
+        self.session.add_all(
+            [ReportSection(report_id=report_id, **s) for s in sections]
+        )
+        self.session.commit()
+        return len(sections)
+
+    def mark_sectioned(self, report: Report) -> None:
+        report.status = ReportStatus.SECTIONED
         report.processing_completed_at = datetime.now(timezone.utc)
         self.session.commit()

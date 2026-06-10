@@ -15,6 +15,7 @@ import uuid
 from app.core.logging import get_logger
 from app.db.session import SyncSessionLocal
 from app.ingestion.pdf_parser import parse_pdf
+from app.ingestion.section_detection import SectionDetector
 from app.ingestion.storage import get_storage
 from app.repositories.report_repository import SyncReportRepository
 from app.tasks.celery_app import celery_app
@@ -55,6 +56,10 @@ def process_report(report_id: str) -> dict:
             repo.mark_processed(report, total_pages=parsed.total_pages)
 
             log.info("processing.success", report_id=report_id, total_pages=parsed.total_pages)
+
+            # Chain into Phase 1B section detection (separate task / status).
+            detect_sections.delay(report_id)
+
             return {
                 "report_id": report_id,
                 "status": "PROCESSED",
@@ -63,6 +68,59 @@ def process_report(report_id: str) -> dict:
 
         except Exception as exc:  # noqa: BLE001 - record as FAILED, log, do not crash-loop
             log.error("processing.failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(name="app.tasks.ingestion.detect_sections", acks_late=True)
+def detect_sections(report_id: str) -> dict:
+    """Detect logical sections for a processed report (Phase 1B).
+
+    Workflow: load report → SECTIONING → load pages → rule-based detect →
+    normalize → store sections → SECTIONED. On error: FAILED + recorded reason.
+    Deterministic and LLM-free.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("sectioning.start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("sectioning.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            pages = repo.get_pages_ordered(rid)
+            if not pages:
+                raise ValueError("no pages to section (report not processed?)")
+
+            repo.mark_sectioning(report)
+
+            detector = SectionDetector()
+            detected = detector.detect(pages, report_type=str(report.report_type.value))
+            rows = [
+                {
+                    "section_name": d.section_name,
+                    "normalized_section_name": d.normalized_section_name,
+                    "start_page": d.start_page,
+                    "end_page": d.end_page,
+                    "content": d.content,
+                    "confidence_score": d.confidence_score,
+                }
+                for d in detected
+            ]
+            count = repo.replace_sections(rid, rows)
+            repo.mark_sectioned(report)
+
+            log.info("sectioning.success", report_id=report_id, sections=count)
+            return {"report_id": report_id, "status": "SECTIONED", "sections": count}
+
+        except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
+            log.error("sectioning.failure", report_id=report_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:

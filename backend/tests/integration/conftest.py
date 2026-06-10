@@ -41,7 +41,12 @@ def _clean_tables() -> Generator[None, None, None]:
     """Truncate between tests for isolation."""
     yield
     with sync_engine.begin() as conn:
-        conn.execute(text("TRUNCATE report_pages, reports, companies RESTART IDENTITY CASCADE"))
+        conn.execute(
+            text(
+                "TRUNCATE report_sections, report_pages, reports, companies "
+                "RESTART IDENTITY CASCADE"
+            )
+        )
 
 
 @pytest.fixture
@@ -64,7 +69,9 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
         def delay(self, report_id: str) -> None:  # no broker in tests
             return None
 
+    # Stub both tasks: upload enqueues process_report, which would chain detect_sections.
     monkeypatch.setattr("app.tasks.ingestion.process_report", _Task())
+    monkeypatch.setattr("app.tasks.ingestion.detect_sections", _Task())
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)
@@ -74,12 +81,29 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
     app.dependency_overrides.clear()
 
 
-@pytest.fixture
-def tiny_pdf_bytes() -> bytes:
+def _pdf_from_pages(page_lines: list[str]) -> bytes:
     doc = fitz.open()
-    for txt in ["Revenue was $1,284 million.", "Risk factors discussion."]:
+    for body in page_lines:
         page = doc.new_page()
-        page.insert_text((72, 72), txt)
+        # insert_text renders each "\n" as a new line, preserving headings on top.
+        page.insert_text((72, 72), body)
     data = doc.tobytes()
     doc.close()
     return data
+
+
+@pytest.fixture
+def tiny_pdf_bytes() -> bytes:
+    return _pdf_from_pages(["Revenue was $1,284 million.", "Risk factors discussion."])
+
+
+@pytest.fixture
+def tenk_pdf_bytes() -> bytes:
+    return _pdf_from_pages(
+        [
+            "PART I\nItem 1. Business\nWe build robots.",
+            "Item 1A. Risk Factors\nThe following risks could affect us.",
+            "Item 7. Management's Discussion and Analysis\nRevenue rose.",
+            "Item 8. Financial Statements\nConsolidated Balance Sheets.",
+        ]
+    )

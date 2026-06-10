@@ -27,6 +27,7 @@ from app.models.enums import ReportStatus, ReportType
 if TYPE_CHECKING:
     from app.models.company import Company
     from app.models.report_page import ReportPage
+    from app.models.report_section import ReportSection
 
 
 class Report(UUIDMixin, Base):
@@ -80,6 +81,12 @@ class Report(UUIDMixin, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by="ReportPage.page_number",
+    )
+    sections: Mapped[list["ReportSection"]] = relationship(
+        back_populates="report",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="ReportSection.start_page",
     )
 
     __table_args__ = (

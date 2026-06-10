@@ -84,3 +84,51 @@ class ReportPagesResponse(BaseModel):
     items: list[ReportPageOut]
     limit: int
     offset: int
+
+
+# ---- Phase 1B: sections ------------------------------------------------------
+
+
+class SectionOut(BaseModel):
+    """A detected section including its full content."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    section_name: str
+    normalized_section_name: str
+    start_page: int
+    end_page: int
+    confidence_score: float
+    content: str
+
+
+class SectionSummary(BaseModel):
+    """A detected section WITHOUT content (for list views)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    section_name: str
+    normalized_section_name: str
+    start_page: int
+    end_page: int
+    confidence_score: float
+
+
+class SectionListResponse(BaseModel):
+    report_id: uuid.UUID
+    count: int
+    items: list[SectionSummary]
+
+
+class SectionMapItem(BaseModel):
+    section: str            # normalized name
+    start_page: int
+    end_page: int
+    confidence_score: float
+
+
+class SectionMapResponse(BaseModel):
+    report_id: uuid.UUID
+    sections: list[SectionMapItem]

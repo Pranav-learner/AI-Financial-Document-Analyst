@@ -6,8 +6,9 @@ citation-backed analysis: metric extraction, YoY/QoQ comparison, risk extraction
 and evolution tracking, management tone analysis, competitor benchmarking,
 investment memo generation, and conversational financial Q&A.
 
-> **Status:** Phase 1A complete — document ingestion foundation (upload → store →
-> queue → PDF extraction → page persistence). See `docs/06_IMPLEMENTATION_ROADMAP.md`.
+> **Status:** Phase 1B complete — financial section intelligence (rule-based
+> section detection → normalization → storage) on top of the Phase 1A ingestion
+> pipeline. See `docs/06_IMPLEMENTATION_ROADMAP.md`.
 
 ## Tech stack
 
@@ -69,4 +70,7 @@ pytest -m integration   # requires Postgres (via docker compose)
 | `docs/07_REPOSITORY_STRUCTURE.md` | Folder structure & conventions |
 | `docs/08_INFRASTRUCTURE_SETUP.md` | Docker / Postgres / Redis / Celery / Alembic |
 | `docs/09_DEVELOPMENT_GUIDELINES.md` | Naming, branching, commits, testing |
-| `docs/10_PHASE_1A_IMPLEMENTATION.md` | Phase 1A — document ingestion foundation |
+
+> Implementation history for every phase (including Phase 1A and 1B completion
+> reports, ADRs, and lessons learned) lives in `docs/06_IMPLEMENTATION_ROADMAP.md` —
+> the single source of truth.

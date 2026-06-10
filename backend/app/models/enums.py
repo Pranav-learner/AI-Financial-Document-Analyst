@@ -15,9 +15,11 @@ class ReportType(str, Enum):
 
 
 class ReportStatus(str, Enum):
-    """Lifecycle of a report through the ingestion pipeline."""
+    """Lifecycle of a report through the ingestion + structure pipeline."""
 
     UPLOADED = "UPLOADED"        # file stored, record created, task queued
-    PROCESSING = "PROCESSING"    # worker is parsing the PDF
-    PROCESSED = "PROCESSED"      # pages extracted and persisted
-    FAILED = "FAILED"            # processing failed (see error_message / logs)
+    PROCESSING = "PROCESSING"    # worker is parsing the PDF (Phase 1A)
+    PROCESSED = "PROCESSED"      # pages extracted and persisted (Phase 1A done)
+    SECTIONING = "SECTIONING"    # worker is detecting sections (Phase 1B)
+    SECTIONED = "SECTIONED"      # sections detected and persisted (Phase 1B done)
+    FAILED = "FAILED"            # a processing step failed (see error_message / logs)

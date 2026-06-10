@@ -86,6 +86,11 @@ class Settings(BaseSettings):
     allowed_upload_extensions: str = ".pdf"
     allowed_upload_content_types: str = "application/pdf,application/x-pdf"
 
+    # ---- Section detection (Phase 1B) ----
+    # Path to the configurable section taxonomy. Empty → use the packaged default
+    # (app/ingestion/section_detection/taxonomy.json).
+    section_taxonomy_path: str = ""
+
     # ---- Object storage ----
     storage_backend: str = "local"
     storage_local_path: str = "./data/uploads"

@@ -1,0 +1,146 @@
+{
+  "$comment": "Configurable section taxonomy for Phase 1B. Business logic reads this file; values are NOT hardcoded in code. Override path via SECTION_TAXONOMY_PATH.",
+  "fallback_section": "Uncategorized",
+  "fallback_confidence": 0.3,
+  "confidence": {
+    "sec_item": 0.95,
+    "transcript_marker": 0.9,
+    "exact_alias": 0.85,
+    "pattern": 0.75,
+    "weak": 0.5
+  },
+  "canonical_sections": [
+    "Business Overview",
+    "Risk Factors",
+    "MD&A",
+    "Market Risk Disclosures",
+    "Financial Statements",
+    "Balance Sheet",
+    "Income Statement",
+    "Cash Flow Statement",
+    "Notes to Financial Statements",
+    "Forward Guidance",
+    "Management Commentary",
+    "Legal Proceedings",
+    "Controls and Procedures",
+    "Operator Remarks",
+    "Prepared Remarks",
+    "CEO Commentary",
+    "CFO Commentary",
+    "Question & Answer",
+    "Closing Remarks",
+    "Uncategorized"
+  ],
+  "$sec_items_comment": "Item numbering differs by document type and (for 10-Q) by Part, because SEC reuses numbers across parts. Keys: '10-K' (flat), '10-Q-I' (Part I), '10-Q-II' (Part II).",
+  "sec_items": {
+    "10-K": {
+      "1": "Business Overview",
+      "1A": "Risk Factors",
+      "3": "Legal Proceedings",
+      "7": "MD&A",
+      "7A": "Market Risk Disclosures",
+      "8": "Financial Statements",
+      "9A": "Controls and Procedures"
+    },
+    "10-Q-I": {
+      "1": "Financial Statements",
+      "2": "MD&A",
+      "3": "Market Risk Disclosures",
+      "4": "Controls and Procedures"
+    },
+    "10-Q-II": {
+      "1": "Legal Proceedings",
+      "1A": "Risk Factors"
+    }
+  },
+  "aliases": {
+    "business": "Business Overview",
+    "business overview": "Business Overview",
+    "our business": "Business Overview",
+    "company overview": "Business Overview",
+    "overview of the business": "Business Overview",
+
+    "risk factors": "Risk Factors",
+    "principal risks": "Risk Factors",
+    "key risks": "Risk Factors",
+    "risk considerations": "Risk Factors",
+    "risk disclosures": "Risk Factors",
+    "principal risks and uncertainties": "Risk Factors",
+    "certain risk factors": "Risk Factors",
+
+    "md&a": "MD&A",
+    "mda": "MD&A",
+    "management discussion": "MD&A",
+    "management discussion and analysis": "MD&A",
+    "management's discussion and analysis": "MD&A",
+    "management's discussion and analysis of financial condition and results of operations": "MD&A",
+    "discussion and analysis": "MD&A",
+
+    "quantitative and qualitative disclosures about market risk": "Market Risk Disclosures",
+    "market risk": "Market Risk Disclosures",
+    "market risk disclosures": "Market Risk Disclosures",
+
+    "financial statements": "Financial Statements",
+    "consolidated financial statements": "Financial Statements",
+    "financial statements and supplementary data": "Financial Statements",
+    "condensed consolidated financial statements": "Financial Statements",
+
+    "balance sheet": "Balance Sheet",
+    "balance sheets": "Balance Sheet",
+    "consolidated balance sheet": "Balance Sheet",
+    "consolidated balance sheets": "Balance Sheet",
+    "statement of financial position": "Balance Sheet",
+
+    "income statement": "Income Statement",
+    "statements of operations": "Income Statement",
+    "statement of operations": "Income Statement",
+    "consolidated statements of operations": "Income Statement",
+    "statements of income": "Income Statement",
+    "statement of income": "Income Statement",
+    "profit and loss": "Income Statement",
+
+    "cash flow statement": "Cash Flow Statement",
+    "statement of cash flows": "Cash Flow Statement",
+    "statements of cash flows": "Cash Flow Statement",
+    "consolidated statements of cash flows": "Cash Flow Statement",
+
+    "notes to financial statements": "Notes to Financial Statements",
+    "notes to the financial statements": "Notes to Financial Statements",
+    "notes to consolidated financial statements": "Notes to Financial Statements",
+    "notes to the consolidated financial statements": "Notes to Financial Statements",
+
+    "forward guidance": "Forward Guidance",
+    "guidance": "Forward Guidance",
+    "outlook": "Forward Guidance",
+    "financial outlook": "Forward Guidance",
+    "fiscal year outlook": "Forward Guidance",
+    "forward-looking guidance": "Forward Guidance",
+
+    "management commentary": "Management Commentary",
+    "management's commentary": "Management Commentary",
+
+    "legal proceedings": "Legal Proceedings",
+    "controls and procedures": "Controls and Procedures",
+
+    "operator": "Operator Remarks",
+    "prepared remarks": "Prepared Remarks",
+    "ceo commentary": "CEO Commentary",
+    "chief executive officer": "CEO Commentary",
+    "cfo commentary": "CFO Commentary",
+    "chief financial officer": "CFO Commentary",
+    "question-and-answer session": "Question & Answer",
+    "questions and answers": "Question & Answer",
+    "q&a": "Question & Answer",
+    "q & a": "Question & Answer",
+    "closing remarks": "Closing Remarks",
+    "conclusion": "Closing Remarks"
+  },
+  "transcript_markers": {
+    "operator": "Operator Remarks",
+    "prepared remarks": "Prepared Remarks",
+    "question-and-answer session": "Question & Answer",
+    "questions and answers": "Question & Answer",
+    "q&a": "Question & Answer",
+    "closing remarks": "Closing Remarks"
+  }
+}

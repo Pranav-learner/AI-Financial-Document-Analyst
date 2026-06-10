@@ -8,11 +8,13 @@ from app.models.company import Company
 from app.models.enums import ReportStatus, ReportType
 from app.models.report import Report
 from app.models.report_page import ReportPage
+from app.models.report_section import ReportSection
 
 __all__ = [
     "Company",
     "Report",
     "ReportPage",
+    "ReportSection",
     "ReportStatus",
     "ReportType",
 ]

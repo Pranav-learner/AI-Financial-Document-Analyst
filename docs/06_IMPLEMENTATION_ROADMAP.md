@@ -16,6 +16,7 @@
    - ⭐ [Phase 0 Completion Report](#phase-0-completion-report)
    - ⭐ [Phase 0.5 — Repository Foundation](#phase-05--repository-foundation)
    - ⭐ [Phase 1A — Document Ingestion Foundation](#phase-1a--document-ingestion-foundation)
+   - ⭐ [Phase 1B Completion Report — Financial Section Intelligence](#phase-1b-completion-report--financial-section-intelligence)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -56,7 +57,8 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **0** | **Architecture** | Foundation & docs | `docs/01–06`, schema, decisions locked | All 6 docs reviewed; tech stack ratified |
 | **0.5** | **Repository Foundation** | Scaffold & infra | Monorepo structure, Docker stack, config/logging/health, Celery + Alembic + SQLAlchemy patterns, `docs/07–09` | Stack boots; health endpoints green (see §below) |
 | **1A** | **Document Ingestion** ✅ | Upload + raw PDF extraction | Upload/store/queue, PyMuPDF parser, `companies`/`reports`/`report_pages`, report APIs | PDF→pages persisted; status tracked (DONE) |
-| **1B** | **Document Intelligence** | Section detection | Sectioner (10-K/10-Q item map), transcript segmentation, table handling | Sections correctly identified |
+| **1B** | **Section Intelligence** ✅ | Rule-based section detection | `report_sections`, detection engine + configurable taxonomy, section APIs, status lifecycle | Sections detected/normalized/stored for 10-K/10-Q/transcript (DONE) |
+| **1C** | **Chunking** | Section-aware chunking | Chunker over `report_sections` boundaries | Section-aware chunks produced |
 | **2** | **Knowledge Base** | Chunk + embed + store | Chunker, Gemini embedding pipeline, pgvector + HNSW, `/upload`,`/search` | Semantic search returns relevant cited chunks |
 | **3** | **Financial Metric Extraction** | Typed KPIs + deltas | Metric Extraction Agent, `financial_metrics`, YoY/QoQ, `/metrics` | ≥95% extraction accuracy on gold set |
 | **4** | **Risk Intelligence** | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling |
@@ -242,6 +244,149 @@ integration suite (DB-backed) authored for CI. Full table in `docs/10`.
 
 ---
 
+## Phase 1B Completion Report — Financial Section Intelligence
+
+### Overview
+Phase 1B converts the raw extracted pages from Phase 1A into **meaningful, logical
+financial sections** (Risk Factors, MD&A, Financial Statements, transcript
+segments, …) and stores them with page boundaries, full content, and a confidence
+score. Detection is **100% rule-based and deterministic — no LLMs, no embeddings,
+no chunking, no retrieval** — solving the problem of making document structure
+queryable cheaply, fast, and explainably. This is the structural layer later
+phases (chunking, metric/risk extraction) build on.
+
+### Features Implemented
+- Page analysis + **rule-based section detection** (SEC item headings, transcript
+  markers, heading-text matching, TOC skipping, PART-context tracking).
+- **Section normalization** to a canonical taxonomy (configurable, external JSON).
+- **Confidence scoring** per detected section (tiered).
+- **Section storage** in a new `report_sections` table (whole-section content; no chunks).
+- **Celery `detect_sections` task** with its own status lifecycle (`SECTIONING`/`SECTIONED`).
+- Three **APIs**: list sections, section detail (with content), section-map (boundaries).
+- Pipeline chaining: `process_report` → enqueues `detect_sections` on success.
+
+### Architecture Changes
+- **New module package** `app/ingestion/section_detection/` — `section_detector.py`
+  (engine), `section_patterns.py` (regex/heading primitives), `normalization.py`
+  (alias→canonical), `taxonomy.py` (loader) + `taxonomy.json` (configurable data).
+  *Why:* isolates deterministic structure detection as a reusable, testable unit
+  with policy (taxonomy) separated from mechanism (patterns).
+- **New table** `report_sections` (+ migration `0002_phase1b`). *Why:* structured
+  document intelligence stored separately from future RAG data (ADR-007).
+- **Extended `ReportStatus`** with `SECTIONING`/`SECTIONED` and the CHECK constraint.
+  *Why:* the sectioning stage is a distinct, observable pipeline step.
+- **New Celery task** `app.tasks.ingestion.detect_sections` (ingestion queue).
+- **Repository extensions** (async section reads; sync section writes for the worker).
+
+### Technical Decisions
+- **Decision:** Rule-based section detection.
+  **Alternatives:** LLM-based detection; fine-tuned classifier.
+  **Reason chosen:** deterministic, fast (regex over 100–300 pages), cheap (no API),
+  explainable, easy to debug — exactly the Phase 1B mandate. (See **ADR-011**.)
+  **Tradeoffs:** less flexible on unusual/foreign layouts than an ML approach;
+  relies on heading conventions.
+- **Decision:** Configurable external taxonomy (`taxonomy.json` + `SECTION_TAXONOMY_PATH`).
+  **Reason:** add/adjust section vocabularies without code changes; no hardcoding in logic.
+- **Decision:** Document-type/Part-aware SEC item map.
+  **Reason:** Item numbers differ between 10-K and 10-Q and repeat across 10-Q
+  Part I/II (e.g. Item 2 = Properties in 10-K but MD&A in 10-Q) — a flat map would mislabel.
+- **Decision:** TOC lines are skipped as section starts.
+  **Reason:** table-of-contents entries are pointers, not the section body; using them
+  would set false boundaries. (TOC→page mapping noted as a future improvement.)
+- **Decision:** Fallback "Uncategorized" section when nothing matches.
+  **Reason:** downstream phases always have a section to operate on.
+
+### Files Created
+- `app/models/report_section.py`
+- `app/ingestion/section_detection/__init__.py`
+- `app/ingestion/section_detection/taxonomy.json`
+- `app/ingestion/section_detection/taxonomy.py`
+- `app/ingestion/section_detection/section_patterns.py`
+- `app/ingestion/section_detection/normalization.py`
+- `app/ingestion/section_detection/section_detector.py`
+- `migrations/versions/20260610_0002_phase1b_sections.py`
+- `tests/unit/test_section_patterns.py`
+- `tests/unit/test_normalization.py`
+- `tests/unit/test_section_detection.py`
+- `tests/integration/test_sections_api.py`
+
+### Files Modified
+- `app/models/enums.py` (added `SECTIONING`/`SECTIONED`)
+- `app/models/report.py` (added `sections` relationship)
+- `app/models/__init__.py` (registered `ReportSection`)
+- `app/core/config.py` (added `section_taxonomy_path`)
+- `app/repositories/report_repository.py` (async section reads + sync section writes)
+- `app/schemas/report.py` (section schemas)
+- `app/api/v1/endpoints/reports.py` (3 section endpoints)
+- `app/tasks/ingestion.py` (`detect_sections` task; chained from `process_report`)
+- `tests/integration/conftest.py` (truncate `report_sections`, stub chained task, 10-K PDF fixture)
+
+### Database Changes
+- **New table** `report_sections` (id, report_id FK `CASCADE`, section_name,
+  normalized_section_name, start_page, end_page, content, confidence_score
+  `NUMERIC(4,3)`, created_at, updated_at).
+- **Constraints:** `ck_report_sections_confidence` (0–1), `ck_report_sections_start_page`
+  (≥1), `ck_report_sections_page_order` (end ≥ start).
+- **Indexes:** `ix_report_sections_report_id`, `ix_report_sections_normalized_name`.
+- **Altered:** `reports.status` CHECK constraint extended with `SECTIONING`/`SECTIONED`.
+- **Migration:** `0002_phase1b` (down_revision `0001_phase1a`), with working downgrade.
+
+### API Changes
+- `GET /api/v1/reports/{report_id}/sections` → `{report_id, count, items[]}` (summaries, no content).
+- `GET /api/v1/reports/{report_id}/sections/{section_id}` → full section incl. `content`.
+- `GET /api/v1/reports/{report_id}/section-map` → `{report_id, sections:[{section,start_page,end_page,confidence_score}]}`.
+- 404 (`NOT_FOUND`) for unknown report/section via the standard envelope.
+
+### Testing Summary
+- **Unit (24 new; 43 total passing):** patterns (SEC item parse, TOC, heading
+  heuristics), normalization (alias/case/containment/unknown), detection
+  (10-K, 10-Q part-aware, transcript, confidence tiers, fallback, boundaries,
+  content spanning, empty input).
+- **Integration (DB-backed, CI):** full upload→process→sectioning→APIs; missing
+  pages → FAILED; unknown id → MISSING; 404; **idempotency** (re-run does not duplicate).
+- Success **and** failure cases covered; deterministic (no external calls).
+
+### Lessons Learned
+- SEC item numbering is **not** uniform — modeling it per document-type and Part
+  was essential to avoid mislabeling (10-Q Item 2 = MD&A, not Properties).
+- TOC entries are the main source of false section starts; detecting dot-leader/
+  trailing-page-number lines and skipping them sharply improved precision.
+- Keeping taxonomy as external data (not code) made the detector easy to tune and test.
+
+### Risks Discovered
+- **TOC-only detection gap:** start pages rely on in-body headings; documents that
+  only list sections in a TOC (no in-body heading) won't get precise boundaries.
+- **Heading-style sensitivity:** scanned/oddly-formatted filings or non-standard
+  issuers may under-detect; mitigated by the `Uncategorized` fallback + confidence scores.
+- **Boundary heuristic** assumes sections are contiguous and ordered; deeply nested
+  subsections are flattened to the nearest canonical section in Phase 1B.
+
+### Future Phase Dependencies
+- **Phase 1C (chunking)** depends on `report_sections` (chunk *within* section boundaries).
+- **Phase 3 (metric extraction)** depends on the **section taxonomy** to target
+  Financial Statements / MD&A.
+- **Phase 4 (risk)** targets the normalized **Risk Factors** section.
+- **Phase 5 (tone)** targets transcript segments (Prepared Remarks / Q&A).
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| Sections detected correctly | ✅ (10-K/10-Q/transcript unit + integration) |
+| Sections normalized correctly | ✅ (taxonomy alias→canonical) |
+| Confidence scores assigned | ✅ (tiered 0.3–0.95) |
+| Sections stored in database | ✅ (`report_sections`, whole content) |
+| APIs expose sections | ✅ (list / detail / section-map) |
+| Tests pass | ✅ (43 unit pass; integration authored for CI) |
+| Documentation updated | ✅ (this report + ADR-011) |
+| Works on 10-K | ✅ |
+| Works on 10-Q | ✅ (part-aware items) |
+| Works on earnings transcripts | ✅ |
+
+### Final Status
+> **PHASE 1B COMPLETED.** Phase 1C (chunking) NOT started — strictly out of scope.
+
+---
+
 ## 3. Technology Decisions Log
 
 > Template: **Decision · Alternatives Considered · Chosen Because · Tradeoffs · Expected Impact**
@@ -322,6 +467,13 @@ integration suite (DB-backed) authored for CI. Full table in `docs/10`.
 - **Chosen because:** fast C-backed extraction, reliable per-page text + document metadata, simple API, good layout fidelity for financial filings
 - **Tradeoffs:** AGPL/commercial licensing to track; no OCR (image-only PDFs unsupported in 1A)
 - **Expected impact:** robust raw-text foundation for chunking/structure in later phases
+
+### TDL-012 — Section taxonomy as external config (Phase 1B)
+- **Decision:** Store the section taxonomy (canonical names, aliases, SEC item maps, transcript markers, confidence weights) in an external `taxonomy.json`, loaded at runtime (override via `SECTION_TAXONOMY_PATH`)
+- **Alternatives:** hardcode mappings in Python; a DB table
+- **Chosen because:** tune/extend section vocabularies without code changes; keeps policy (taxonomy) separate from mechanism (detection); trivially testable
+- **Tradeoffs:** a malformed JSON fails fast at load; schema is convention-based (no formal validation yet)
+- **Expected impact:** maintainable, configurable detection that evolves with new filing styles
 
 ---
 
@@ -415,6 +567,14 @@ integration suite (DB-backed) authored for CI. Full table in `docs/10`.
 - **Reasoning:** strong passage-re-ranking performance, **fast** (sub-100ms batch over 20 candidates), **cheap** (no per-call token cost), **deterministic** (reproducible scores → testable retrieval), and **runs locally** (no network hop, no data egress, no rate limits on the hot path).
 - **Consequences:** LLM-based re-ranking is **excluded from the critical retrieval path** (slow, costly, non-deterministic) and reserved only as an *offline evaluation/audit layer*. Adds a local model dependency (one-time download, modest memory). (See `05_RETRIEVAL_DESIGN.md` §8.)
 
+### ADR-011 — Rule-Based Section Detection (No LLM)  *(Accepted — Phase 1B)*
+- **Context:** Raw pages must be turned into logical financial sections before any chunking/extraction. This runs on every ingested document over 100–300 pages.
+- **Problem:** How to detect/normalize sections reliably without unbounded cost or non-determinism.
+- **Options:** Rule-based (regex + heading matching + configurable taxonomy) · LLM-based classification · a fine-tuned section classifier.
+- **Decision:** **Rule-based detection** driven by an external, configurable taxonomy; document-type/Part-aware SEC item mapping; tiered confidence scores; TOC-skip; `Uncategorized` fallback.
+- **Reasoning:** **deterministic, fast, cheap, explainable, easy to debug** — and financial filings/transcripts follow strong heading conventions (SEC items, standard statement titles), so rules cover the high-value cases well. Aligns with the "deterministic structure, no LLM" mandate and ADR-007 (structured intelligence kept separate from RAG data).
+- **Consequences:** less flexible than ML for unusual/foreign layouts or TOC-only documents; depends on heading conventions. Confidence scores + the fallback section keep low-quality detections visible and non-fatal. An ML/LLM-assisted detector may be added later strictly as an *augmentation*, not on the deterministic path.
+
 ---
 
 ## 5. Implementation Log
@@ -438,7 +598,12 @@ integration suite (DB-backed) authored for CI. Full table in `docs/10`.
 | 2026-06-10 | 1A | Report APIs | nickg | upload / list / detail / pages under `/api/v1/reports` | ✅ Completed |
 | 2026-06-10 | 1A | Tests + docs | nickg | 19 unit tests pass; integration suite authored; `docs/10` | ✅ Completed |
 | 2026-06-10 | 1A | **Phase 1A COMPLETE** | nickg | All exit criteria met; 1B not started | ✅ Completed |
-| | 1B | Section detection / sectioner | | 10-K/10-Q item map; transcript segmentation | ⬜ Todo |
+| — | 1B | Section detection engine | nickg | Rule-based detector + configurable taxonomy + normalization + confidence (`app/ingestion/section_detection/`) | ✅ Completed |
+| — | 1B | `report_sections` + migration | nickg | New table + migration `0002_phase1b`; extended status enum | ✅ Completed |
+| — | 1B | `detect_sections` task + APIs | nickg | Celery task (SECTIONING/SECTIONED) chained from `process_report`; list/detail/section-map endpoints | ✅ Completed |
+| — | 1B | Tests + docs | nickg | 24 new unit tests (43 total pass); integration suite; Phase 1B Completion Report + ADR-011 | ✅ Completed |
+| — | 1B | **Phase 1B COMPLETE** | nickg | All exit criteria met; 1C not started | ✅ Completed |
+| — | 1C | Section-aware chunking | | Chunker over `report_sections` boundaries | ⬜ Todo |
 
 > _Add a row per meaningful change. Mark status: ⬜ Todo · 🟡 In progress · ✅ Completed · ⛔ Blocked._
 
@@ -479,6 +644,9 @@ integration suite (DB-backed) authored for CI. Full table in `docs/10`.
 | Performance improvements | _(none yet)_ | |
 | Retrieval improvements | _(none yet)_ | |
 | Robustness (1A) | Magic-byte (`%PDF-`) check beyond extension/MIME; idempotent `replace_pages` so re-processing is safe; failures recorded as `FAILED` not crash-loops. | 2026-06-10 |
+| Detection (1B) | SEC item numbers are not uniform — modeled per document-type **and** 10-Q Part to avoid mislabeling (Item 2 = MD&A in 10-Q, Properties in 10-K). | — |
+| Detection (1B) | TOC entries (dot-leaders / trailing page numbers) are the main false-start source; skipping them materially improved boundary precision. | — |
+| Config (1B) | Externalizing the taxonomy to JSON kept detection tunable and tests data-driven (no code edits to add a section alias). | — |
 
 ---
 

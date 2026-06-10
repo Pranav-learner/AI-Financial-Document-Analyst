@@ -24,6 +24,11 @@ from app.schemas.report import (
     ReportPageOut,
     ReportPagesResponse,
     ReportUploadResponse,
+    SectionListResponse,
+    SectionMapItem,
+    SectionMapResponse,
+    SectionOut,
+    SectionSummary,
 )
 
 router = APIRouter()
@@ -111,3 +116,70 @@ async def get_report_pages(
         limit=limit,
         offset=offset,
     )
+
+
+# ---- Phase 1B: sections ------------------------------------------------------
+
+
+@router.get(
+    "/{report_id}/sections",
+    response_model=SectionListResponse,
+    summary="List detected sections (no content)",
+)
+async def list_sections(
+    report_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> SectionListResponse:
+    repo = ReportRepository(db)
+    if await repo.get_report(report_id) is None:
+        raise NotFoundError("Report not found", details={"report_id": str(report_id)})
+    sections = await repo.get_sections(report_id)
+    return SectionListResponse(
+        report_id=report_id,
+        count=len(sections),
+        items=[SectionSummary.model_validate(s) for s in sections],
+    )
+
+
+@router.get(
+    "/{report_id}/section-map",
+    response_model=SectionMapResponse,
+    summary="Section boundary map (debug/visualization)",
+)
+async def section_map(
+    report_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> SectionMapResponse:
+    repo = ReportRepository(db)
+    if await repo.get_report(report_id) is None:
+        raise NotFoundError("Report not found", details={"report_id": str(report_id)})
+    sections = await repo.get_sections(report_id)
+    return SectionMapResponse(
+        report_id=report_id,
+        sections=[
+            SectionMapItem(
+                section=s.normalized_section_name,
+                start_page=s.start_page,
+                end_page=s.end_page,
+                confidence_score=float(s.confidence_score),
+            )
+            for s in sections
+        ],
+    )
+
+
+@router.get(
+    "/{report_id}/sections/{section_id}",
+    response_model=SectionOut,
+    summary="Get one detected section (with content)",
+)
+async def get_section(
+    report_id: uuid.UUID,
+    section_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+) -> SectionOut:
+    repo = ReportRepository(db)
+    section = await repo.get_section(section_id)
+    if section is None or section.report_id != report_id:
+        raise NotFoundError("Section not found", details={"section_id": str(section_id)})
+    return SectionOut.model_validate(section)
