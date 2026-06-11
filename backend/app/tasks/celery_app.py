@@ -23,8 +23,8 @@ celery_app = Celery(
     "fda",
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
-    # Task modules registered with the worker (Phase 1A: ingestion).
-    include=["app.tasks.ingestion", "app.tasks.rag"],
+    # Task modules registered with the worker
+    include=["app.tasks.ingestion", "app.tasks.rag", "app.tasks.benchmark"],
 )
 
 # ---------------------------------------------------------------------------
@@ -41,14 +41,12 @@ celery_app.conf.task_default_queue = "default"
 # ---------------------------------------------------------------------------
 # Task routing — map task name globs to queues. Concrete task names are added
 # alongside their implementations in later phases.
-# Example (future):
-#   "app.tasks.ingestion.*":  {"queue": "ingestion"}
-#   "app.tasks.extraction.*": {"queue": "extraction"}
 # ---------------------------------------------------------------------------
 celery_app.conf.task_routes = {
     "app.tasks.ingestion.*": {"queue": "ingestion"},
     "app.tasks.extraction.*": {"queue": "extraction"},
     "app.tasks.rag.*": {"queue": "extraction"},
+    "app.tasks.benchmark.*": {"queue": "default"},
 }
 
 # ---------------------------------------------------------------------------

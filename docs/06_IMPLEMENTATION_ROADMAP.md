@@ -1598,6 +1598,36 @@ Phase 7 implements the stateful Financial Analyst Agent System. It leverages Lan
 
 ---
 
+## Phase 8 Completion Report — Competitor Benchmarking Engine
+
+> **Date:** 2026-06-11 · **Owner:** Lead Financial Analytics Engineer (pranav) · **Scope:** Financial Benchmarking, Risk Benchmarking, Tone Benchmarking, Capital Allocation Benchmarking, Ranking Engine, and Comparative Intelligence APIs. **No Agent Systems, Competitor Benchmarking front-end, Investment Memos, or MCP tools.**
+
+### Overview
+Phase 8 implements the Competitor Benchmarking Engine. This module establishes a comprehensive, multi-dimensional benchmarking capability for comparing target companies against custom cohorts. It evaluates target companies on four key pillars (Financial, Risk, Tone, and Capital Allocation), normalizes these raw metrics, processes ranks and percentiles via a robust Ranking Engine supporting multiple tie-breaking strategies, and persists run metrics to database tables. REST endpoints expose these calculations for both synchronous in-memory analysis and asynchronous, background Celery-worker executed tasks.
+
+### Features Implemented
+- **Database Tables**: Created `benchmark_runs`, `benchmark_results`, and `benchmark_summaries` tables (+ migration `20260611_1559_60ece09504c1_phase8_benchmarking`) storing run status, weights, granular metrics, percentiles, and weighted final scores.
+- **Competitor Benchmarking Engine**: Built `ComparisonBuilder` to retrieve, parse, and structure cohort metrics across 25 distinct financial, risk, tone, and capital allocation data points.
+- **Ranking Engine & Score Calculator**: Standardized percentile calculations and min-max score normalization, implementing `min`, `max`, `dense`, and `average` tie-breaker methods.
+- **Async Execution Pipeline**: Created `BenchmarkService` and a background Celery task `run_benchmark_task` to compute and store detailed cohort analysis.
+- **REST Router & APIs**: Exposed `/compare` for synchronous on-the-fly comparisons, `/run` for initiating background benchmarking runs, and status check/results/summary endpoints.
+- **Testing**: Added unit tests for ranking mechanics, tie-breaking logic, and score normalization, along with full-lifecycle integration tests verifying the API routers.
+
+### Exit Criteria Verification
+| Criterion | Status | Evidence |
+|---|---|---|
+| `benchmark_runs`, `results`, `summaries` tables | ✅ | Migration `20260611_1559_60ece09504c1` |
+| Financial, Risk, Tone, & CapAlloc Benchmarking | ✅ | 25 distinct metrics parsed across all four dimensions |
+| Ranking Engine & Score normalization | ✅ | Min/Max/Dense/Average tie-breakers & percentile scaling |
+| Celery Async Task runner | ✅ | `run_benchmark_task` enqueues and executes background runs |
+| APIs operational | ✅ | POST `/compare`, POST `/run`, GET `/results`, GET `/summary` |
+| Verification tests pass | ✅ | 19 unit tests + 3 integration tests (100% pass) |
+
+### Final Status
+> **PHASE 8 COMPLETED.**
+
+---
+
 ## 3. Technology Decisions Log
 
 > Template: **Decision · Alternatives Considered · Chosen Because · Tradeoffs · Expected Impact**

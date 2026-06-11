@@ -19,6 +19,7 @@ from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
 from app.models.conversation_thread import ConversationThread
 from app.models.conversation_message import ConversationMessage
+from app.models.benchmark import BenchmarkRun, BenchmarkResult, BenchmarkSummary
 
 __all__ = [
     "Company",
@@ -37,5 +38,9 @@ __all__ = [
     "ReportType",
     "ConversationThread",
     "ConversationMessage",
+    "BenchmarkRun",
+    "BenchmarkResult",
+    "BenchmarkSummary",
 ]
+
 

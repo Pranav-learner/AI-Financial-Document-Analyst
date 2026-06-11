@@ -165,3 +165,23 @@ class ToneEvolutionType(str, Enum):
     LESS_CAUTIOUS = "LESS_CAUTIOUS"
     UNCHANGED = "UNCHANGED"
 
+
+class BenchmarkStatus(str, Enum):
+    """Lifecycle status of a competitor benchmarking run (Phase 8)."""
+
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class BenchmarkDimension(str, Enum):
+    """Benchmarking dimensions (Phase 8)."""
+
+    FINANCIAL = "FINANCIAL"
+    RISK = "RISK"
+    TONE = "TONE"
+    CAPITAL_ALLOCATION = "CAPITAL_ALLOCATION"
+    OVERALL = "OVERALL"
+
+
