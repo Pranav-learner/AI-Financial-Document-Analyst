@@ -9,7 +9,15 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import chunks, embeddings, evaluation, health, reports, search
+from app.api.v1.endpoints import (
+    chunks,
+    embeddings,
+    evaluation,
+    health,
+    metrics,
+    reports,
+    search,
+)
 
 api_router = APIRouter()
 
@@ -28,6 +36,9 @@ api_router.include_router(search.router, prefix="/search", tags=["search"])
 
 # Retrieval evaluation & observability (Phase 2D) — measurement only.
 api_router.include_router(evaluation.router, prefix="/evaluation", tags=["evaluation"])
+
+# Financial metric extraction (Phase 3A) — report-scoped; inspection + trigger.
+api_router.include_router(metrics.router, prefix="/reports", tags=["metrics"])
 
 # --- Business routers (added per phase) ---------------------------------------
 # api_router.include_router(metrics.router,   prefix="/reports",   tags=["metrics"])    # Phase 3

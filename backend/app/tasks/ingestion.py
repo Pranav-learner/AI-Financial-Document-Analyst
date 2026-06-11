@@ -14,6 +14,7 @@ import uuid
 
 from app.core.logging import get_logger
 from app.db.session import SyncSessionLocal
+from app.financial.extraction import ChunkInput, HybridExtractor
 from app.ingestion.chunking import ChunkGenerator, ReportContext, SectionInput
 from app.ingestion.pdf_parser import parse_pdf
 from app.ingestion.section_detection import SectionDetector
@@ -25,6 +26,12 @@ from app.retrieval.embeddings import (
     GeminiEmbeddingProvider,
 )
 from app.tasks.celery_app import celery_app
+
+# Canonical sections that carry financial metrics (candidate set for extraction).
+METRIC_CANDIDATE_SECTIONS = (
+    "Income Statement", "Financial Statements", "Balance Sheet", "Cash Flow Statement",
+    "Notes to Financial Statements", "MD&A", "Forward Guidance", "Management Commentary",
+)
 
 log = get_logger(__name__)
 
@@ -282,6 +289,88 @@ def generate_embeddings_task(self, report_id: str, *, force: bool = False) -> di
 
         except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
             log.error("embedding.task_failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(
+    bind=True,
+    name="app.tasks.extraction.extract_financial_metrics_task",
+    acks_late=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def extract_financial_metrics_task(self, report_id: str) -> dict:
+    """Extract structured financial metrics from a report's chunks (Phase 3A).
+
+    Workflow: load report → EXTRACTING → load candidate (financial-section) chunks
+    → hybrid extract (rule + LLM, cross-validated) → validate → normalize → store
+    → EXTRACTED. Idempotent (rebuilds the report's metrics). The LLM degrades
+    gracefully (rule-only) when no key is configured, so this never hard-fails on
+    the LLM. Routed to the `extraction` queue.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("extraction.task_start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("extraction.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            chunks = repo.get_extraction_chunks(rid, METRIC_CANDIDATE_SECTIONS)
+            if not chunks:
+                raise ValueError("no candidate chunks to extract (report not chunked?)")
+
+            repo.mark_extracting(report)
+
+            inputs = [
+                ChunkInput(
+                    chunk_id=str(c.id),
+                    text=c.chunk_text,
+                    normalized_section_name=(c.chunk_metadata or {}).get(
+                        "normalized_section_name"
+                    ),
+                    fiscal_year=report.year,
+                    fiscal_quarter=report.quarter,
+                )
+                for c in chunks
+            ]
+
+            result = HybridExtractor().extract(inputs)
+            rows = [
+                {
+                    "source_chunk_id": uuid.UUID(m.source_chunk_id) if m.source_chunk_id else None,
+                    "metric_name": m.metric_name,
+                    "normalized_metric_name": m.normalized_metric_name,
+                    "metric_category": m.category,
+                    "value": m.value,
+                    "currency": m.currency,
+                    "unit": m.unit,
+                    "fiscal_year": m.fiscal_year,
+                    "fiscal_quarter": m.fiscal_quarter,
+                    "confidence_score": m.confidence_score,
+                    "extraction_method": m.extraction_method,
+                    "source_text": m.source_text,
+                    "extraction_metadata": m.extraction_metadata,
+                }
+                for m in result.metrics
+            ]
+            count = repo.replace_metrics(rid, rows)
+            repo.mark_extracted(report)
+
+            log.info(
+                "extraction.task_success", report_id=report_id, metrics=count, **result.stats.as_dict()
+            )
+            return {"report_id": report_id, "status": "EXTRACTED", "metrics": count, **result.stats.as_dict()}
+
+        except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
+            log.error("extraction.task_failure", report_id=report_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:

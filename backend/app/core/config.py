@@ -109,6 +109,18 @@ class Settings(BaseSettings):
     hnsw_ef_construction: int = 64
     hnsw_ef_search: int = 40
 
+    # ---- Financial metric extraction (Phase 3A) ----
+    # Override the packaged metric taxonomy; empty → use the bundled JSON.
+    metric_taxonomy_path: str = ""
+    # Override the packaged extraction gold dataset; empty → use the bundled JSON.
+    metric_gold_path: str = ""
+    # LLM extraction tuning (reuses gemini_llm_model + gemini_api_key).
+    metric_llm_max_retries: int = 3
+    metric_llm_retry_base_delay: float = 2.0
+    metric_llm_request_timeout: float = 60.0
+    # Relative tolerance for rule-vs-LLM value agreement (1% by default).
+    metric_agreement_rel_tol: float = 0.01
+
     # ---- Retrieval evaluation (Phase 2D) ----
     # Override the packaged benchmark suite; empty → use the bundled JSON.
     retrieval_benchmark_path: str = ""

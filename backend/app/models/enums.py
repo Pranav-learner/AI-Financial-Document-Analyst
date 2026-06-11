@@ -26,7 +26,34 @@ class ReportStatus(str, Enum):
     CHUNKED = "CHUNKED"          # chunks generated and persisted (Phase 1C done)
     EMBEDDING = "EMBEDDING"      # worker is generating embeddings (Phase 2A)
     EMBEDDED = "EMBEDDED"        # every chunk has a valid embedding (Phase 2A done)
+    EXTRACTING = "EXTRACTING"    # worker is extracting financial metrics (Phase 3A)
+    EXTRACTED = "EXTRACTED"      # financial metrics extracted and stored (Phase 3A done)
     FAILED = "FAILED"            # a processing step failed (see error_message / logs)
+
+
+class ExtractionMethod(str, Enum):
+    """How a financial metric value was obtained (Phase 3A) — for auditability.
+
+    The LLM is never the source of truth (ADR-007/ADR-017): every value passes
+    deterministic validation, and the method records how it was derived.
+    """
+
+    RULE_BASED = "RULE_BASED"            # deterministic regex/pattern extraction
+    LLM_BASED = "LLM_BASED"              # LLM structured extraction (validated)
+    HYBRID_VALIDATED = "HYBRID_VALIDATED"  # rule + LLM agreed → highest confidence
+
+
+class MetricCategory(str, Enum):
+    """Top-level grouping for a financial metric (Phase 3A)."""
+
+    REVENUE = "REVENUE"
+    PROFITABILITY = "PROFITABILITY"
+    MARGINS = "MARGINS"
+    CASH_FLOW = "CASH_FLOW"
+    DEBT = "DEBT"
+    CAPEX = "CAPEX"
+    GUIDANCE = "GUIDANCE"
+    OTHER = "OTHER"
 
 
 class EmbeddingStatus(str, Enum):

@@ -27,6 +27,7 @@ from app.models.enums import ReportStatus, ReportType
 if TYPE_CHECKING:
     from app.models.company import Company
     from app.models.document_chunk import DocumentChunk
+    from app.models.financial_metric import FinancialMetric
     from app.models.report_page import ReportPage
     from app.models.report_section import ReportSection
 
@@ -94,6 +95,11 @@ class Report(UUIDMixin, Base):
         cascade="all, delete-orphan",
         passive_deletes=True,
         order_by="DocumentChunk.chunk_index",
+    )
+    metrics: Mapped[list["FinancialMetric"]] = relationship(
+        back_populates="report",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
     )
 
     __table_args__ = (

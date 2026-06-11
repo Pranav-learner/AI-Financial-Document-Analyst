@@ -1,0 +1,76 @@
+{
+  "$comment": "Phase 3A extraction gold set. `value` is the NORMALIZED ABSOLUTE magnitude expected after normalization. Used to measure extraction + normalization accuracy. Override via METRIC_GOLD_PATH.",
+  "version": 1,
+  "examples": [
+    {
+      "id": "rev-billion",
+      "section": "Income Statement",
+      "fiscal_year": 2024,
+      "text": "Total revenue was $96.7 billion in fiscal 2024, an increase over the prior year.",
+      "expected": [{"metric": "REVENUE", "value": 96700000000, "unit": "BILLION", "currency": "USD"}]
+    },
+    {
+      "id": "rev-million",
+      "section": "Income Statement",
+      "fiscal_year": 2024,
+      "text": "Net sales for the period totaled $96,700 million.",
+      "expected": [{"metric": "REVENUE", "value": 96700000000, "unit": "MILLION", "currency": "USD"}]
+    },
+    {
+      "id": "net-income",
+      "section": "Income Statement",
+      "fiscal_year": 2024,
+      "text": "Net income was $5,123 million, compared with the prior-year period.",
+      "expected": [{"metric": "NET_INCOME", "value": 5123000000, "unit": "MILLION", "currency": "USD"}]
+    },
+    {
+      "id": "operating-margin",
+      "section": "MD&A",
+      "fiscal_year": 2024,
+      "text": "Operating margin expanded to 28.5% during the year.",
+      "expected": [{"metric": "OPERATING_MARGIN", "value": 28.5, "unit": "PERCENT", "currency": null}]
+    },
+    {
+      "id": "ocf",
+      "section": "Cash Flow Statement",
+      "fiscal_year": 2024,
+      "text": "Net cash provided by operating activities was $12.4 billion.",
+      "expected": [{"metric": "OPERATING_CASH_FLOW", "value": 12400000000, "unit": "BILLION", "currency": "USD"}]
+    },
+    {
+      "id": "fcf",
+      "section": "Cash Flow Statement",
+      "fiscal_year": 2024,
+      "text": "Free cash flow for the year was $9.3 billion.",
+      "expected": [{"metric": "FREE_CASH_FLOW", "value": 9300000000, "unit": "BILLION", "currency": "USD"}]
+    },
+    {
+      "id": "capex",
+      "section": "Cash Flow Statement",
+      "fiscal_year": 2024,
+      "text": "Capital expenditures were $3.1 billion for the fiscal year.",
+      "expected": [{"metric": "CAPEX", "value": 3100000000, "unit": "BILLION", "currency": "USD"}]
+    },
+    {
+      "id": "total-debt",
+      "section": "Balance Sheet",
+      "fiscal_year": 2024,
+      "text": "Total debt at year end was $25,000 million.",
+      "expected": [{"metric": "TOTAL_DEBT", "value": 25000000000, "unit": "MILLION", "currency": "USD"}]
+    },
+    {
+      "id": "guidance",
+      "section": "Forward Guidance",
+      "fiscal_year": 2025,
+      "text": "Full-year revenue is expected to be approximately $105 billion.",
+      "expected": [{"metric": "REVENUE_GUIDANCE", "value": 105000000000, "unit": "BILLION", "currency": "USD"}]
+    },
+    {
+      "id": "ebitda",
+      "section": "MD&A",
+      "fiscal_year": 2024,
+      "text": "Adjusted EBITDA was $18.2 billion for the year.",
+      "expected": [{"metric": "EBITDA", "value": 18200000000, "unit": "BILLION", "currency": "USD"}]
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "$comment": "Phase 3A canonical financial-metric taxonomy. Configurable — override via METRIC_TAXONOMY_PATH. value_kind: 'currency' (absolute money) | 'percent' (margins/rates). expected_sections are canonical Phase 1B section names that boost rule confidence.",
+  "version": 1,
+  "metrics": [
+    {
+      "canonical": "REVENUE",
+      "category": "REVENUE",
+      "value_kind": "currency",
+      "aliases": ["revenue", "net sales", "total revenue", "total net sales", "net revenue", "total revenues", "sales"],
+      "expected_sections": ["Income Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "NET_INCOME",
+      "category": "PROFITABILITY",
+      "value_kind": "currency",
+      "aliases": ["net income", "net earnings", "profit after tax", "net profit", "net income attributable", "net loss"],
+      "expected_sections": ["Income Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "OPERATING_INCOME",
+      "category": "PROFITABILITY",
+      "value_kind": "currency",
+      "aliases": ["operating income", "income from operations", "operating profit", "operating loss"],
+      "expected_sections": ["Income Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "GROSS_PROFIT",
+      "category": "PROFITABILITY",
+      "value_kind": "currency",
+      "aliases": ["gross profit", "gross income"],
+      "expected_sections": ["Income Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "EBITDA",
+      "category": "PROFITABILITY",
+      "value_kind": "currency",
+      "aliases": ["ebitda", "adjusted ebitda"],
+      "expected_sections": ["MD&A", "Financial Statements", "Income Statement"]
+    },
+    {
+      "canonical": "GROSS_MARGIN",
+      "category": "MARGINS",
+      "value_kind": "percent",
+      "aliases": ["gross margin", "gross profit margin"],
+      "expected_sections": ["MD&A", "Income Statement", "Financial Statements"]
+    },
+    {
+      "canonical": "OPERATING_MARGIN",
+      "category": "MARGINS",
+      "value_kind": "percent",
+      "aliases": ["operating margin", "operating profit margin"],
+      "expected_sections": ["MD&A", "Income Statement", "Financial Statements"]
+    },
+    {
+      "canonical": "NET_MARGIN",
+      "category": "MARGINS",
+      "value_kind": "percent",
+      "aliases": ["net margin", "net profit margin", "net income margin"],
+      "expected_sections": ["MD&A", "Income Statement", "Financial Statements"]
+    },
+    {
+      "canonical": "OPERATING_CASH_FLOW",
+      "category": "CASH_FLOW",
+      "value_kind": "currency",
+      "aliases": ["operating cash flow", "cash flow from operations", "net cash provided by operating activities", "cash from operations", "cash provided by operating activities"],
+      "expected_sections": ["Cash Flow Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "FREE_CASH_FLOW",
+      "category": "CASH_FLOW",
+      "value_kind": "currency",
+      "aliases": ["free cash flow", "fcf"],
+      "expected_sections": ["Cash Flow Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "TOTAL_DEBT",
+      "category": "DEBT",
+      "value_kind": "currency",
+      "aliases": ["total debt", "total borrowings", "total long-term debt", "long-term debt", "total indebtedness"],
+      "expected_sections": ["Balance Sheet", "Financial Statements", "MD&A", "Notes to Financial Statements"]
+    },
+    {
+      "canonical": "CAPEX",
+      "category": "CAPEX",
+      "value_kind": "currency",
+      "aliases": ["capital expenditure", "capital expenditures", "capex", "purchases of property and equipment", "additions to property and equipment", "purchases of property plant and equipment"],
+      "expected_sections": ["Cash Flow Statement", "Financial Statements", "MD&A"]
+    },
+    {
+      "canonical": "REVENUE_GUIDANCE",
+      "category": "GUIDANCE",
+      "value_kind": "currency",
+      "aliases": ["revenue guidance", "revenue outlook", "expected revenue", "projected revenue", "revenue is expected to be", "full-year revenue"],
+      "expected_sections": ["Forward Guidance", "MD&A", "Management Commentary"]
+    },
+    {
+      "canonical": "MARGIN_GUIDANCE",
+      "category": "GUIDANCE",
+      "value_kind": "percent",
+      "aliases": ["margin guidance", "operating margin guidance", "expected margin", "projected margin", "margin is expected to be"],
+      "expected_sections": ["Forward Guidance", "MD&A", "Management Commentary"]
+    }
+  ]
+}

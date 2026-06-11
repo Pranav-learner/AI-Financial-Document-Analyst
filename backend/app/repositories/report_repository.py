@@ -14,13 +14,14 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from app.models.company import Company
 from app.models.document_chunk import DocumentChunk
 from app.models.enums import EmbeddingStatus, ReportStatus, ReportType
+from app.models.financial_metric import FinancialMetric
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
@@ -194,6 +195,27 @@ class ReportRepository:
             )
             or 0
         )
+
+    # ---- Phase 3A: financial metrics (read-only, API layer) -----------------
+
+    async def get_metrics(
+        self, report_id: uuid.UUID, *, category: str | None = None
+    ) -> list[FinancialMetric]:
+        stmt = select(FinancialMetric).where(FinancialMetric.report_id == report_id)
+        if category is not None:
+            stmt = stmt.where(FinancialMetric.metric_category == category)
+        rows = (
+            await self.session.scalars(
+                stmt.order_by(
+                    FinancialMetric.metric_category.asc(),
+                    FinancialMetric.normalized_metric_name.asc(),
+                )
+            )
+        ).all()
+        return list(rows)
+
+    async def get_metric(self, metric_id: uuid.UUID) -> FinancialMetric | None:
+        return await self.session.get(FinancialMetric, metric_id)
 
 
 class SyncReportRepository:
@@ -379,4 +401,50 @@ class SyncReportRepository:
         chunk.embedding_generated_at = datetime.now(UTC)
 
     def commit(self) -> None:
+        self.session.commit()
+
+    # ---- Phase 3A: financial metric extraction ------------------------------
+
+    def get_extraction_chunks(
+        self, report_id: uuid.UUID, sections: tuple[str, ...]
+    ) -> list[DocumentChunk]:
+        """Candidate chunks for metric extraction: those in financial sections."""
+        query = self.session.query(DocumentChunk).filter(
+            DocumentChunk.report_id == report_id
+        )
+        if sections:
+            conds = [
+                DocumentChunk.chunk_metadata.contains({"normalized_section_name": s})
+                for s in sections
+            ]
+            query = query.filter(or_(*conds))
+        return list(query.order_by(DocumentChunk.chunk_index.asc()).all())
+
+    def count_chunks_for_report(self, report_id: uuid.UUID) -> int:
+        return int(
+            self.session.query(func.count(DocumentChunk.id))
+            .filter(DocumentChunk.report_id == report_id)
+            .scalar()
+            or 0
+        )
+
+    def mark_extracting(self, report: Report) -> None:
+        report.status = ReportStatus.EXTRACTING
+        report.error_message = None
+        self.session.commit()
+
+    def replace_metrics(self, report_id: uuid.UUID, metrics: list[dict]) -> int:
+        """Delete existing metrics for the report and insert the new set (idempotent)."""
+        self.session.query(FinancialMetric).filter(
+            FinancialMetric.report_id == report_id
+        ).delete()
+        self.session.add_all(
+            [FinancialMetric(report_id=report_id, **m) for m in metrics]
+        )
+        self.session.commit()
+        return len(metrics)
+
+    def mark_extracted(self, report: Report) -> None:
+        report.status = ReportStatus.EXTRACTED
+        report.processing_completed_at = datetime.now(UTC)
         self.session.commit()

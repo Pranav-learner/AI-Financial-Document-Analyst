@@ -46,8 +46,8 @@ def _clean_tables() -> Generator[None, None, None]:
     with sync_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE document_chunks, report_sections, report_pages, reports, companies "
-                "RESTART IDENTITY CASCADE"
+                "TRUNCATE financial_metrics, document_chunks, report_sections, report_pages, "
+                "reports, companies RESTART IDENTITY CASCADE"
             )
         )
 
@@ -80,6 +80,8 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
     # Phase 2A: the embeddings endpoint enqueues generate_embeddings_task.delay();
     # stub it in the endpoint's namespace so no broker is needed.
     monkeypatch.setattr("app.api.v1.endpoints.embeddings.generate_embeddings_task", _Task())
+    # Phase 3A: the metrics endpoint enqueues extract_financial_metrics_task.delay().
+    monkeypatch.setattr("app.api.v1.endpoints.metrics.extract_financial_metrics_task", _Task())
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)
