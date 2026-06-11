@@ -18,13 +18,19 @@
    - ⭐ [Phase 1A — Document Ingestion Foundation](#phase-1a--document-ingestion-foundation)
    - ⭐ [Phase 1B Completion Report — Financial Section Intelligence](#phase-1b-completion-report--financial-section-intelligence)
    - ⭐ [Phase 1C Completion Report — Knowledge Preparation Layer](#phase-1c-completion-report--knowledge-preparation-layer)
-   - ⭐ [Phase 2A Completion Report — Embedding Infrastructure](#phase-2a-completion-report--embedding-infrastructure)
-   - ⭐ [Phase 2B Completion Report — Vector Search Foundation](#phase-2b-completion-report--vector-search-foundation)
-   - ⭐ [Phase 2C Completion Report — Hybrid Retrieval Foundation](#phase-2c-completion-report--hybrid-retrieval-foundation)
-   - ⭐ [Phase 2D Completion Report — Retrieval Evaluation & Observability](#phase-2d-completion-report--retrieval-evaluation--observability)
-   - ⭐ [Phase 3A Completion Report — Financial Metric Extraction Foundation](#phase-3a-completion-report--financial-metric-extraction-foundation)
-   - ⭐ [Phase 3B Completion Report — Period Comparison Engine](#phase-3b-completion-report--period-comparison-engine)
-   - ⭐ [Phase 3C Completion Report — Financial Analytics Layer](#phase-3c-completion-report--financial-analytics-layer)
+   - ⭐ [Phase 2A Completion Report — Embedding Infrastructure](#phase-2a-embedding-infrastructure)
+   - ⭐ [Phase 2B Completion Report — Vector Search Foundation](#phase-2b-vector-search-foundation)
+   - ⭐ [Phase 2C Completion Report — Hybrid Retrieval Foundation](#phase-2c-hybrid-retrieval-foundation)
+   - ⭐ [Phase 2D Completion Report — Retrieval Evaluation & Observability](#phase-2d-retrieval-evaluation--observability)
+   - ⭐ [Phase 3A Completion Report — Financial Metric Extraction Foundation](#phase-3a-financial-metric-extraction-foundation)
+   - ⭐ [Phase 3B Completion Report — Period Comparison Engine](#phase-3b-period-comparison-engine)
+   - ⭐ [Phase 3C Completion Report — Financial Analytics Layer](#phase-3c-financial-analytics-layer)
+   - ⭐ [Phase 4 Completion Report — Risk Intelligence Engine](#phase-4-completion-report)
+   - ⭐ [Phase 5 Completion Report — Management Tone Intelligence Engine](#phase-5--management-tone-intelligence-engine)
+   - ⭐ [Phase 6 Completion Report — Advanced Retrieval & RAG Intelligence](#phase-6-completion-report--advanced-retrieval--rag-intelligence)
+   - ⭐ [Phase 7 Completion Report — Financial Analyst Agent System](#phase-7-completion-report--financial-analyst-agent-system)
+   - ⭐ [Phase 8 Completion Report — Competitor Benchmarking Engine](#phase-8-completion-report--competitor-benchmarking-engine)
+   - ⭐ [Phase 9 Completion Report — Investment Memo Generation Engine](#phase-9-completion-report--investment-memo-generation-engine)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -78,9 +84,9 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **4** | **Risk Intelligence** ✅ | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling (DONE) |
 | **5** | **Management Tone Analysis** ✅ | Sentiment/confidence | Tone Agent, `tone_analysis`, rubric scoring, trends | Stable, rubric-anchored scores with citations (DONE) |
 | **6** | **Advanced RAG** ✅ | Precision retrieval | Query rewrite, HyDE, **BGE re-ranking (`BAAI/bge-reranker-base`)**, metadata filtering, groundedness guard | Measurable retrieval-accuracy lift (DONE) |
-| **7** | **Multi-Agent Orchestration** | LangGraph supervisor | Supervisor + graph, checkpointing, shared state | Parallel ingestion + conditional query routing working |
-| **8** | **Competitor Benchmarking** | Peer comparison | Benchmark Agent, metric alignment, `/benchmark`, caching | Correct cross-company normalized comparison |
-| **9** | **Investment Memo Generation** | Synthesis | Memo Agent, `investment_memos`, `/memos`, export | Cited, structured memo with recommendation |
+| **7** | **Multi-Agent Orchestration** ✅ | LangGraph supervisor | Supervisor + graph, checkpointing, shared state | Parallel ingestion + conditional query routing working (DONE) |
+| **8** | **Competitor Benchmarking** ✅ | Peer comparison | Benchmark Agent, metric alignment, `/benchmark`, caching | Correct cross-company normalized comparison (DONE) |
+| **9** | **Investment Memo Generation** ✅ | Synthesis | Memo Agent, `investment_memos`, `/memos`, export | Cited, structured memo with recommendation (DONE) |
 | **10** | **Conversational Financial Analyst** | Chat | Streaming `/chat`, session context, citations UI | Grounded multi-turn Q&A with click-through |
 | **11** | **Production Hardening** | Reliability & scale | AuthN/Z, rate limits, observability, fallback, HITL review, load test | SLOs met; security review passed |
 | **12** | **Bonus Features & MCP** | Extensibility | MCP tool server, selected future enhancements | External agents can call analyst tools |
@@ -1625,6 +1631,37 @@ Phase 8 implements the Competitor Benchmarking Engine. This module establishes a
 
 ### Final Status
 > **PHASE 8 COMPLETED.**
+
+---
+
+## Phase 9 Completion Report — Investment Memo Generation Engine
+
+> **Date:** 2026-06-11 · **Owner:** Lead Financial AI Engineer (pranav) · **Scope:** Memo Orchestration, Evidence Packaging, Bull/Bear Case Generation, due diligence Question Generation, Investment Decisioning context, and Markdown/JSON export APIs. **No Competitor Benchmarking front-end, final downstream UI integration, or MCP tools.**
+
+### Overview
+Phase 9 implements the Investment Memo Generation Engine. It packages structured metrics, text chunks, risk factors, and tone analyses from database tables, generating professional, multi-section investment memos either via Gemini 2.5 Pro (`gemini-2.5-pro`) or using a robust deterministic fallback generation mechanism with Jaccard token-similarity citation matching. Celery tasks handle asynchronous run lifecycle transitions, and REST endpoints expose the generated memos for retrieval, citation compilation, and GFM markdown or JSON exports.
+
+### Features Implemented
+- **Database Tables**: Created `investment_memos` and `memo_sections` tables (Alembic migration `3e0b2e88a09f_add_phase_9_investment_memo_tables`) with cascades and indexes.
+- **Evidence Packaging Builder**: Implemented `MemoPackageBuilder` to extract and map Report, DocumentChunk, FinancialMetric, RiskFactor, and ManagementTone entities correctly.
+- **Structured prompt generators**: Built overview, financial, risk, tone, cohort benchmark, bull/bear-case, and diligence question generators.
+- **Prompt Orchestrator & LLM Integration**: Implemented `MemoBuilder` targeting Gemini 2.5 Pro with structured schema output constraints and a Jaccard token-similarity resolver for claim provenance tracking.
+- **Deterministic Rule Fallback**: Formulated a full-lifecycle fallback generator (`generate_fallback_memo`) ensuring that the memo generation runs successfully even if API keys are absent.
+- **Async Celery & REST APIs**: Configured `generate_memo_task` and mounted routes in `/api/v1/endpoints/memo.py` for `/memos`, status, citations, and export.
+
+### Exit Criteria Verification
+| Criterion | Status | Evidence |
+|---|---|---|
+| `investment_memos` & `memo_sections` tables | ✅ | Migration `3e0b2e88a09f_add_phase_9_investment_memo_tables` |
+| Evidence packaging & context extraction | ✅ | `MemoPackageBuilder` structuring financial/risk/tone inputs |
+| LLM orchestration & prompt templates | ✅ | `MemoBuilder` config with Gemini 2.5 Pro JSON schema constraints |
+| Jaccard similarity citation resolver | ✅ | `CitationBuilder` mapping generated claims to source chunk IDs |
+| Rule-based fallback generator | ✅ | High-fidelity deterministic fallback generating all 8 memo sections |
+| APIs operational (create/status/citations/export) | ✅ | POST `/memos`, GET `/memos/{id}`, GET `/citations`, GET `/export` |
+| Verification tests pass | ✅ | 12 unit tests + 1 integration test (100% pass) |
+
+### Final Status
+> **PHASE 9 COMPLETED.**
 
 ---
 

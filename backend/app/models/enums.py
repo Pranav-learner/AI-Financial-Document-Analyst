@@ -185,3 +185,19 @@ class BenchmarkDimension(str, Enum):
     OVERALL = "OVERALL"
 
 
+class MemoStatus(str, Enum):
+    """Lifecycle status of an investment memo (Phase 9)."""
+
+    PENDING = "PENDING"
+    GENERATING = "GENERATING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+
+
+class MemoType(str, Enum):
+    """Type of investment memo (Phase 9)."""
+
+    SINGLE_COMPANY = "SINGLE_COMPANY"
+    BENCHMARK_COMPARISON = "BENCHMARK_COMPARISON"
+
+

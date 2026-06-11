@@ -46,7 +46,7 @@ def _clean_tables() -> Generator[None, None, None]:
     with sync_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE benchmark_summaries, benchmark_results, benchmark_runs, "
+                "TRUNCATE memo_sections, investment_memos, benchmark_summaries, benchmark_results, benchmark_runs, "
                 "conversation_messages, conversation_threads, risk_evolution, risk_factors, "
                 "metric_comparisons, financial_metrics, document_chunks, report_sections, report_pages, "
                 "reports, companies RESTART IDENTITY CASCADE"
@@ -101,6 +101,8 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
     monkeypatch.setattr("app.api.v1.endpoints.tone.extract_management_tone_task", _Task())
     # Phase 8: the benchmark endpoint enqueues run_benchmark_task.delay().
     monkeypatch.setattr("app.api.v1.endpoints.benchmark.run_benchmark_task", _Task())
+    # Phase 9: the memo endpoint enqueues generate_memo_task.delay().
+    monkeypatch.setattr("app.api.v1.endpoints.memo.generate_memo_task", _Task())
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)

@@ -24,6 +24,7 @@ from app.api.v1.endpoints import (
     tone,
     rag,
     agent,
+    memo,
 )
 
 api_router = APIRouter()
@@ -67,5 +68,5 @@ api_router.include_router(agent.router, prefix="/agent", tags=["agent"])
 
 # --- Business routers (added per phase) ---------------------------------------
 api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmark"])
-# api_router.include_router(memos.router,     prefix="/memos",     tags=["memos"])      # Phase 9
+api_router.include_router(memo.router,     prefix="/memos",     tags=["memos"])      # Phase 9
 # api_router.include_router(chat.router,      prefix="/chat",      tags=["chat"])       # Phase 10

@@ -20,6 +20,7 @@ from app.models.report_section import ReportSection
 from app.models.conversation_thread import ConversationThread
 from app.models.conversation_message import ConversationMessage
 from app.models.benchmark import BenchmarkRun, BenchmarkResult, BenchmarkSummary
+from app.models.memo import InvestmentMemo, MemoSection
 
 __all__ = [
     "Company",
@@ -41,6 +42,8 @@ __all__ = [
     "BenchmarkRun",
     "BenchmarkResult",
     "BenchmarkSummary",
+    "InvestmentMemo",
+    "MemoSection",
 ]
 
 

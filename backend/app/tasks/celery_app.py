@@ -24,7 +24,7 @@ celery_app = Celery(
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
     # Task modules registered with the worker
-    include=["app.tasks.ingestion", "app.tasks.rag", "app.tasks.benchmark"],
+    include=["app.tasks.ingestion", "app.tasks.rag", "app.tasks.benchmark", "app.tasks.memo"],
 )
 
 # ---------------------------------------------------------------------------
@@ -47,6 +47,7 @@ celery_app.conf.task_routes = {
     "app.tasks.extraction.*": {"queue": "extraction"},
     "app.tasks.rag.*": {"queue": "extraction"},
     "app.tasks.benchmark.*": {"queue": "default"},
+    "app.tasks.memo.*": {"queue": "extraction"},
 }
 
 # ---------------------------------------------------------------------------
