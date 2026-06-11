@@ -109,6 +109,13 @@ class Settings(BaseSettings):
     hnsw_ef_construction: int = 64
     hnsw_ef_search: int = 40
 
+    # ---- Retrieval evaluation (Phase 2D) ----
+    # Override the packaged benchmark suite; empty → use the bundled JSON.
+    retrieval_benchmark_path: str = ""
+    # Default K for evaluation runs and how many runs the in-memory store keeps.
+    evaluation_default_top_k: int = 10
+    evaluation_max_stored_runs: int = 200
+
     openrouter_api_key: str = ""
     openrouter_fallback_model: str = "openai/gpt-4o"
 

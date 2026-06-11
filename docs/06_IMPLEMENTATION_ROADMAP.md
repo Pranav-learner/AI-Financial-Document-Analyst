@@ -21,6 +21,7 @@
    - ⭐ [Phase 2A Completion Report — Embedding Infrastructure](#phase-2a-completion-report--embedding-infrastructure)
    - ⭐ [Phase 2B Completion Report — Vector Search Foundation](#phase-2b-completion-report--vector-search-foundation)
    - ⭐ [Phase 2C Completion Report — Hybrid Retrieval Foundation](#phase-2c-completion-report--hybrid-retrieval-foundation)
+   - ⭐ [Phase 2D Completion Report — Retrieval Evaluation & Observability](#phase-2d-completion-report--retrieval-evaluation--observability)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -66,7 +67,8 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **2A** | **Embedding Infrastructure** ✅ | Embed + store (no search) | `gemini-embedding-001`→`vector(768)`, provider layer, embedding APIs/status; **no ANN index** | Every chunk has a valid stored embedding (DONE) |
 | **2B** | **Vector Search Foundation** ✅ | Index + retrieve (vector-only) | HNSW (cosine) on `vector(768)`, query embedding, top-K KNN, `/search/vector`+`/search/debug` | Top-K semantically relevant chunks returned with scores (DONE) |
 | **2C** | **Hybrid Retrieval Foundation** ✅ | Metadata filter + vector | Filter→candidate→vector search, retrieval profiles, `/search/hybrid` | Scoped retrieval beats vector-only (DONE) |
-| **2D** | **Advanced Retrieval** | Rewrite + rerank | Query rewrite/HyDE, BGE re-rank, groundedness | Higher-precision cited retrieval |
+| **2D** | **Retrieval Evaluation & Observability** ✅ | Measure + benchmark | Metrics (Recall/Precision/MRR/Hit), ground-truth suite, runner, `/evaluation/*`, vector vs hybrid baselines | Retrieval quality measurable + baselined (DONE) |
+| **2E** | **Advanced Retrieval** | Rewrite + rerank | Query rewrite/HyDE, BGE re-rank, groundedness (each measured vs 2D baseline) | Higher-precision cited retrieval |
 | **3** | **Financial Metric Extraction** | Typed KPIs + deltas | Metric Extraction Agent, `financial_metrics`, YoY/QoQ, `/metrics` | ≥95% extraction accuracy on gold set |
 | **4** | **Risk Intelligence** | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling |
 | **5** | **Management Tone Analysis** | Sentiment/confidence | Tone Agent, `tone_analysis`, rubric scoring, trends | Stable, rubric-anchored scores with citations |
@@ -1051,6 +1053,179 @@ precise for context-bound financial questions — the core motivation of the pha
 
 ---
 
+## Phase 2D Completion Report — Retrieval Evaluation & Observability
+
+> **Date:** 2026-06-11 · **Owner:** Lead Retrieval Engineer / AI Evaluation Engineer (nickg) · **Scope:** **measurement only** — evaluation framework, benchmark suite, metrics, observability, baselines. **No retrieval enhancement, no query rewriting, HyDE, re-ranking, LLM judge, RAG, or generation.**
+
+### Overview
+Phase 2D makes retrieval quality **objectively measurable and repeatable**, so every future
+enhancement (query rewriting, HyDE, re-ranking, RAG) can be judged against the *same* benchmark.
+It adds a reusable ground-truth suite, the standard IR metrics (Recall@K, Precision@K, MRR, Hit
+Rate, latency, candidate reduction), a strategy-agnostic benchmark runner, evaluation APIs, and
+recorded **vector vs hybrid baselines**. It runs the existing Phase 2B/2C retrieval exactly as
+built and scores it — it does not change retrieval.
+
+### Features Implemented
+- **Evaluation framework** (`app/retrieval/evaluation/`): metrics, models, ground truth,
+  benchmark runner, service, exceptions.
+- **Reusable ground-truth dataset** (`benchmark_suite.json`, override via
+  `RETRIEVAL_BENCHMARK_PATH`) — 9 examples across 5 categories; relevance judged by canonical
+  section (corpus-portable), with optional curated report/chunk ids. **Not hardcoded in tests.**
+- **Metrics:** Recall@K, Precision@K, MRR, Hit Rate@K, latency, candidate-reduction % — pure,
+  unit-tested functions with documented definitions.
+- **Strategy-agnostic `BenchmarkRunner`** — scores vector, hybrid, and any future strategy
+  identically (so they are directly comparable), with per-category breakdowns and failure counts.
+- **`EvaluationService`** — wires Phase 2B vector + Phase 2C hybrid retrieval, computes recall
+  denominators from the DB, runs the suite, and records runs in an in-memory store.
+- **Comparison study** — vector baseline vs hybrid baseline, exposed as deltas.
+- **Observability** — per-query embedding/filter/vector latency, candidate counts, results
+  returned, and failures captured in every `EvaluationResult`.
+- **Dashboard APIs** (backend only): run, results, metrics (+comparison), benchmarks.
+
+### Architecture Changes
+- **New package** `app/retrieval/evaluation/`: `metrics.py` (pure), `evaluation_models.py`
+  (`EvaluationResult`/`EvaluationRun`), `ground_truth.py` + `benchmark_suite.json`,
+  `benchmark_runner.py`, `evaluation_service.py` (+ in-memory `EvaluationStore`),
+  `evaluation_exceptions.py`. *Why:* one centralized, reusable evaluation harness that all future
+  retrieval work plugs into.
+- **In-memory results store** (process-local ring buffer), not a DB table. *Why:* evaluation
+  runs are operational telemetry, not domain data — no migration needed; a persistence table is a
+  noted future enhancement for cross-restart trends.
+- **New `/api/v1/evaluation` router**; reuses Phase 2B `SearchResult` + Phase 2C retrieval
+  unchanged (no retrieval logic added here).
+
+### Technical Decisions
+- **Decision:** **Section-based relevance** as the default ground-truth signal (with optional
+  curated chunk/report ids). *Why:* makes the suite corpus-portable — it works on any ingested
+  corpus without hardcoding ids that change per ingestion — while still supporting a precise gold
+  set when available. (See **ADR-016**.)
+- **Decision:** **Strategy-agnostic runner** depending only on an async `retrieve` callable
+  returning a uniform `RetrievalOutput`. *Why:* the same harness scores future strategies, so
+  comparisons are apples-to-apples — the core principle of the phase.
+- **Decision:** **In-memory run store.** *Why:* lightweight, migration-free operational telemetry.
+- **Decision:** Precision@K denominator = items actually returned in top-K (not always K).
+  *Why:* not to penalize returning fewer than K when the filtered candidate set is small.
+
+### Files Created
+- `app/retrieval/evaluation/__init__.py`, `metrics.py`, `evaluation_models.py`,
+  `ground_truth.py`, `benchmark_suite.json`, `benchmark_runner.py`, `evaluation_service.py`,
+  `evaluation_exceptions.py`
+- `app/schemas/evaluation.py`, `app/api/v1/endpoints/evaluation.py`
+- `tests/unit/test_retrieval_metrics.py`, `test_ground_truth.py`, `test_benchmark_runner.py`
+- `tests/integration/test_evaluation_api.py`
+
+### Files Modified
+- `app/core/config.py` (benchmark path + evaluation defaults)
+- `app/api/v1/router.py` (mount evaluation router)
+
+### Metrics Implemented
+| Metric | Definition | Why it matters |
+|---|---|---|
+| **Recall@K** | relevant in top-K / total relevant in corpus | Did we find the evidence that exists? Primary quality signal. |
+| **Precision@K** | relevant in top-K / items returned in top-K | How much of what we returned was on-target (noise control). |
+| **MRR** | mean of 1/rank of first relevant | Rewards ranking a hit high (small context windows). |
+| **Hit Rate@K** | fraction of queries with ≥1 relevant in top-K | Coarse "did retrieval work at all". |
+| **Latency** | end-to-end retrieval time (per stage) | Quality is useless if too slow on the hot path. |
+| **Candidate Reduction %** | 1 − candidates/corpus | How much filtering narrowed the search (0% for vector). |
+
+### Benchmark Design
+9 queries across 5 financial categories — **RISK** ("supply chain risk", "cybersecurity…"),
+**FINANCIAL_STATEMENTS** ("operating margin", "cash flow", "capital expenditure"), **GUIDANCE**
+("future outlook", "forward guidance…"), **MANAGEMENT** ("management discussion…"), **GENERAL**
+("company business overview"). Each carries `expected_sections` (canonical), an optional
+`profile`, and optional `filters`. Relevance = the retrieved chunk's `normalized_section_name`
+∈ `expected_sections` (or curated ids). The suite is data (JSON), reusable across corpora and
+overridable, never embedded in test code.
+
+### API Changes
+- `POST /api/v1/evaluation/run` — `{retrieval_type: vector|hybrid|both, top_k?}` → runs the suite,
+  records results, returns per-strategy runs (with per-query detail).
+- `GET /api/v1/evaluation/results` — recorded run summaries (newest first).
+- `GET /api/v1/evaluation/metrics` — latest per strategy + hybrid-vs-vector comparison deltas.
+- `GET /api/v1/evaluation/benchmarks` — the ground-truth suite.
+- Errors: `INVALID_EVALUATION_REQUEST` → 422; `GROUND_TRUTH_ERROR` → 500.
+
+### Testing Summary
+- **Unit (24 new; 180 total passing):** metrics (recall/precision/MRR/hit/reduction edge cases);
+  ground truth (load, relevance priority chunk→section→report, malformed/empty errors); runner
+  (perfect/none/rank-2/aggregate/per-category/failures); store ring-buffer + latest-by-type.
+- **Integration (DB-backed, hashing embedder):** benchmarks endpoint; run both + metrics; results
+  + comparison APIs; single-strategy run; invalid type → 422; ranking correctness ("cash flow" →
+  Cash Flow chunk relevant). Verified against live `pgvector/pgvector:pg16`.
+- Same Python-3.14 asyncpg/pytest-asyncio teardown artifact (per-test isolation passes; 3.11/CI ok).
+
+### Performance Findings & Baseline Measurements (task §11/§12)
+Recorded baselines (9-query suite, top_k=10, ef_search=40) at three corpus sizes. The corpus =
+16 query-aligned section chunks + near-duplicate filler noise to reach N (the filler is
+**adversarial for ANN** — many near-identical vectors — which is exactly what stresses recall):
+
+| N | strategy | Recall@10 | Precision@10 | MRR | Hit | latency (ms) | candidate reduction |
+|---|---|---|---|---|---|---|---|
+| 100 | vector | 0.944 | 0.400 | 1.000 | 1.00 | 18.5 | 0% |
+| 100 | **hybrid** | 0.833 | **0.700** | 1.000 | 1.00 | 15.3 | **84.6%** |
+| 1000 | vector | **0.000** | 0.000 | 0.000 | 0.00 | 10.5 | 0% |
+| 1000 | **hybrid** | **0.722** | **0.667** | **0.889** | 0.89 | 14.8 | **88.5%** |
+| 10000 | vector | 0.889 | 0.367 | 1.000 | 1.00 | 87.1 | 0% |
+| 10000 | **hybrid** | 0.833 | **0.700** | 1.000 | 1.00 | **50.4** | **88.8%** |
+
+### Retrieval Quality Findings (vector baseline vs hybrid baseline)
+- **Where hybrid clearly improves:** **Precision** (0.40→0.70 at 100; 0.37→0.70 at 10k) and
+  **candidate reduction** (~85–89%) — filtering removes off-section noise, so what's returned is
+  on-target. At 10k, hybrid was also **faster** (50 vs 87 ms) because most queries are
+  profile-scoped to a handful of candidates.
+- **Robustness:** pure-vector recall was **volatile under ANN approximation** with the
+  near-duplicate noise (0.944 → **0.000** → 0.889 across sizes — at N=1000 the HNSW graph,
+  dominated by duplicate filler, failed to reach the sparse relevant chunks at ef_search=40),
+  while **hybrid stayed 0.72–0.83** because it filters to the section then scans that small set
+  **exactly**. This is the headline finding: metadata filtering makes retrieval *robust*, not
+  just precise.
+- **Where hybrid does *not* help (honest):** when a **profile is narrower than the relevant
+  set** (e.g. `MANAGEMENT_TONE` excludes MD&A, which the management query also accepts), hybrid
+  recall drops below vector for that query. And (from Phase 2C) **low-selectivity** filters over a
+  large corpus can make hybrid latency exceed vector. Both are tuning issues, now *measurable*.
+- **This is the baseline** every future retrieval phase must beat on this suite.
+
+### Lessons Learned
+- **You can't improve what you don't measure — and ANN recall is not free.** The N=1000
+  vector collapse (recall 0) was invisible until the benchmark exposed it; it's a real
+  ef_search/data-distribution interaction, and now it's a number we can watch and tune.
+- **Corpus-portable ground truth (section-based) beats hardcoded chunk ids:** the same suite runs
+  on any corpus, so evaluation isn't coupled to a specific ingestion.
+- **A strategy-agnostic runner is the whole point:** vector and hybrid drop into the identical
+  harness, which is what makes the comparison — and all future ones — trustworthy.
+
+### Risks Discovered
+- **In-memory store** resets on restart — fine for live dashboards/CI, but cross-restart trend
+  history needs a future persistence table.
+- **ANN recall volatility** (the N=1000 finding) means production should tune `ef_search` (and
+  consider exact rescoring for high-stakes queries) against the *real* corpus.
+- **Section-based relevance is coarse:** it credits any chunk in the right section; a curated
+  chunk-level gold set (supported by the schema) is needed for fine-grained precision claims.
+
+### Future Phase Dependencies
+- **Query rewriting / HyDE / re-ranking (ADR-010)** each plug into the `BenchmarkRunner` as a new
+  strategy and must beat the recorded vector/hybrid baselines on this suite.
+- **RAG / agents** reuse the metrics + ground truth to gate answer-grounding quality.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| Evaluation framework implemented | ✅ `app/retrieval/evaluation/` |
+| Ground truth dataset structure | ✅ reusable JSON suite (corpus-portable) |
+| Recall@K · Precision@K · MRR · Hit Rate | ✅ pure, unit-tested |
+| Benchmark runner operational | ✅ strategy-agnostic, per-category |
+| Evaluation APIs operational | ✅ run / results / metrics / benchmarks |
+| Observability added | ✅ per-stage latency + candidates + failures |
+| Vector baseline measured · Hybrid baseline measured | ✅ table above |
+| Tests pass | ✅ 180 unit; 6 evaluation integration (isolation-verified) |
+| Documentation updated | ✅ this report + ADR-016 + metrics/baseline tables |
+
+### Final Status
+> **PHASE 2D COMPLETED.** Phase 3 / query rewriting / HyDE / re-ranking / RAG / agents / financial
+> extraction **NOT started — strictly out of scope.**
+
+---
+
 ## 3. Technology Decisions Log
 
 > Template: **Decision · Alternatives Considered · Chosen Because · Tradeoffs · Expected Impact**
@@ -1188,6 +1363,19 @@ precise for context-bound financial questions — the core motivation of the pha
 - **Tradeoffs:** report-level filters need a join; section filtering trusts the chunk's
   denormalized `normalized_section_name`; profiles are static config (no learning).
 - **Expected impact:** cheap, correct metadata scoping today; a clean seam for Phase-3+ agents.
+
+### TDL-017 — Retrieval evaluation harness (Phase 2D)
+- **Decision:** A strategy-agnostic `BenchmarkRunner` + pure metric functions + a reusable JSON
+  ground-truth suite (section-based relevance) + an in-memory run store, exposed via
+  `/api/v1/evaluation/*`.
+- **Alternatives:** ad-hoc metrics inside tests; a heavyweight eval DB/table from day one; an
+  external eval framework (ragas/trulens) coupling us to LLM-judge metrics (out of scope here).
+- **Chosen because:** one harness scores every current/future strategy identically (apples-to-
+  apples); section-based relevance is corpus-portable so the suite isn't hardcoded to one
+  ingestion; in-memory keeps it migration-free for operational telemetry.
+- **Tradeoffs:** in-memory store resets on restart; section relevance is coarser than a curated
+  chunk-level gold set (both supported by the schema as future upgrades).
+- **Expected impact:** every retrieval change from here is measurable against a fixed baseline.
 
 ---
 
@@ -1369,6 +1557,28 @@ precise for context-bound financial questions — the core motivation of the pha
   iterative index scans. This is **metadata-filtered vector search**, not lexical (BM25) fusion or
   re-ranking — those are later phases (ADR-010). (See TDL-016; Phase 2C report.)
 
+### ADR-016 — Section-Based, Strategy-Agnostic Retrieval Evaluation  *(Accepted — Phase 2D)*
+- **Context:** Every future retrieval enhancement (rewriting, HyDE, re-ranking, RAG) must be
+  proven to help. That requires one fixed, repeatable benchmark — not per-feature ad-hoc checks.
+- **Problem:** How to judge "relevant" portably, and how to structure the harness so all
+  strategies are comparable.
+- **Options:**
+  1. **Curated chunk-id gold set** — precise but tied to one ingestion (ids change per corpus).
+  2. **Section-based relevance** (a result is relevant if its canonical section ∈ expected) —
+     corpus-portable, coarser.
+  3. LLM-judge relevance — out of scope (no LLM in retrieval phases) and non-deterministic.
+- **Decision:** **Section-based relevance by default** (option 2), with optional curated
+  report/chunk ids layered on (option 1) when available; a single **strategy-agnostic runner**
+  that scores any retrieval function via a uniform `RetrievalOutput`; standard IR metrics
+  (Recall@K/Precision@K/MRR/Hit Rate) + latency + candidate reduction.
+- **Reasoning:** the same suite runs on any corpus and every strategy plugs into the same harness,
+  so comparisons (and regressions) are trustworthy. LLM-judge is deliberately excluded to keep
+  evaluation deterministic and within the retrieval-only mandate.
+- **Consequences:** measurable baselines (vector vs hybrid recorded); section relevance is coarse
+  (credits any in-section chunk) — a curated gold set is a future refinement; the in-memory store
+  trades cross-restart history for zero migration. The recorded baselines are the bar future
+  phases must beat. (See TDL-017; Phase 2D report.)
+
 ---
 
 ## 5. Implementation Log
@@ -1418,7 +1628,11 @@ precise for context-bound financial questions — the core motivation of the pha
 | 2026-06-11 | 2C | Hybrid APIs + observability | nickg | `POST /search/hybrid` + `/hybrid/debug` + `GET /search/profiles`; candidate count + per-stage latency | ✅ Completed |
 | 2026-06-11 | 2C | Tests + perf + quality + docs | nickg | 34 new unit (156 total); 11 hybrid integration incl. hybrid-vs-vector quality; perf (10× candidate reduction @100/1k/10k); Phase 2C report | ✅ Completed |
 | 2026-06-11 | 2C | **Phase 2C COMPLETE** | nickg | All exit criteria met; query-rewrite / HyDE / rerank / RAG not started | ✅ Completed |
-| — | 2D+ | Rerank / rewrite / RAG | | Query rewrite/HyDE, BGE re-rank (ADR-010), groundedness, then RAG/agents | ⬜ Todo |
+| 2026-06-11 | 2D | Evaluation framework | nickg | `app/retrieval/evaluation/` — metrics (Recall@K/Precision@K/MRR/HitRate), reusable ground-truth suite, strategy-agnostic runner, in-memory store; ADR-016/TDL-017 | ✅ Completed |
+| 2026-06-11 | 2D | Evaluation APIs + baselines | nickg | `/evaluation/run|results|metrics|benchmarks`; recorded vector vs hybrid baselines @100/1k/10k | ✅ Completed |
+| 2026-06-11 | 2D | Tests + docs | nickg | 24 new unit (180 total); 6 evaluation integration; Phase 2D report + comparison/perf tables | ✅ Completed |
+| 2026-06-11 | 2D | **Phase 2D COMPLETE** | nickg | All exit criteria met; Phase 3 / rewrite / HyDE / rerank / RAG not started | ✅ Completed |
+| — | 3+ | Rerank / rewrite / RAG / extraction | | Query rewrite/HyDE, BGE re-rank (ADR-010), groundedness, RAG/agents, financial extraction — each measured vs the 2D baseline | ⬜ Todo |
 
 > _Add a row per meaningful change. Mark status: ⬜ Todo · 🟡 In progress · ✅ Completed · ⛔ Blocked._
 

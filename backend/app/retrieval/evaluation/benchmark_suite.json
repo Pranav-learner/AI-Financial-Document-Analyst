@@ -1,0 +1,69 @@
+{
+  "$comment": "Phase 2D reusable retrieval benchmark suite. Relevance is judged by expected_sections (canonical normalized_section_name) so the suite is corpus-portable; expected_report_ids / expected_chunk_ids may be supplied for a curated gold set. Override path via RETRIEVAL_BENCHMARK_PATH.",
+  "version": 1,
+  "examples": [
+    {
+      "id": "risk-supply-chain",
+      "query": "supply chain risk",
+      "category": "RISK",
+      "expected_sections": ["Risk Factors", "Market Risk Disclosures"],
+      "profile": "RISK_ANALYSIS"
+    },
+    {
+      "id": "risk-cybersecurity",
+      "query": "cybersecurity and data breach risk",
+      "category": "RISK",
+      "expected_sections": ["Risk Factors", "Market Risk Disclosures"],
+      "profile": "RISK_ANALYSIS"
+    },
+    {
+      "id": "fin-operating-margin",
+      "query": "operating margin",
+      "category": "FINANCIAL_STATEMENTS",
+      "expected_sections": ["Income Statement", "Financial Statements", "MD&A"],
+      "profile": "FINANCIAL_STATEMENTS"
+    },
+    {
+      "id": "fin-cash-flow",
+      "query": "cash flow",
+      "category": "FINANCIAL_STATEMENTS",
+      "expected_sections": ["Cash Flow Statement", "Financial Statements"],
+      "profile": "FINANCIAL_STATEMENTS"
+    },
+    {
+      "id": "fin-capex",
+      "query": "capital expenditure",
+      "category": "FINANCIAL_STATEMENTS",
+      "expected_sections": ["Cash Flow Statement", "Financial Statements", "MD&A"],
+      "profile": "FINANCIAL_STATEMENTS"
+    },
+    {
+      "id": "guidance-outlook",
+      "query": "future outlook",
+      "category": "GUIDANCE",
+      "expected_sections": ["Forward Guidance", "MD&A"],
+      "profile": "GUIDANCE"
+    },
+    {
+      "id": "guidance-forward",
+      "query": "forward guidance for next fiscal year",
+      "category": "GUIDANCE",
+      "expected_sections": ["Forward Guidance"],
+      "profile": "GUIDANCE"
+    },
+    {
+      "id": "mgmt-discussion",
+      "query": "management discussion and analysis of results",
+      "category": "MANAGEMENT",
+      "expected_sections": ["MD&A", "Management Commentary"],
+      "profile": "MANAGEMENT_TONE"
+    },
+    {
+      "id": "general-business",
+      "query": "company business overview",
+      "category": "GENERAL",
+      "expected_sections": ["Business Overview"],
+      "profile": "GENERAL"
+    }
+  ]
+}
