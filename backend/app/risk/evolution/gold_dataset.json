@@ -1,0 +1,127 @@
+{
+  "$comment": "Phase 4 risk evolution gold set. Used to measure accuracy of period-over-period risk evolution tracking.",
+  "version": 1,
+  "examples": [
+    {
+      "id": "evol-escalated",
+      "company_id": "company-1",
+      "prior": [
+        {
+          "id": "prior-sc",
+          "risk_name": "Supply Chain Delays",
+          "category": "SUPPLY_CHAIN",
+          "severity": "LOW"
+        }
+      ],
+      "current": [
+        {
+          "id": "curr-sc",
+          "risk_name": "Supply Chain Delays",
+          "category": "SUPPLY_CHAIN",
+          "severity": "HIGH"
+        }
+      ],
+      "expected": [
+        {
+          "previous_risk_id": "prior-sc",
+          "current_risk_id": "curr-sc",
+          "evolution_type": "ESCALATED_RISK"
+        }
+      ]
+    },
+    {
+      "id": "evol-reduced",
+      "company_id": "company-1",
+      "prior": [
+        {
+          "id": "prior-reg",
+          "risk_name": "Regulatory compliance costs",
+          "category": "REGULATORY",
+          "severity": "CRITICAL"
+        }
+      ],
+      "current": [
+        {
+          "id": "curr-reg",
+          "risk_name": "Regulatory compliance costs",
+          "category": "REGULATORY",
+          "severity": "MEDIUM"
+        }
+      ],
+      "expected": [
+        {
+          "previous_risk_id": "prior-reg",
+          "current_risk_id": "curr-reg",
+          "evolution_type": "REDUCED_RISK"
+        }
+      ]
+    },
+    {
+      "id": "evol-unchanged",
+      "company_id": "company-1",
+      "prior": [
+        {
+          "id": "prior-cyber",
+          "risk_name": "Cybersecurity and hacker threats",
+          "category": "CYBERSECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "current": [
+        {
+          "id": "curr-cyber",
+          "risk_name": "Cybersecurity and hacker threats",
+          "category": "CYBERSECURITY",
+          "severity": "HIGH"
+        }
+      ],
+      "expected": [
+        {
+          "previous_risk_id": "prior-cyber",
+          "current_risk_id": "curr-cyber",
+          "evolution_type": "UNCHANGED_RISK"
+        }
+      ]
+    },
+    {
+      "id": "evol-new",
+      "company_id": "company-1",
+      "prior": [],
+      "current": [
+        {
+          "id": "curr-geo",
+          "risk_name": "Geopolitical tariff risks",
+          "category": "GEOPOLITICAL",
+          "severity": "HIGH"
+        }
+      ],
+      "expected": [
+        {
+          "previous_risk_id": null,
+          "current_risk_id": "curr-geo",
+          "evolution_type": "NEW_RISK"
+        }
+      ]
+    },
+    {
+      "id": "evol-removed",
+      "company_id": "company-1",
+      "prior": [
+        {
+          "id": "prior-env",
+          "risk_name": "Environmental waste fines",
+          "category": "ENVIRONMENTAL",
+          "severity": "MEDIUM"
+        }
+      ],
+      "current": [],
+      "expected": [
+        {
+          "previous_risk_id": "prior-env",
+          "current_risk_id": null,
+          "evolution_type": "REMOVED_RISK"
+        }
+      ]
+    }
+  ]
+}

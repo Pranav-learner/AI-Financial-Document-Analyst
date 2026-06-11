@@ -1,0 +1,71 @@
+{
+  "$comment": "Phase 4 risk extraction gold set. Used to measure risk extraction, classification, and severity labeling accuracy.",
+  "version": 1,
+  "examples": [
+    {
+      "id": "supply-chain-high",
+      "section": "Risk Factors",
+      "fiscal_year": 2024,
+      "text": "We face significant disruption to our global supply chain which could adversely affect our manufacturing capabilities and result in major delays.",
+      "expected": [
+        {
+          "category": "SUPPLY_CHAIN",
+          "severity": "HIGH",
+          "normalized_risk_name": "SUPPLY CHAIN RISK"
+        }
+      ]
+    },
+    {
+      "id": "regulatory-medium",
+      "section": "Risk Factors",
+      "fiscal_year": 2024,
+      "text": "Changes in regulatory compliance requirements present a risk of moderate cost increases.",
+      "expected": [
+        {
+          "category": "REGULATORY",
+          "severity": "MEDIUM",
+          "normalized_risk_name": "REGULATORY RISK"
+        }
+      ]
+    },
+    {
+      "id": "cybersecurity-critical",
+      "section": "Risk Factors",
+      "fiscal_year": 2024,
+      "text": "A severe security breach or cyberattack presents an existential threat and could impair our entire cloud service operations.",
+      "expected": [
+        {
+          "category": "CYBERSECURITY",
+          "severity": "CRITICAL",
+          "normalized_risk_name": "SECURITY BREACH RISK"
+        }
+      ]
+    },
+    {
+      "id": "competition-low",
+      "section": "Risk Factors",
+      "fiscal_year": 2024,
+      "text": "Increased local competition in secondary markets represents a minor risk of downward pressure on pricing.",
+      "expected": [
+        {
+          "category": "COMPETITION",
+          "severity": "LOW",
+          "normalized_risk_name": "COMPETITION RISK"
+        }
+      ]
+    },
+    {
+      "id": "legal-high",
+      "section": "Legal Proceedings",
+      "fiscal_year": 2024,
+      "text": "We face a material risk of patent infringement lawsuits that could disrupt our core product sales.",
+      "expected": [
+        {
+          "category": "LEGAL",
+          "severity": "HIGH",
+          "normalized_risk_name": "LAWSUIT RISK"
+        }
+      ]
+    }
+  ]
+}

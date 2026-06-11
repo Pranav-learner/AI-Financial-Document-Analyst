@@ -32,6 +32,8 @@ class ReportStatus(str, Enum):
     COMPARED = "COMPARED"        # period comparisons generated and stored (Phase 3B done)
     ANALYZING = "ANALYZING"      # worker is generating financial analytics (Phase 3C)
     ANALYZED = "ANALYZED"        # financial analytics generated and stored (Phase 3C done)
+    RISK_EXTRACTING = "RISK_EXTRACTING"  # worker is extracting risks (Phase 4)
+    RISK_EXTRACTED = "RISK_EXTRACTED"    # risks extracted and stored (Phase 4 done)
     FAILED = "FAILED"            # a processing step failed (see error_message / logs)
 
 
@@ -93,3 +95,42 @@ class EmbeddingStatus(str, Enum):
     PROCESSING = "PROCESSING"    # embedding is being generated for this chunk
     COMPLETED = "COMPLETED"      # a valid embedding is stored
     FAILED = "FAILED"            # embedding generation/validation failed
+
+
+class RiskCategory(str, Enum):
+    """Canonical risk categories (Phase 4)."""
+
+    SUPPLY_CHAIN = "SUPPLY_CHAIN"
+    REGULATORY = "REGULATORY"
+    MARKET = "MARKET"
+    COMPETITION = "COMPETITION"
+    TECHNOLOGY = "TECHNOLOGY"
+    CYBERSECURITY = "CYBERSECURITY"
+    OPERATIONAL = "OPERATIONAL"
+    LIQUIDITY = "LIQUIDITY"
+    GEOPOLITICAL = "GEOPOLITICAL"
+    LEGAL = "LEGAL"
+    ENVIRONMENTAL = "ENVIRONMENTAL"
+    REPUTATION = "REPUTATION"
+    MACROECONOMIC = "MACROECONOMIC"
+    OTHER = "OTHER"
+
+
+class RiskSeverity(str, Enum):
+    """Risk severity levels (Phase 4)."""
+
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+
+class RiskEvolutionType(str, Enum):
+    """Risk evolution classification (Phase 4)."""
+
+    NEW_RISK = "NEW_RISK"
+    REMOVED_RISK = "REMOVED_RISK"
+    UNCHANGED_RISK = "UNCHANGED_RISK"
+    ESCALATED_RISK = "ESCALATED_RISK"
+    REDUCED_RISK = "REDUCED_RISK"
+

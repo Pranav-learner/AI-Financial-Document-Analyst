@@ -10,6 +10,8 @@ from app.models.enums import ReportStatus, ReportType
 from app.models.financial_metric import FinancialMetric
 from app.models.metric_comparison import MetricComparison
 from app.models.financial_analytics import FinancialAnalytics
+from app.models.risk_factor import RiskFactor
+from app.models.risk_evolution import RiskEvolution
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
@@ -20,9 +22,12 @@ __all__ = [
     "FinancialMetric",
     "MetricComparison",
     "FinancialAnalytics",
+    "RiskFactor",
+    "RiskEvolution",
     "Report",
     "ReportPage",
     "ReportSection",
     "ReportStatus",
     "ReportType",
 ]
+

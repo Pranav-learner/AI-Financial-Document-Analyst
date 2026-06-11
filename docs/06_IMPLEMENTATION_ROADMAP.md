@@ -1469,7 +1469,40 @@ Phase 3C establishes the financial analytics layer, which deterministically calc
 | Evaluation framework operational | ✅ gold set evaluation |
 
 ### Final Status
-> **PHASE 3C COMPLETED.** Phase 4 / Risk Intelligence **NOT started — strictly out of scope.**
+> **PHASE 3C COMPLETED.** Phase 4 / Risk Intelligence **COMPLETED.**
+
+---
+
+## Phase 4 Completion Report — Risk Intelligence Engine
+
+> **Date:** 2026-06-11 · **Owner:** Lead Risk Intelligence Engineer (pranav) · **Scope:** risk extraction, taxonomy categorization, severity classification, period-over-period risk evolution tracking, storage, and APIs. **No sentiment/tone analysis, benchmarking, investment memos, or trend narratives.**
+
+### Overview
+Phase 4 implements the Risk Intelligence Engine. It processes normalized document sections (specifically "Risk Factors") using a hybrid extraction strategy (combining rule-based triggers and LLM-assisted models) to extract risks. These risks are categorized into canonical areas (e.g. SUPPLY_CHAIN, REGULATORY, CYBERSECURITY), assigned a severity level (CRITICAL, HIGH, MEDIUM, LOW), and matched across sequential reporting periods to calculate evolution states (NEW_RISK, REMOVED_RISK, UNCHANGED_RISK, ESCALATED_RISK, REDUCED_RISK). Results are saved in the `risk_factors` and `risk_evolutions` tables and exposed via REST APIs.
+
+### Features Implemented
+- **Database Tables**: Created `risk_factors` and `risk_evolutions` tables (+ migration `20260611_0009_phase4_risk_intelligence`) storing canonical category types, severity levels, descriptions, confidence metrics, and transition mappings.
+- **Rule-Based & LLM Risk Extraction**: Created taxonomy-driven pattern matcher (`RuleBasedRiskExtractor`) and Gemini-backed LLM extractor (`RiskLLMExtractor`) unified by `HybridRiskExtractor` to cross-validate results.
+- **Severity Classifier**: Deterministically classifies risk severity levels (CRITICAL, HIGH, MEDIUM, LOW) based on keyword markers in description texts.
+- **Period-over-Period Risk Matcher**: Matches risks between reporting periods using a hybrid strategy (exact match on normalized name, fuzzy match on Jaccard token similarity restricted to the same category).
+- **Risk Evolution Classifier & Service**: Classifies transitions into evolution types based on changes in severity levels between matched risks.
+- **Idempotent Celery Tasks**: Added `extract_risks_task` and `generate_risk_evolution_task` to handle asynchronous ingestion pipelines, updating report statuses to `RISK_EXTRACTED` or `RISK_EXTRACTED_PARTIAL`.
+- **FastAPI Endpoints**: Created endpoints to fetch risks and period-over-period risk evolution for reports and companies.
+- **Evaluation Framework**: Implemented gold dataset validators to measure extraction recall/precision and evolution classification accuracy offline.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| `risk_factors` and `risk_evolutions` tables implemented | ✅ migration `20260611_0009` (reversible) |
+| Rule + LLM extraction engine | ✅ `HybridRiskExtractor` with validation and confidence scoring |
+| Risk severity classification | ✅ CRITICAL, HIGH, MEDIUM, LOW categories |
+| Period-over-period risk evolution | ✅ `RiskMatcher` and `RiskEvolutionClassifier` mapping change types |
+| Idempotent Celery tasks | ✅ `extract_risks_task` and `generate_risk_evolution_task` integrated |
+| APIs operational | ✅ GET endpoints for report/company risks and evolution |
+| Evaluation framework operational | ✅ Gold dataset evaluations and unit tests passing |
+
+### Final Status
+> **PHASE 4 COMPLETED.** Phase 5 / Tone Analysis **NOT started — strictly out of scope.**
 
 ---
 

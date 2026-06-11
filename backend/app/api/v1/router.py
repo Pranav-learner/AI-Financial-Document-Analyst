@@ -18,6 +18,7 @@ from app.api.v1.endpoints import (
     health,
     metrics,
     reports,
+    risks,
     search,
 )
 
@@ -48,9 +49,10 @@ api_router.include_router(comparisons.router, tags=["comparisons"])
 # Financial analytics (Phase 3C) — report + company scoped; full paths inside.
 api_router.include_router(analytics.router, tags=["analytics"])
 
+# Risk intelligence (Phase 4) — report + company scoped; full paths inside.
+api_router.include_router(risks.router, tags=["risks"])
+
 # --- Business routers (added per phase) ---------------------------------------
-# api_router.include_router(metrics.router,   prefix="/reports",   tags=["metrics"])    # Phase 3
-# api_router.include_router(risks.router,     prefix="/reports",   tags=["risks"])      # Phase 4
 # api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmark"])  # Phase 8
 # api_router.include_router(memos.router,     prefix="/memos",     tags=["memos"])      # Phase 9
 # api_router.include_router(chat.router,      prefix="/chat",      tags=["chat"])       # Phase 10

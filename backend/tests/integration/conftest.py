@@ -46,7 +46,7 @@ def _clean_tables() -> Generator[None, None, None]:
     with sync_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE metric_comparisons, financial_metrics, document_chunks, "
+                "TRUNCATE risk_evolution, risk_factors, metric_comparisons, financial_metrics, document_chunks, "
                 "report_sections, report_pages, reports, companies RESTART IDENTITY CASCADE"
             )
         )
@@ -93,6 +93,8 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
     monkeypatch.setattr(
         "app.api.v1.endpoints.comparisons.generate_metric_comparisons_task", _Task()
     )
+    # Phase 4: the risks endpoint enqueues extract_risks_task.delay().
+    monkeypatch.setattr("app.api.v1.endpoints.risks.extract_risks_task", _Task())
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)

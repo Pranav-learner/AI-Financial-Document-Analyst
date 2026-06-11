@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -27,6 +27,8 @@ from app.models.financial_analytics import FinancialAnalytics
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
+from app.models.risk_factor import RiskFactor
+from app.models.risk_evolution import RiskEvolution
 
 
 class ReportRepository:
@@ -316,6 +318,74 @@ class ReportRepository:
             )
             .order_by(FinancialAnalytics.created_at.asc())
         )
+        return list((await self.session.scalars(stmt)).all())
+
+    # ---- Phase 4: risk factors & risk evolution (read-only, API layer) ------
+
+    async def get_risks(
+        self, report_id: uuid.UUID, *, category: str | None = None
+    ) -> list[RiskFactor]:
+        stmt = select(RiskFactor).where(RiskFactor.report_id == report_id)
+        if category is not None:
+            stmt = stmt.where(RiskFactor.category == category)
+        rows = (
+            await self.session.scalars(
+                stmt.order_by(
+                    RiskFactor.category.asc(),
+                    RiskFactor.normalized_risk_name.asc(),
+                )
+            )
+        ).all()
+        return list(rows)
+
+    async def get_risks_by_company(
+        self,
+        company_id: uuid.UUID,
+        *,
+        category: str | None = None,
+        severity: str | None = None,
+    ) -> list[RiskFactor]:
+        stmt = select(RiskFactor).where(RiskFactor.company_id == company_id)
+        if category is not None:
+            stmt = stmt.where(RiskFactor.category == category)
+        if severity is not None:
+            stmt = stmt.where(RiskFactor.severity == severity)
+        rows = (
+            await self.session.scalars(
+                stmt.order_by(
+                    RiskFactor.category.asc(),
+                    RiskFactor.normalized_risk_name.asc(),
+                )
+            )
+        ).all()
+        return list(rows)
+
+    async def get_risk(self, risk_id: uuid.UUID) -> RiskFactor | None:
+        return await self.session.get(RiskFactor, risk_id)
+
+    async def get_risk_evolutions_by_report(
+        self, report_id: uuid.UUID
+    ) -> list[RiskEvolution]:
+        risk_ids = select(RiskFactor.id).where(RiskFactor.report_id == report_id)
+        stmt = (
+            select(RiskEvolution)
+            .where(
+                or_(
+                    RiskEvolution.current_risk_id.in_(risk_ids),
+                    RiskEvolution.previous_risk_id.in_(risk_ids),
+                )
+            )
+            .order_by(RiskEvolution.evolution_type.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
+
+    async def get_risk_evolutions_by_company(
+        self, company_id: uuid.UUID, *, evolution_type: str | None = None
+    ) -> list[RiskEvolution]:
+        stmt = select(RiskEvolution).where(RiskEvolution.company_id == company_id)
+        if evolution_type is not None:
+            stmt = stmt.where(RiskEvolution.evolution_type == evolution_type)
+        stmt = stmt.order_by(RiskEvolution.created_at.asc())
         return list((await self.session.scalars(stmt)).all())
 
 
@@ -615,3 +685,106 @@ class SyncReportRepository:
         report.status = ReportStatus.ANALYZED
         report.processing_completed_at = datetime.now(UTC)
         self.session.commit()
+
+    # ---- Phase 4: risk factors & risk evolution (sync, Celery worker) --------
+
+    def mark_risk_extracting(self, report: Report) -> None:
+        report.status = ReportStatus.RISK_EXTRACTING
+        report.error_message = None
+        self.session.commit()
+
+    def replace_risks(self, report_id: uuid.UUID, risks: list[dict]) -> int:
+        """Delete existing risk factors for the report and insert the new set (idempotent)."""
+        self.session.query(RiskFactor).filter(
+            RiskFactor.report_id == report_id
+        ).delete()
+        self.session.add_all(
+            [RiskFactor(report_id=report_id, **r) for r in risks]
+        )
+        self.session.commit()
+        return len(risks)
+
+    def mark_risk_extracted(self, report: Report) -> None:
+        report.status = ReportStatus.RISK_EXTRACTED
+        report.processing_completed_at = datetime.now(UTC)
+        self.session.commit()
+
+    def get_report_risks(self, report_id: uuid.UUID) -> list[RiskFactor]:
+        return list(
+            self.session.query(RiskFactor)
+            .filter(RiskFactor.report_id == report_id)
+            .all()
+        )
+
+    def get_company_risks(self, company_id: uuid.UUID) -> list[RiskFactor]:
+        """All risk factors for a company across its reports."""
+        return list(
+            self.session.query(RiskFactor)
+            .join(Report, RiskFactor.report_id == Report.id)
+            .filter(Report.company_id == company_id)
+            .all()
+        )
+
+    def get_prior_report(self, report: Report) -> Report | None:
+        """Find the prior chronological report for the same company.
+
+        Chronological order: sort by (year, quarter if quarter is not None else 4) ASC.
+        Returns the report immediately preceding the given report.
+        """
+        if report.company_id is None:
+            return None
+        all_reports = (
+            self.session.query(Report)
+            .filter(Report.company_id == report.company_id)
+            .all()
+        )
+        def sort_key(r: Report):
+            q = r.quarter if r.quarter is not None else 4
+            return (r.year, q)
+
+        sorted_reports = sorted(all_reports, key=sort_key)
+        try:
+            idx = next(i for i, r in enumerate(sorted_reports) if r.id == report.id)
+            if idx > 0:
+                return sorted_reports[idx - 1]
+        except StopIteration:
+            pass
+        return None
+
+    def replace_risk_evolution(
+        self,
+        company_id: uuid.UUID,
+        report_id: uuid.UUID,
+        prior_report_id: uuid.UUID | None,
+        rows: list[dict],
+    ) -> int:
+        """Rebuild risk evolution records for this period comparison (idempotent)."""
+        current_ids = select(RiskFactor.id).where(RiskFactor.report_id == report_id)
+        if prior_report_id:
+            prior_ids = select(RiskFactor.id).where(RiskFactor.report_id == prior_report_id)
+            self.session.query(RiskEvolution).filter(
+                RiskEvolution.company_id == company_id,
+                or_(
+                    RiskEvolution.current_risk_id.in_(current_ids),
+                    or_(
+                        RiskEvolution.previous_risk_id.in_(current_ids),
+                        # Handles REMOVED_RISKs (current is NULL, previous is in prior report)
+                        and_(
+                            RiskEvolution.previous_risk_id.in_(prior_ids),
+                            RiskEvolution.current_risk_id.is_(None)
+                        )
+                    )
+                )
+            ).delete(synchronize_session=False)
+        else:
+            self.session.query(RiskEvolution).filter(
+                RiskEvolution.company_id == company_id,
+                or_(
+                    RiskEvolution.current_risk_id.in_(current_ids),
+                    RiskEvolution.previous_risk_id.in_(current_ids),
+                )
+            ).delete(synchronize_session=False)
+
+        self.session.add_all([RiskEvolution(company_id=company_id, **r) for r in rows])
+        self.session.commit()
+        return len(rows)

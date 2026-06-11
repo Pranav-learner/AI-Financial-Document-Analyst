@@ -123,6 +123,11 @@ class Settings(BaseSettings):
     # Relative tolerance for rule-vs-LLM value agreement (1% by default).
     metric_agreement_rel_tol: float = 0.01
 
+    # ---- Risk intelligence (Phase 4) ----
+    risk_llm_max_retries: int = 3
+    risk_llm_retry_base_delay: float = 2.0
+    risk_llm_request_timeout: float = 60.0
+
     # ---- Retrieval evaluation (Phase 2D) ----
     # Override the packaged benchmark suite; empty → use the bundled JSON.
     retrieval_benchmark_path: str = ""

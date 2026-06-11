@@ -28,12 +28,20 @@ from app.retrieval.embeddings import (
     EmbeddingService,
     GeminiEmbeddingProvider,
 )
+from app.risk.extraction.extraction_models import RiskChunkInput
+from app.risk.extraction.hybrid_extractor import HybridRiskExtractor
+from app.risk.evolution.evolution_service import RiskEvolutionService
 from app.tasks.celery_app import celery_app
 
 # Canonical sections that carry financial metrics (candidate set for extraction).
 METRIC_CANDIDATE_SECTIONS = (
     "Income Statement", "Financial Statements", "Balance Sheet", "Cash Flow Statement",
     "Notes to Financial Statements", "MD&A", "Forward Guidance", "Management Commentary",
+)
+
+# Canonical sections that carry risk disclosures.
+RISK_CANDIDATE_SECTIONS = (
+    "Risk Factors", "MD&A", "Forward Guidance", "Forward-Looking Statements",
 )
 
 log = get_logger(__name__)
@@ -533,3 +541,163 @@ def generate_financial_analytics_task(self, report_id: str) -> dict:
             if failed is not None:
                 repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(
+    bind=True,
+    name="app.tasks.extraction.extract_risks_task",
+    acks_late=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def extract_risks_task(self, report_id: str) -> dict:
+    """Extract structured risk factors from a report's chunks (Phase 4).
+
+    Workflow: load report → RISK_EXTRACTING → load candidate (risk-section) chunks
+    → hybrid extract (rule + LLM, cross-validated) → validate → store
+    → trigger risk evolution. Routed to the `extraction` queue.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("risk_extraction.task_start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("risk_extraction.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            chunks = repo.get_extraction_chunks(rid, RISK_CANDIDATE_SECTIONS)
+            if not chunks:
+                raise ValueError("no candidate chunks to extract risks (report not chunked?)")
+
+            repo.mark_risk_extracting(report)
+
+            inputs = [
+                RiskChunkInput(
+                    chunk_id=str(c.id),
+                    text=c.chunk_text,
+                    normalized_section_name=(c.chunk_metadata or {}).get(
+                        "normalized_section_name"
+                    ),
+                    fiscal_year=report.year,
+                    fiscal_quarter=report.quarter,
+                )
+                for c in chunks
+            ]
+
+            result = HybridRiskExtractor().extract(inputs)
+            rows = [
+                {
+                    "company_id": report.company_id,
+                    "source_chunk_id": uuid.UUID(r.source_chunk_id) if r.source_chunk_id else None,
+                    "risk_name": r.risk_name,
+                    "normalized_risk_name": r.normalized_risk_name,
+                    "risk_description": r.risk_description,
+                    "category": r.category,
+                    "severity": r.severity,
+                    "confidence_score": r.confidence_score,
+                    "extraction_method": r.extraction_method,
+                    "source_text": r.source_text,
+                    "extraction_metadata": r.extraction_metadata,
+                }
+                for r in result.risks
+            ]
+            count = repo.replace_risks(rid, rows)
+
+            log.info(
+                "risk_extraction.task_success", report_id=report_id, risks=count, **result.stats.as_dict()
+            )
+
+            # Chain into Phase 4 risk evolution
+            generate_risk_evolution_task.delay(report_id)
+
+            return {"report_id": report_id, "status": "RISK_EXTRACTED_PARTIAL", "risks": count, **result.stats.as_dict()}
+
+        except Exception as exc:  # noqa: BLE001
+            log.error("risk_extraction.task_failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(
+    bind=True,
+    name="app.tasks.extraction.generate_risk_evolution_task",
+    acks_late=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def generate_risk_evolution_task(self, report_id: str) -> dict:
+    """Generate risk evolution records comparing current risks to prior period (Phase 4).
+
+    Workflow: load report → load current + prior period's risks → match and classify evolution
+    → validate → store → RISK_EXTRACTED. Routed to the `extraction` queue.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("risk_evolution.task_start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("risk_evolution.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            if report.company_id is None:
+                repo.replace_risk_evolution(uuid.UUID("00000000-0000-0000-0000-000000000000"), rid, None, [])
+                repo.mark_risk_extracted(report)
+                log.info("risk_evolution.no_company", report_id=report_id)
+                return {"report_id": report_id, "status": "RISK_EXTRACTED", "evolutions": 0}
+
+            prior_report = repo.get_prior_report(report)
+            prior_report_id = prior_report.id if prior_report else None
+
+            current_risks = repo.get_report_risks(rid)
+            prior_risks = repo.get_report_risks(prior_report_id) if prior_report_id else []
+
+            result = RiskEvolutionService().build_evolution(
+                str(report.company_id),
+                current_risks,
+                prior_risks,
+            )
+
+            rows = [
+                {
+                    "current_risk_id": uuid.UUID(r.current_risk_id) if r.current_risk_id else None,
+                    "previous_risk_id": uuid.UUID(r.previous_risk_id) if r.previous_risk_id else None,
+                    "evolution_type": r.evolution_type,
+                    "confidence_score": r.confidence_score,
+                    "explanation": r.explanation,
+                }
+                for r in result.rows
+            ]
+
+            count = repo.replace_risk_evolution(
+                report.company_id,
+                rid,
+                prior_report_id,
+                rows,
+            )
+            repo.mark_risk_extracted(report)
+
+            log.info(
+                "risk_evolution.task_success",
+                report_id=report_id,
+                evolutions=count,
+                **result.stats.as_dict(),
+            )
+            return {"report_id": report_id, "status": "RISK_EXTRACTED", "evolutions": count, **result.stats.as_dict()}
+
+        except Exception as exc:  # noqa: BLE001
+            log.error("risk_evolution.task_failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+

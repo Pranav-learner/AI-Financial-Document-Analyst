@@ -1,0 +1,74 @@
+{
+  "categories": {
+    "SUPPLY_CHAIN": {
+      "display_name": "Supply Chain",
+      "description": "Risks related to suppliers, vendors, procurement, logistics, and distribution dependencies.",
+      "keywords": ["supply chain", "supplier", "vendor", "procurement", "logistics", "distribution", "supplier concentration", "supply disruption", "single source", "component shortage", "raw material"]
+    },
+    "REGULATORY": {
+      "display_name": "Regulatory",
+      "description": "Risks arising from government regulations, compliance requirements, and policy changes.",
+      "keywords": ["regulatory", "regulation", "compliance", "regulatory compliance", "government regulation", "regulatory approval", "regulatory change", "regulatory action", "regulatory requirement", "permit", "license"]
+    },
+    "MARKET": {
+      "display_name": "Market",
+      "description": "Risks from market conditions, demand shifts, pricing pressure, and market competition.",
+      "keywords": ["market", "market condition", "market demand", "pricing pressure", "market share", "market volatility", "demand decline", "market downturn", "consumer preference", "seasonal"]
+    },
+    "COMPETITION": {
+      "display_name": "Competition",
+      "description": "Risks from competitive dynamics, new entrants, and competitive positioning.",
+      "keywords": ["competition", "competitive", "competitor", "competitive pressure", "new entrant", "market entry", "competitive advantage", "competitive position", "pricing competition", "alternative product"]
+    },
+    "TECHNOLOGY": {
+      "display_name": "Technology",
+      "description": "Risks related to technological change, innovation, obsolescence, and R&D.",
+      "keywords": ["technology", "technological change", "innovation", "obsolescence", "technological disruption", "research and development", "technical", "technology failure", "system failure", "software"]
+    },
+    "CYBERSECURITY": {
+      "display_name": "Cybersecurity",
+      "description": "Risks from cyber threats, data breaches, information security, and privacy.",
+      "keywords": ["cybersecurity", "cyber attack", "data breach", "information security", "cyber threat", "ransomware", "malware", "phishing", "unauthorized access", "data privacy", "data protection", "security breach", "hacking"]
+    },
+    "OPERATIONAL": {
+      "display_name": "Operational",
+      "description": "Risks from business operations, key personnel, execution, and internal processes.",
+      "keywords": ["operational", "operations", "key personnel", "employee", "talent", "workforce", "production", "manufacturing", "capacity", "execution risk", "operational disruption", "business continuity", "internal control"]
+    },
+    "LIQUIDITY": {
+      "display_name": "Liquidity",
+      "description": "Risks related to financial liquidity, capital access, debt obligations, and cash flow.",
+      "keywords": ["liquidity", "cash flow", "capital", "credit", "debt", "financing", "credit facility", "indebtedness", "leverage", "interest rate", "refinancing", "debt covenant", "working capital"]
+    },
+    "GEOPOLITICAL": {
+      "display_name": "Geopolitical",
+      "description": "Risks from geopolitical events, international operations, trade policies, and sanctions.",
+      "keywords": ["geopolitical", "political", "international", "trade", "tariff", "sanction", "embargo", "war", "conflict", "political instability", "foreign", "export control", "trade restriction"]
+    },
+    "LEGAL": {
+      "display_name": "Legal",
+      "description": "Risks from litigation, intellectual property disputes, and legal proceedings.",
+      "keywords": ["legal", "litigation", "lawsuit", "legal proceeding", "intellectual property", "patent", "trademark", "copyright", "infringement", "class action", "settlement", "legal liability", "regulatory investigation"]
+    },
+    "ENVIRONMENTAL": {
+      "display_name": "Environmental",
+      "description": "Risks from environmental regulations, climate change, natural disasters, and sustainability.",
+      "keywords": ["environmental", "climate", "climate change", "natural disaster", "weather", "carbon", "emission", "pollution", "environmental regulation", "sustainability", "renewable", "flood", "earthquake", "wildfire", "pandemic", "epidemic", "health crisis"]
+    },
+    "REPUTATION": {
+      "display_name": "Reputation",
+      "description": "Risks to brand reputation, public perception, and stakeholder trust.",
+      "keywords": ["reputation", "reputational", "brand", "public perception", "media", "social media", "negative publicity", "consumer trust", "stakeholder", "controversy", "scandal"]
+    },
+    "MACROECONOMIC": {
+      "display_name": "Macroeconomic",
+      "description": "Risks from broader economic conditions, inflation, recession, and currency fluctuations.",
+      "keywords": ["macroeconomic", "economic", "recession", "inflation", "economic downturn", "economic condition", "GDP", "unemployment", "consumer spending", "economic slowdown", "currency", "foreign exchange", "exchange rate"]
+    },
+    "OTHER": {
+      "display_name": "Other",
+      "description": "Risks that do not fit into any of the above canonical categories.",
+      "keywords": []
+    }
+  }
+}
