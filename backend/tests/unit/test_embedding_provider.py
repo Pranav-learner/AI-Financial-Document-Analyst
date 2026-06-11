@@ -31,7 +31,7 @@ def make_provider(responses=None, *, normalize=True, max_retries=3, errors=None)
     err_iter = list(errors or [])
 
     class _P(GeminiEmbeddingProvider):
-        def _embed_once(self, texts):
+        def _embed_once(self, texts, task_type=None):
             calls["n"] += 1
             if err_iter:
                 raise err_iter.pop(0)

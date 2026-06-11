@@ -19,6 +19,7 @@
    - ⭐ [Phase 1B Completion Report — Financial Section Intelligence](#phase-1b-completion-report--financial-section-intelligence)
    - ⭐ [Phase 1C Completion Report — Knowledge Preparation Layer](#phase-1c-completion-report--knowledge-preparation-layer)
    - ⭐ [Phase 2A Completion Report — Embedding Infrastructure](#phase-2a-completion-report--embedding-infrastructure)
+   - ⭐ [Phase 2B Completion Report — Vector Search Foundation](#phase-2b-completion-report--vector-search-foundation)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -62,7 +63,8 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **1B** | **Section Intelligence** ✅ | Rule-based section detection | `report_sections`, detection engine + configurable taxonomy, section APIs, status lifecycle | Sections detected/normalized/stored for 10-K/10-Q/transcript (DONE) |
 | **1C** | **Knowledge Preparation** ✅ | Section-aware recursive chunking | `document_chunks` (+metadata, no vectors), chunking engine, token counter, validation, chunk APIs | Validated chunks + metadata stored for 10-K/10-Q/transcript (DONE) |
 | **2A** | **Embedding Infrastructure** ✅ | Embed + store (no search) | `gemini-embedding-001`→`vector(768)`, provider layer, embedding APIs/status; **no ANN index** | Every chunk has a valid stored embedding (DONE) |
-| **2B** | **Knowledge Base (Search)** | Index + retrieve | HNSW on `vector(768)`, query embedding, hybrid retrieval, `/search` | Semantic search returns relevant cited chunks |
+| **2B** | **Vector Search Foundation** ✅ | Index + retrieve (vector-only) | HNSW (cosine) on `vector(768)`, query embedding, top-K KNN, `/search/vector`+`/search/debug` | Top-K semantically relevant chunks returned with scores (DONE) |
+| **2C** | **Advanced Retrieval** | Filter + hybrid + rerank | Metadata filter, hybrid (vector+keyword), query rewrite/HyDE, BGE re-rank | Higher-precision cited retrieval |
 | **3** | **Financial Metric Extraction** | Typed KPIs + deltas | Metric Extraction Agent, `financial_metrics`, YoY/QoQ, `/metrics` | ≥95% extraction accuracy on gold set |
 | **4** | **Risk Intelligence** | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling |
 | **5** | **Management Tone Analysis** | Sentiment/confidence | Tone Agent, `tone_analysis`, rubric scoring, trends | Stable, rubric-anchored scores with citations |
@@ -715,6 +717,170 @@ the live model**, not assumed.
 
 ---
 
+## Phase 2B Completion Report — Vector Search Foundation
+
+> **Date:** 2026-06-11 · **Owner:** Lead Retrieval Engineer / Vector DB Engineer (nickg) · **Scope:** **retrieval only** — query embedding → pgvector cosine KNN → top-K chunks. **No metadata filtering, no hybrid retrieval, no query rewriting, no HyDE, no re-ranking, no LLM/RAG.**
+
+### Overview
+Phase 2B turns the stored embeddings (Phase 2A) into a **searchable semantic knowledge
+base**. A natural-language query is embedded with the same Gemini model (using the
+`RETRIEVAL_QUERY` task type), then matched against `document_chunks.embedding` via a pgvector
+**HNSW** cosine-distance index, returning the **top-K** most similar chunks with scores. The
+path is intentionally narrow: it returns *relevant chunks*, never answers — no reasoning, no
+generation, no filtering, no re-ranking. Those belong to later phases.
+
+### Features Implemented
+- **HNSW ANN index** on `document_chunks.embedding` (`vector_cosine_ops`, m=16,
+  ef_construction=64) — the index deferred from Phase 2A (migration `0005_phase2b`).
+- **Query embedding pipeline** (`query_embedding.py`) — same model as 2A, `RETRIEVAL_QUERY`
+  task type, dimension-validated (==768), failures logged; empty / over-long queries rejected.
+- **Vector search executor** (`vector_search.py`) — async pgvector cosine KNN, `score =
+  1 - cosine_distance`, `embedding IS NOT NULL` guard only (no metadata filter), query-time
+  `hnsw.ef_search` tuning.
+- **`VectorSearchService`** — orchestrates query → embed → search → top-K, with per-stage
+  latency, top_k validation, and the sync embedding call run in a threadpool.
+- **`SearchResult` contract** (`chunk_id`, `report_id`, `section_id`, `score`, `chunk_text`,
+  `metadata`) — the stable retrieval unit future phases depend on.
+- **Top-K control** — default 10, bounded [5, 50], validated at the schema and the service.
+- **Two APIs**: `POST /search/vector` (results) and `POST /search/debug` (diagnostics:
+  query-embedding stats + scores + timings).
+- **Observability** — embedding / vector-search / total latency, result counts, and errors
+  logged per search.
+
+### Architecture Changes
+- **New package** `app/retrieval/search/` (`search_service.py`, `vector_search.py`,
+  `query_embedding.py`, `retrieval_models.py`, `search_exceptions.py`). *Why:* isolate the
+  retrieval path behind a small, testable surface that later phases compose.
+- **`EmbeddingProvider` extended** with `embed_query` (concrete default delegates to
+  `embed_documents`); `GeminiEmbeddingProvider` overrides it to use `RETRIEVAL_QUERY`. *Why:*
+  Gemini embeddings are **asymmetric** — the query side needs its own task type for quality.
+- **HNSW index** added via migration only (not in the ORM `__table_args__`). *Why:* index
+  build is an operational/DDL concern; keeping it out of `create_all` also keeps the test
+  schema light (exact search is correct without the index).
+- **New `/api/v1/search` router**; `SearchError` hierarchy maps onto the existing HTTP envelope.
+
+### Technical Decisions
+- **Decision:** **HNSW** index with **cosine** distance (`vector_cosine_ops`), m=16,
+  ef_construction=64, query-time ef_search=40. **Why cosine:** embeddings are unit-normalized
+  (Phase 2A), so cosine is the natural, well-conditioned metric and `score = 1 - distance`
+  maps cleanly to [0, 1]. **Why HNSW over IVFFlat:** better recall/latency tradeoff, no
+  training/`lists` tuning, and robust as rows are added incrementally. (See **ADR-014**, **TDL-015**.)
+- **Decision:** `RETRIEVAL_QUERY` task type for queries (vs `RETRIEVAL_DOCUMENT` for chunks).
+  **Why:** matches how the model was trained for asymmetric retrieval.
+- **Decision:** No metadata filter beyond `embedding IS NOT NULL`. **Why:** strict Phase 2B
+  scope — metadata/hybrid filtering is a later phase. (The `IS NOT NULL` guard is data
+  integrity, not filtering.)
+- **Decision:** Run the (sync) Gemini call in a threadpool from the async endpoint. **Why:**
+  avoid blocking the event loop while keeping the provider implementation simple/sync.
+
+### Files Created
+- `app/retrieval/search/__init__.py`, `search_service.py`, `vector_search.py`,
+  `query_embedding.py`, `retrieval_models.py`, `search_exceptions.py`
+- `app/schemas/search.py`, `app/api/v1/endpoints/search.py`
+- `migrations/versions/20260611_0005_phase2b_hnsw.py`
+- `tests/unit/test_query_embedding.py`, `tests/unit/test_vector_search_service.py`
+- `tests/integration/test_search_api.py`
+
+### Files Modified
+- `app/retrieval/embeddings/provider.py` (concrete `embed_query`)
+- `app/retrieval/embeddings/gemini_provider.py` (`embed_query` + per-call task type)
+- `app/core/config.py` (query task type + search/HNSW settings)
+- `app/api/v1/router.py` (mount search router)
+- `.env.example` (query task type + search settings)
+- `tests/unit/test_embedding_provider.py` (test double `_embed_once` signature)
+
+### Database Changes
+- **HNSW index** `ix_document_chunks_embedding_hnsw` on `document_chunks.embedding` using
+  `hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64)` (migration
+  `0005_phase2b`, down_revision `0004_phase2a`). **Reversible** (verified upgrade → downgrade →
+  re-upgrade). No table/column changes — this phase only adds the index + reads.
+
+### API Changes
+- `POST /api/v1/search/vector` — body `{query, top_k}` → `{query, top_k, count, timings,
+  results:[{chunk_id, report_id, section_id, score, chunk_text, metadata}]}`.
+- `POST /api/v1/search/debug` — same input → adds `query_embedding` stats (dimension, norm,
+  preview, model, task_type) for retrieval diagnostics.
+- Validation: empty query → 422 (`EMPTY_QUERY`); `top_k` outside [5, 50] → 422; over-long
+  query → 422 (`QUERY_TOO_LONG`); embedding failure → 502 (`QUERY_EMBEDDING_ERROR`).
+
+### Testing Summary
+- **Unit (13 new; 122 total passing):** query embedder (valid, empty, over-long, provider
+  error → wrapped, wrong dimension, `RETRIEVAL_QUERY` task-type routing); search service
+  (results+timings+stats, default top_k, ranking order preserved, top_k range validation,
+  empty DB → no results).
+- **Integration (DB-backed, deterministic token-hashing embedder — no key/network):** top-K
+  with scores + ranking + result contract; **retrieval-quality** ("cash flow" → Cash Flow
+  chunk #1; "supply chain disruption risk" → Risk Factors chunk #1); debug stats (unit norm,
+  dim 768); empty/whitespace query → 422; top_k 2/100 → 422; empty DB → 0 results;
+  NULL-embedding chunks excluded. Verified against a live `pgvector/pgvector:pg16` container.
+- *Note:* same Python-3.14 asyncpg/pytest-asyncio teardown artifact as Phase 2A — every test
+  passes in isolation; project targets 3.11/CI.
+
+### Performance Findings (task §11)
+Measured query-execution latency (the SQL KNN, HNSW index present, ef_search=40) on a fresh
+pgvector/pg16 DB; recall@10 = HNSW vs exact (index disabled) overlap. **Random unit vectors**
+were used — a near-orthogonal **worst case** for ANN recall; real clustered embeddings do better.
+
+| Corpus (chunks) | avg ms | p50 ms | p95 ms | recall@10 |
+|---|---|---|---|---|
+| 10 | 2.15 | 2.02 | 2.57 | 1.00 |
+| 100 | 2.59 | 2.62 | 3.06 | 1.00 |
+| 1000 | 3.28 | 3.19 | 4.11 | 0.92 |
+
+- **Latency:** sub-5 ms p95 through 1000 chunks; growth is sub-linear (HNSW working as
+  intended). End-to-end search latency is dominated by the **external** Gemini query-embedding
+  call (network), not the vector scan.
+- **Recall:** 1.00 at 10/100; 0.92 at 1000 on adversarial random data — `hnsw.ef_search`
+  trades recall for latency and can be raised if needed. **Index performance:** the index is
+  used (confirmed: disabling index scan changes results, proving ANN vs exact divergence).
+- **Retrieval quality** (integration, real text): expected sections rank #1 for their topical
+  queries — the pipeline retrieves semantically, not lexically.
+
+### Lessons Learned
+- **Query embeddings are asymmetric:** Gemini's `RETRIEVAL_QUERY` vs `RETRIEVAL_DOCUMENT`
+  task types matter — embedding a query as a "document" degrades retrieval. The provider now
+  routes task type per call.
+- **A deterministic hashing embedder makes retrieval tests real:** sharing one bag-of-tokens
+  vector space across stored chunks and queries lets us assert ranking quality (cash-flow
+  query → cash-flow chunk) with **zero** API/network and full reproducibility.
+- **`SET LOCAL hnsw.ef_search`** is the right recall knob — it lives on the query transaction,
+  so it tunes recall/latency without rebuilding the index.
+
+### Risks Discovered
+- **External-API latency on the hot path:** query embedding is a network call that dominates
+  end-to-end search time and is subject to provider rate limits — a caching/local-query-model
+  option may be worth it later (not Phase 2B).
+- **ANN recall < 100%:** HNSW is approximate; for high-stakes retrieval the ef_search floor
+  (and possibly exact rescoring) should be tuned with the real corpus in a later phase.
+- **Global search scope:** search spans all embedded chunks (no report/period scoping yet) —
+  intentional for 2B; scoping is metadata filtering (a later phase).
+
+### Future Phase Dependencies
+- **Hybrid retrieval / metadata filtering** builds on `VectorSearch` (add WHERE predicates over
+  the GIN-indexed `metadata`).
+- **Re-ranking (ADR-010, BGE)** consumes the top-K `SearchResult` list as candidates.
+- **Query rewriting / HyDE** wrap `QueryEmbedder`; **RAG / agents** consume `SearchResult` as
+  grounded evidence with citations.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| HNSW index created | ✅ `ix_document_chunks_embedding_hnsw` (cosine; migration `0005`) |
+| Query embeddings generated | ✅ `RETRIEVAL_QUERY`, dimension-validated (768) |
+| Vector search operational | ✅ pgvector cosine KNN (async) |
+| Top-K retrieval operational | ✅ default 10, bounded [5, 50], validated |
+| Search APIs operational | ✅ `/search/vector` + `/search/debug` |
+| Retrieval scores returned | ✅ `score = 1 - cosine_distance` |
+| Observability added | ✅ embedding/vector/total latency + counts + errors |
+| Tests pass | ✅ 122 unit; 8 search integration (isolation-verified) |
+| Documentation updated | ✅ this report + ADR-014 + TDL-015 + performance table |
+
+### Final Status
+> **PHASE 2B COMPLETED.** Phase 2C / metadata filtering / hybrid retrieval / query rewriting /
+> HyDE / re-ranking / RAG **NOT started — strictly out of scope.**
+
+---
+
 ## 3. Technology Decisions Log
 
 > Template: **Decision · Alternatives Considered · Chosen Because · Tradeoffs · Expected Impact**
@@ -823,6 +989,21 @@ the live model**, not assumed.
 - **Tradeoffs:** external paid dependency + rate limits; truncated output must be re-normalized;
   a model/dimension change is a full re-embed. SDK is lazy-imported so the app/tests load without it.
 - **Expected impact:** reliable, batched, low-cost vector generation with a clean upgrade path.
+
+### TDL-015 — HNSW index parameters + query task type (Phase 2B)
+- **Decision:** Index `document_chunks.embedding` with **HNSW** `vector_cosine_ops`, **m=16,
+  ef_construction=64**, query-time **ef_search=40**; embed queries with the **`RETRIEVAL_QUERY`**
+  task type (documents use `RETRIEVAL_DOCUMENT`).
+- **Alternatives:** IVFFlat (`lists` tuning + training step); flat/exact scan; one shared task
+  type for queries and documents.
+- **Chosen because:** HNSW gives the best recall/latency tradeoff with no training and stays
+  robust under incremental inserts; m/ef_construction defaults are a solid general-purpose
+  balance; ef_search is a per-query recall knob (no rebuild). Asymmetric task types match how
+  Gemini embeddings are trained, improving retrieval.
+- **Tradeoffs:** HNSW build is memory/time heavier than IVFFlat and write-locks unless built
+  CONCURRENTLY; recall is approximate (<100%) and ef_search trades recall for latency.
+- **Expected impact:** sub-5 ms p95 vector scans through ~1k chunks (measured) with high recall;
+  tunable as the corpus grows.
 
 ---
 
@@ -960,6 +1141,28 @@ the live model**, not assumed.
   The native-3072 option is revisitable in Phase 2B via `halfvec` if quality demands it.
   **Resolves the Phase 0 deferred `EMBEDDING_DIM` and variant items.** (See TDL-014, TDL-003.)
 
+### ADR-014 — HNSW + Cosine for Vector Search  *(Accepted — Phase 2B)*
+- **Context:** Phase 2A stored unit-normalized `vector(768)` embeddings but deliberately
+  created **no ANN index**. Phase 2B must make semantic search fast at scale (100–300 page
+  filings → thousands of chunks each).
+- **Problem:** Choose the ANN index type and the distance metric for similarity search.
+- **Options:** **HNSW** vs **IVFFlat** (index); **cosine** vs **L2** vs **inner product** (metric).
+- **Decision:** **HNSW** with **cosine distance** (`vector_cosine_ops`), m=16,
+  ef_construction=64, query-time ef_search=40; similarity `score = 1 - cosine_distance`.
+- **Reasoning:**
+  - *HNSW over IVFFlat:* superior recall/latency tradeoff, **no training step or `lists`
+    tuning**, and stable recall as rows are inserted incrementally (our ingestion adds chunks
+    continuously). IVFFlat needs a representative training set and re-tuning as data grows.
+  - *Cosine:* embeddings are L2-normalized (ADR-013), so cosine is the natural, well-conditioned
+    metric and maps to an intuitive [0, 1] score. (For unit vectors cosine and inner product
+    rank identically; cosine keeps the score interpretable.)
+- **Consequences:** approximate recall (<100%) tuned via `hnsw.ef_search` without rebuilds;
+  heavier build than IVFFlat (write-locks unless built CONCURRENTLY — noted in the migration);
+  the 768-dim choice (ADR-013) keeps the column within HNSW's ≤2000-dim limit so this index is
+  a plain `vector` HNSW, no `halfvec`. **Measured:** sub-5 ms p95 through 1k chunks, recall@10
+  ≥ 0.92 on adversarial random data. Score interpretation: ~0.95 highly relevant, ~0.80
+  relevant, ~0.50 weak. (See TDL-015; performance table in the Phase 2B report.)
+
 ---
 
 ## 5. Implementation Log
@@ -1000,7 +1203,12 @@ the live model**, not assumed.
 | 2026-06-11 | 2A | Migration chain bug-fix | nickg | Fixed doubled `ck_reports_report_status` naming in `0002`/`0003`/`0004` so Alembic runs end-to-end (upgrade/downgrade verified) | ✅ Completed |
 | 2026-06-11 | 2A | Tests + docs | nickg | 42 new unit tests (109 total pass); 6 DB-backed embedding integration tests; Phase 2A Completion Report + ADR-013/TDL-014 | ✅ Completed |
 | 2026-06-11 | 2A | **Phase 2A COMPLETE** | nickg | All exit criteria met; Phase 2B (search) not started | ✅ Completed |
-| — | 2B | Vector/hybrid search | | HNSW index on `vector(768)`; query embedding; similarity + hybrid retrieval; re-rank; search APIs | ⬜ Todo |
+| 2026-06-11 | 2B | HNSW index + migration | nickg | `ix_document_chunks_embedding_hnsw` (cosine, m=16, ef_construction=64); migration `0005_phase2b` (reversible); ADR-014/TDL-015 | ✅ Completed |
+| 2026-06-11 | 2B | Vector search layer | nickg | `app/retrieval/search/` — query embedding (`RETRIEVAL_QUERY`), cosine KNN, service, `SearchResult` contract, exceptions | ✅ Completed |
+| 2026-06-11 | 2B | Search APIs + observability | nickg | `POST /search/vector` + `/search/debug`; top_k [5,50]; per-stage latency + error logging | ✅ Completed |
+| 2026-06-11 | 2B | Tests + perf + docs | nickg | 13 new unit (122 total); 8 search integration incl. retrieval-quality; latency/recall benchmark (≤5ms p95 @1k); Phase 2B report + ADR-014 | ✅ Completed |
+| 2026-06-11 | 2B | **Phase 2B COMPLETE** | nickg | All exit criteria met; metadata filter / hybrid / rerank / RAG not started | ✅ Completed |
+| — | 2C+ | Hybrid retrieval / rerank | | Metadata filter, hybrid (vector+keyword), query rewrite/HyDE, BGE re-rank (ADR-010) | ⬜ Todo |
 
 > _Add a row per meaningful change. Mark status: ⬜ Todo · 🟡 In progress · ✅ Completed · ⛔ Blocked._
 

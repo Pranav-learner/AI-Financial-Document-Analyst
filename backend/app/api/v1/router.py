@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import chunks, embeddings, health, reports
+from app.api.v1.endpoints import chunks, embeddings, health, reports, search
 
 api_router = APIRouter()
 
@@ -23,8 +23,10 @@ api_router.include_router(chunks.router, prefix="/chunks", tags=["chunks"])
 # Embedding generation + operational monitoring (Phase 2A). Report-scoped paths.
 api_router.include_router(embeddings.router, prefix="/reports", tags=["embeddings"])
 
+# Vector similarity search (Phase 2B) — retrieval only, no reasoning.
+api_router.include_router(search.router, prefix="/search", tags=["search"])
+
 # --- Business routers (added per phase) ---------------------------------------
-# api_router.include_router(search.router,    prefix="/search",    tags=["search"])     # Phase 2B
 # api_router.include_router(metrics.router,   prefix="/reports",   tags=["metrics"])    # Phase 3
 # api_router.include_router(risks.router,     prefix="/reports",   tags=["risks"])      # Phase 4
 # api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmark"])  # Phase 8

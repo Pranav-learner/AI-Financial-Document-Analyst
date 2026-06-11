@@ -5,10 +5,11 @@ concrete model (Gemini today) can be swapped without touching business logic
 (ADR-003 / ADR-013). A provider's job is narrow: turn texts into vectors,
 reliably (retries, rate-limit handling, response validation, normalization).
 
-Design note — task types: Phase 2A only embeds *documents* (stored chunks) with
-the `RETRIEVAL_DOCUMENT` task type. The `embed_query` path (`RETRIEVAL_QUERY`)
-is part of search and belongs to Phase 2B; it is intentionally NOT implemented
-here to keep this phase strictly "generation + storage", not retrieval.
+Design note — task types: documents (stored chunks) are embedded with the
+`RETRIEVAL_DOCUMENT` task type (Phase 2A). The **query** path (`embed_query`,
+`RETRIEVAL_QUERY`) is added in Phase 2B for search — Gemini produces asymmetric
+embeddings tuned for document-vs-query, so the query side must use its own task
+type for good retrieval.
 """
 
 from __future__ import annotations
@@ -45,3 +46,13 @@ class EmbeddingProvider(ABC):
         rate limits, response validation, and (if configured) normalization
         internally. Raises `EmbeddingError` on permanent failure.
         """
+
+    def embed_query(self, text: str) -> Embedding:
+        """Embed a search query (Phase 2B), returning a single vector.
+
+        Default delegates to `embed_documents` so simple/test providers work
+        unchanged; the Gemini provider overrides this to use the `RETRIEVAL_QUERY`
+        task type for asymmetric document-vs-query retrieval. Same width/retry/
+        validation/normalization guarantees as `embed_documents`.
+        """
+        return self.embed_documents([text])[0]

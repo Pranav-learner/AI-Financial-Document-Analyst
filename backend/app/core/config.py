@@ -78,8 +78,9 @@ class Settings(BaseSettings):
 
     # ---- Embedding generation (Phase 2A) ----
     # Gemini embedding task type for stored document chunks (RETRIEVAL_DOCUMENT).
-    # The query-side task type (RETRIEVAL_QUERY) belongs to Phase 2B (search).
+    # The query-side task type (RETRIEVAL_QUERY) is used by Phase 2B search.
     embedding_task_type: str = "RETRIEVAL_DOCUMENT"
+    embedding_query_task_type: str = "RETRIEVAL_QUERY"
     # Re-normalize truncated (<3072) vectors to unit length — required because
     # Gemini only L2-normalizes the full-width 3072 output.
     embedding_normalize: bool = True
@@ -92,6 +93,21 @@ class Settings(BaseSettings):
     embedding_request_timeout: float = 60.0   # seconds per API call
     # Cost estimation only (no billing) — USD per 1M input tokens for the model.
     embedding_price_per_1m_tokens: float = 0.15
+
+    # ---- Vector search (Phase 2B) ----
+    # pgvector HNSW distance metric. Embeddings are unit-normalized, so cosine is
+    # the natural choice; score = 1 - cosine_distance (see ADR-014).
+    search_distance_metric: str = "cosine"
+    # Top-K result count: default 10, bounded [5, 50].
+    search_default_top_k: int = 10
+    search_min_top_k: int = 5
+    search_max_top_k: int = 50
+    # Reject queries longer than this (chars) before calling the embedding API.
+    search_max_query_chars: int = 8192
+    # HNSW build parameters (index migration) + query-time ef_search.
+    hnsw_m: int = 16
+    hnsw_ef_construction: int = 64
+    hnsw_ef_search: int = 40
 
     openrouter_api_key: str = ""
     openrouter_fallback_model: str = "openai/gpt-4o"

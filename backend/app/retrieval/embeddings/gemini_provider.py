@@ -50,6 +50,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         model: str,
         dimension: int,
         task_type: str = "RETRIEVAL_DOCUMENT",
+        query_task_type: str = "RETRIEVAL_QUERY",
         normalize: bool = True,
         max_retries: int = 5,
         base_delay: float = 2.0,
@@ -66,6 +67,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         self._model = model
         self._dimension = dimension
         self._task_type = task_type
+        self._query_task_type = query_task_type
         self._normalize = normalize
         self._max_retries = max_retries
         self._base_delay = base_delay
@@ -86,6 +88,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
             model=app_settings.gemini_embedding_model,
             dimension=app_settings.embedding_dim,
             task_type=app_settings.embedding_task_type,
+            query_task_type=app_settings.embedding_query_task_type,
             normalize=app_settings.embedding_normalize,
             max_retries=app_settings.embedding_max_retries,
             base_delay=app_settings.embedding_retry_base_delay,
@@ -108,11 +111,20 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
         """Embed a batch of chunk texts (one API call, with retries)."""
         if not texts:
             return []
-        vectors = self._with_retries(lambda: self._embed_once(texts))
+        vectors = self._with_retries(lambda: self._embed_once(texts, self._task_type))
         self._validate(texts, vectors)
         if self._normalize:
             vectors = [self._normalize_vector(v) for v in vectors]
         return vectors
+
+    def embed_query(self, text: str) -> Embedding:
+        """Embed a single search query with the RETRIEVAL_QUERY task type (Phase 2B)."""
+        vectors = self._with_retries(lambda: self._embed_once([text], self._query_task_type))
+        self._validate([text], vectors)
+        vec = vectors[0]
+        if self._normalize:
+            vec = self._normalize_vector(vec)
+        return vec
 
     # ---- network call (overridden in tests) ---------------------------------
 
@@ -129,7 +141,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
             self._client = genai.Client(api_key=self._api_key)
         return self._client
 
-    def _embed_once(self, texts: list[str]) -> list[Embedding]:
+    def _embed_once(self, texts: list[str], task_type: str | None = None) -> list[Embedding]:
         """Single un-retried call to the provider. Returns raw vectors."""
         from google.genai import types  # lazy import
 
@@ -139,7 +151,7 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
                 model=self._model,
                 contents=texts,
                 config=types.EmbedContentConfig(
-                    task_type=self._task_type,
+                    task_type=task_type or self._task_type,
                     output_dimensionality=self._dimension,
                 ),
             )
