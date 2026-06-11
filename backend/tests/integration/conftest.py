@@ -46,10 +46,17 @@ def _clean_tables() -> Generator[None, None, None]:
     with sync_engine.begin() as conn:
         conn.execute(
             text(
-                "TRUNCATE financial_metrics, document_chunks, report_sections, report_pages, "
-                "reports, companies RESTART IDENTITY CASCADE"
+                "TRUNCATE metric_comparisons, financial_metrics, document_chunks, "
+                "report_sections, report_pages, reports, companies RESTART IDENTITY CASCADE"
             )
         )
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def _cleanup_async_engine() -> AsyncGenerator[None, None]:
+    yield
+    from app.db.session import engine
+    await engine.dispose()
 
 
 @pytest.fixture
@@ -82,6 +89,10 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
     monkeypatch.setattr("app.api.v1.endpoints.embeddings.generate_embeddings_task", _Task())
     # Phase 3A: the metrics endpoint enqueues extract_financial_metrics_task.delay().
     monkeypatch.setattr("app.api.v1.endpoints.metrics.extract_financial_metrics_task", _Task())
+    # Phase 3B: the comparisons endpoint enqueues generate_metric_comparisons_task.delay().
+    monkeypatch.setattr(
+        "app.api.v1.endpoints.comparisons.generate_metric_comparisons_task", _Task()
+    )
 
     async with LifespanManager(app):
         transport = ASGITransport(app=app)

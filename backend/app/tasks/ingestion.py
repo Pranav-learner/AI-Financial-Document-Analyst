@@ -14,8 +14,10 @@ import uuid
 
 from app.core.logging import get_logger
 from app.db.session import SyncSessionLocal
+from app.financial.comparison import ComparisonService, MetricPoint
 from app.financial.extraction import ChunkInput, HybridExtractor
 from app.ingestion.chunking import ChunkGenerator, ReportContext, SectionInput
+from app.models.financial_metric import FinancialMetric
 from app.ingestion.pdf_parser import parse_pdf
 from app.ingestion.section_detection import SectionDetector
 from app.ingestion.storage import get_storage
@@ -371,6 +373,91 @@ def extract_financial_metrics_task(self, report_id: str) -> dict:
 
         except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
             log.error("extraction.task_failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+def _to_point(m: FinancialMetric) -> MetricPoint:
+    return MetricPoint(
+        metric_id=str(m.id),
+        normalized_metric_name=m.normalized_metric_name,
+        value=m.value,
+        fiscal_year=m.fiscal_year,
+        fiscal_quarter=m.fiscal_quarter,
+        confidence=float(m.confidence_score),
+    )
+
+
+@celery_app.task(
+    bind=True,
+    name="app.tasks.extraction.generate_metric_comparisons_task",
+    acks_late=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def generate_metric_comparisons_task(self, report_id: str) -> dict:
+    """Generate deterministic period comparisons for a report's metrics (Phase 3B).
+
+    Workflow: load report → COMPARING → load the company's full metric history +
+    this report's metrics → match periods (YoY/QoQ) → calculate changes → validate
+    → store → COMPARED. Deterministic (no LLM). Idempotent: rebuilds this report's
+    comparisons. A report with no company (or no prior periods) simply yields zero
+    comparisons. Routed to the `extraction` queue.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("comparison.task_start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("comparison.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            repo.mark_comparing(report)
+
+            if report.company_id is None:
+                repo.replace_report_comparisons(rid, [])
+                repo.mark_compared(report)
+                log.info("comparison.no_company", report_id=report_id)
+                return {"report_id": report_id, "status": "COMPARED", "comparisons": 0}
+
+            company_points = [_to_point(m) for m in repo.get_company_metrics(report.company_id)]
+            current_points = [_to_point(m) for m in repo.get_report_metrics(rid)]
+
+            result = ComparisonService().build_comparisons(
+                current_points, company_points, str(report.company_id)
+            )
+            rows = [
+                {
+                    "metric_id": uuid.UUID(r.metric_id),
+                    "company_id": uuid.UUID(r.company_id),
+                    "metric_name": r.metric_name,
+                    "comparison_type": r.comparison_type,
+                    "current_period": r.current_period,
+                    "previous_period": r.previous_period,
+                    "current_value": r.current_value,
+                    "previous_value": r.previous_value,
+                    "absolute_change": r.absolute_change,
+                    "percentage_change": r.percentage_change,
+                }
+                for r in result.rows
+            ]
+            count = repo.replace_report_comparisons(rid, rows)
+            repo.mark_compared(report)
+
+            log.info(
+                "comparison.task_success", report_id=report_id, comparisons=count,
+                **result.stats.as_dict(),
+            )
+            return {"report_id": report_id, "status": "COMPARED", "comparisons": count, **result.stats.as_dict()}
+
+        except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
+            log.error("comparison.task_failure", report_id=report_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:

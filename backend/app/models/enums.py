@@ -28,7 +28,31 @@ class ReportStatus(str, Enum):
     EMBEDDED = "EMBEDDED"        # every chunk has a valid embedding (Phase 2A done)
     EXTRACTING = "EXTRACTING"    # worker is extracting financial metrics (Phase 3A)
     EXTRACTED = "EXTRACTED"      # financial metrics extracted and stored (Phase 3A done)
+    COMPARING = "COMPARING"      # worker is generating period comparisons (Phase 3B)
+    COMPARED = "COMPARED"        # period comparisons generated and stored (Phase 3B done)
     FAILED = "FAILED"            # a processing step failed (see error_message / logs)
+
+
+class ComparisonType(str, Enum):
+    """Period-over-period comparison kinds (Phase 3B).
+
+    Phase 3B generates YOY and QOQ deterministically; YTD/TTM are reserved for
+    future extensibility (enum-only — not generated yet).
+    """
+
+    YOY = "YOY"   # year over year (same quarter, prior year; or FY vs prior FY)
+    QOQ = "QOQ"   # quarter over quarter (prior quarter)
+    YTD = "YTD"   # year to date (reserved)
+    TTM = "TTM"   # trailing twelve months (reserved)
+
+
+class ComparisonStatus(str, Enum):
+    """Lifecycle of a comparison-generation run (Phase 3B) — operational visibility."""
+
+    PENDING = "PENDING"
+    PROCESSING = "PROCESSING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
 
 
 class ExtractionMethod(str, Enum):

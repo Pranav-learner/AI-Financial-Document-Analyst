@@ -1,0 +1,89 @@
+{
+  "$comment": "Phase 3B comparison gold set. Each scenario provides a company's metric history + the current period; `expected` lists the comparisons (with exact deltas) that must be produced. Verifies period matching + deterministic calculation. Override via COMPARISON_GOLD_PATH.",
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "revenue-yoy-annual",
+      "points": [
+        {"metric": "REVENUE", "value": 96700000000, "year": 2024, "quarter": null},
+        {"metric": "REVENUE", "value": 81500000000, "year": 2023, "quarter": null}
+      ],
+      "current": {"year": 2024, "quarter": null},
+      "expected": [
+        {"metric": "REVENUE", "type": "YOY", "current_period": "FY2024", "previous_period": "FY2023",
+         "absolute_change": 15200000000, "percentage_change": 18.65}
+      ]
+    },
+    {
+      "id": "ebitda-yoy-annual",
+      "points": [
+        {"metric": "EBITDA", "value": 18200000000, "year": 2024, "quarter": null},
+        {"metric": "EBITDA", "value": 15000000000, "year": 2023, "quarter": null}
+      ],
+      "current": {"year": 2024, "quarter": null},
+      "expected": [
+        {"metric": "EBITDA", "type": "YOY", "current_period": "FY2024", "previous_period": "FY2023",
+         "absolute_change": 3200000000, "percentage_change": 21.33}
+      ]
+    },
+    {
+      "id": "ocf-qoq-and-yoy",
+      "points": [
+        {"metric": "OPERATING_CASH_FLOW", "value": 27000000000, "year": 2025, "quarter": 2},
+        {"metric": "OPERATING_CASH_FLOW", "value": 25000000000, "year": 2025, "quarter": 1},
+        {"metric": "OPERATING_CASH_FLOW", "value": 24000000000, "year": 2024, "quarter": 2}
+      ],
+      "current": {"year": 2025, "quarter": 2},
+      "expected": [
+        {"metric": "OPERATING_CASH_FLOW", "type": "QOQ", "current_period": "Q2 2025", "previous_period": "Q1 2025",
+         "absolute_change": 2000000000, "percentage_change": 8.00},
+        {"metric": "OPERATING_CASH_FLOW", "type": "YOY", "current_period": "Q2 2025", "previous_period": "Q2 2024",
+         "absolute_change": 3000000000, "percentage_change": 12.50}
+      ]
+    },
+    {
+      "id": "qoq-year-wrap",
+      "points": [
+        {"metric": "REVENUE", "value": 26000000000, "year": 2025, "quarter": 1},
+        {"metric": "REVENUE", "value": 24000000000, "year": 2024, "quarter": 4}
+      ],
+      "current": {"year": 2025, "quarter": 1},
+      "expected": [
+        {"metric": "REVENUE", "type": "QOQ", "current_period": "Q1 2025", "previous_period": "Q4 2024",
+         "absolute_change": 2000000000, "percentage_change": 8.33}
+      ]
+    },
+    {
+      "id": "net-income-turnaround-negative-base",
+      "points": [
+        {"metric": "NET_INCOME", "value": 500000000, "year": 2024, "quarter": null},
+        {"metric": "NET_INCOME", "value": -1000000000, "year": 2023, "quarter": null}
+      ],
+      "current": {"year": 2024, "quarter": null},
+      "expected": [
+        {"metric": "NET_INCOME", "type": "YOY", "current_period": "FY2024", "previous_period": "FY2023",
+         "absolute_change": 1500000000, "percentage_change": -150.00}
+      ]
+    },
+    {
+      "id": "zero-previous",
+      "points": [
+        {"metric": "FREE_CASH_FLOW", "value": 5000000000, "year": 2024, "quarter": null},
+        {"metric": "FREE_CASH_FLOW", "value": 0, "year": 2023, "quarter": null}
+      ],
+      "current": {"year": 2024, "quarter": null},
+      "expected": [
+        {"metric": "FREE_CASH_FLOW", "type": "YOY", "current_period": "FY2024", "previous_period": "FY2023",
+         "absolute_change": 5000000000, "percentage_change": null}
+      ]
+    },
+    {
+      "id": "missing-previous-period",
+      "points": [
+        {"metric": "TOTAL_DEBT", "value": 25000000000, "year": 2024, "quarter": null}
+      ],
+      "current": {"year": 2024, "quarter": null},
+      "expected": []
+    }
+  ]
+}

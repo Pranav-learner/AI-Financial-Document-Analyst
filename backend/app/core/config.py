@@ -114,6 +114,8 @@ class Settings(BaseSettings):
     metric_taxonomy_path: str = ""
     # Override the packaged extraction gold dataset; empty → use the bundled JSON.
     metric_gold_path: str = ""
+    # Override the packaged comparison gold dataset (Phase 3B); empty → bundled JSON.
+    comparison_gold_path: str = ""
     # LLM extraction tuning (reuses gemini_llm_model + gemini_api_key).
     metric_llm_max_retries: int = 3
     metric_llm_retry_base_delay: float = 2.0

@@ -22,6 +22,7 @@ from app.models.company import Company
 from app.models.document_chunk import DocumentChunk
 from app.models.enums import EmbeddingStatus, ReportStatus, ReportType
 from app.models.financial_metric import FinancialMetric
+from app.models.metric_comparison import MetricComparison
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
@@ -216,6 +217,52 @@ class ReportRepository:
 
     async def get_metric(self, metric_id: uuid.UUID) -> FinancialMetric | None:
         return await self.session.get(FinancialMetric, metric_id)
+
+    # ---- Phase 3B: comparisons (read-only, API layer) -----------------------
+
+    async def get_company(self, company_id: uuid.UUID) -> Company | None:
+        return await self.session.get(Company, company_id)
+
+    async def get_comparisons_by_report(
+        self, report_id: uuid.UUID
+    ) -> list[MetricComparison]:
+        stmt = (
+            select(MetricComparison)
+            .join(FinancialMetric, MetricComparison.metric_id == FinancialMetric.id)
+            .where(FinancialMetric.report_id == report_id)
+            .order_by(MetricComparison.metric_name.asc(), MetricComparison.comparison_type.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
+
+    async def get_comparisons_by_company(
+        self, company_id: uuid.UUID, *, comparison_type: str | None = None
+    ) -> list[MetricComparison]:
+        stmt = select(MetricComparison).where(MetricComparison.company_id == company_id)
+        if comparison_type is not None:
+            stmt = stmt.where(MetricComparison.comparison_type == comparison_type)
+        return list(
+            (
+                await self.session.scalars(
+                    stmt.order_by(
+                        MetricComparison.metric_name.asc(),
+                        MetricComparison.comparison_type.asc(),
+                    )
+                )
+            ).all()
+        )
+
+    async def get_comparisons_by_company_metric(
+        self, company_id: uuid.UUID, metric_name: str
+    ) -> list[MetricComparison]:
+        stmt = (
+            select(MetricComparison)
+            .where(
+                MetricComparison.company_id == company_id,
+                MetricComparison.metric_name == metric_name,
+            )
+            .order_by(MetricComparison.comparison_type.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
 
 
 class SyncReportRepository:
@@ -446,5 +493,43 @@ class SyncReportRepository:
 
     def mark_extracted(self, report: Report) -> None:
         report.status = ReportStatus.EXTRACTED
+        report.processing_completed_at = datetime.now(UTC)
+        self.session.commit()
+
+    # ---- Phase 3B: comparison generation ------------------------------------
+
+    def get_company_metrics(self, company_id: uuid.UUID) -> list[FinancialMetric]:
+        """All financial metrics for a company across its reports."""
+        return list(
+            self.session.query(FinancialMetric)
+            .join(Report, FinancialMetric.report_id == Report.id)
+            .filter(Report.company_id == company_id)
+            .all()
+        )
+
+    def get_report_metrics(self, report_id: uuid.UUID) -> list[FinancialMetric]:
+        return list(
+            self.session.query(FinancialMetric)
+            .filter(FinancialMetric.report_id == report_id)
+            .all()
+        )
+
+    def mark_comparing(self, report: Report) -> None:
+        report.status = ReportStatus.COMPARING
+        report.error_message = None
+        self.session.commit()
+
+    def replace_report_comparisons(self, report_id: uuid.UUID, rows: list[dict]) -> int:
+        """Rebuild comparisons anchored to this report's metrics (idempotent)."""
+        metric_ids = select(FinancialMetric.id).where(FinancialMetric.report_id == report_id)
+        self.session.query(MetricComparison).filter(
+            MetricComparison.metric_id.in_(metric_ids)
+        ).delete(synchronize_session=False)
+        self.session.add_all([MetricComparison(**r) for r in rows])
+        self.session.commit()
+        return len(rows)
+
+    def mark_compared(self, report: Report) -> None:
+        report.status = ReportStatus.COMPARED
         report.processing_completed_at = datetime.now(UTC)
         self.session.commit()

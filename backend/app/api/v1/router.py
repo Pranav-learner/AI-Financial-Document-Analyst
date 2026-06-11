@@ -11,6 +11,7 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     chunks,
+    comparisons,
     embeddings,
     evaluation,
     health,
@@ -39,6 +40,9 @@ api_router.include_router(evaluation.router, prefix="/evaluation", tags=["evalua
 
 # Financial metric extraction (Phase 3A) — report-scoped; inspection + trigger.
 api_router.include_router(metrics.router, prefix="/reports", tags=["metrics"])
+
+# Period comparisons (Phase 3B) — report + company scoped; full paths inside.
+api_router.include_router(comparisons.router, tags=["comparisons"])
 
 # --- Business routers (added per phase) ---------------------------------------
 # api_router.include_router(metrics.router,   prefix="/reports",   tags=["metrics"])    # Phase 3
