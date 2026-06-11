@@ -31,6 +31,7 @@ class EvaluationResult:
     returned: int
     total_relevant: int
     timestamp: str
+    ndcg: float = 0.0
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -53,6 +54,10 @@ class EvaluationRun:
     corpus_size: int
     failures: int
     timestamp: str
+    mean_ndcg: float = 0.0
+    reranking_gain: float = 0.0
+    query_rewriting_gain: float = 0.0
+    hyde_gain: float = 0.0
     per_category: dict[str, dict] = field(default_factory=dict)
     results: list[EvaluationResult] = field(default_factory=list)
 

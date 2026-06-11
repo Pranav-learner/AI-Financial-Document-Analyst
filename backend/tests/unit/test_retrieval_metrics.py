@@ -67,3 +67,21 @@ def test_candidate_reduction() -> None:
 def test_mean() -> None:
     assert metrics.mean([1.0, 2.0, 3.0]) == 2.0
     assert metrics.mean([]) == 0.0
+
+
+@pytest.mark.unit
+def test_ndcg_at_k() -> None:
+    # perfect ranking
+    assert metrics.ndcg_at_k([True, True, False], k=3) == 1.0
+    # imperfect ranking
+    flags = [False, True]
+    # dcg = 0 / log(2) + 1 / log(3) = 1 / log2(3) = 0.6309
+    # idcg = 1 / log(2) + 0 / log(3) = 1.0
+    # ndcg = 0.6309
+    assert math.isclose(metrics.ndcg_at_k(flags, k=2), 1.0 / math.log2(3))
+
+
+@pytest.mark.unit
+def test_ndcg_empty() -> None:
+    assert metrics.ndcg_at_k([], k=5) == 0.0
+    assert metrics.ndcg_at_k([False, False], k=2) == 0.0

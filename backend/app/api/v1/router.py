@@ -21,6 +21,7 @@ from app.api.v1.endpoints import (
     risks,
     search,
     tone,
+    rag,
 )
 
 api_router = APIRouter()
@@ -55,6 +56,9 @@ api_router.include_router(risks.router, tags=["risks"])
 
 # Management tone intelligence (Phase 5) — report + company scoped; full paths inside.
 api_router.include_router(tone.router, tags=["tone"])
+
+# Advanced Retrieval & RAG (Phase 6)
+api_router.include_router(rag.router, prefix="/rag", tags=["rag"])
 
 # --- Business routers (added per phase) ---------------------------------------
 # api_router.include_router(benchmark.router, prefix="/benchmark", tags=["benchmark"])  # Phase 8

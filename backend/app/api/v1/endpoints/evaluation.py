@@ -61,7 +61,7 @@ async def run_evaluation(
 ) -> EvaluationRunResponse:
     if payload.retrieval_type not in (*VALID_TYPES, "both"):
         raise InvalidEvaluationRequestError(
-            "retrieval_type must be 'vector', 'hybrid', or 'both'",
+            "retrieval_type must be 'vector', 'hybrid', 'rag', or 'both'",
             details={"retrieval_type": payload.retrieval_type},
         )
     runs = await service.run(retrieval_type=payload.retrieval_type, top_k=payload.top_k)

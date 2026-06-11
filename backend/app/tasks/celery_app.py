@@ -24,7 +24,7 @@ celery_app = Celery(
     broker=settings.celery_broker_url,
     backend=settings.celery_result_backend,
     # Task modules registered with the worker (Phase 1A: ingestion).
-    include=["app.tasks.ingestion"],
+    include=["app.tasks.ingestion", "app.tasks.rag"],
 )
 
 # ---------------------------------------------------------------------------
@@ -48,6 +48,7 @@ celery_app.conf.task_default_queue = "default"
 celery_app.conf.task_routes = {
     "app.tasks.ingestion.*": {"queue": "ingestion"},
     "app.tasks.extraction.*": {"queue": "extraction"},
+    "app.tasks.rag.*": {"queue": "extraction"},
 }
 
 # ---------------------------------------------------------------------------

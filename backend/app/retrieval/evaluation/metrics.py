@@ -71,3 +71,25 @@ def candidate_reduction_pct(corpus_size: int, candidate_count: int) -> float:
 
 def mean(values: Sequence[float]) -> float:
     return round(sum(values) / len(values), 6) if values else 0.0
+
+
+def ndcg_at_k(flags: Sequence[bool], k: int) -> float:
+    """Normalized Discounted Cumulative Gain at K (for binary relevance)."""
+    import math
+    topk = list(flags[:k])
+    if not topk or not any(topk):
+        return 0.0
+
+    dcg = 0.0
+    for i, f in enumerate(topk, start=1):
+        if f:
+            dcg += 1.0 / math.log2(i + 1)
+
+    # Ideal DCG: sorted flags (all True/1s at the front)
+    ideal_flags = sorted(topk, reverse=True)
+    idcg = 0.0
+    for i, f in enumerate(ideal_flags, start=1):
+        if f:
+            idcg += 1.0 / math.log2(i + 1)
+
+    return dcg / idcg if idcg > 0 else 0.0

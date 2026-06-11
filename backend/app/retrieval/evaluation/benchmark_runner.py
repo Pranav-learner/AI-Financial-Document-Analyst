@@ -62,6 +62,11 @@ class BenchmarkRunner:
         results: list[EvaluationResult] = []
         failures = 0
 
+        # Lists to aggregate gains
+        reranking_gains = []
+        query_rewriting_gains = []
+        hyde_gains = []
+
         for ex in examples:
             out = await retrieve(ex, top_k)
             if out.error is not None:
@@ -71,6 +76,12 @@ class BenchmarkRunner:
 
             flags = [ex.is_relevant(r) for r in out.results]
             denom = await total_relevant(ex)
+
+            # Extract gains from out.extra if present
+            reranking_gains.append(out.extra.get("reranking_gain", 0.0))
+            query_rewriting_gains.append(out.extra.get("query_rewriting_gain", 0.0))
+            hyde_gains.append(out.extra.get("hyde_gain", 0.0))
+
             results.append(
                 EvaluationResult(
                     query=ex.query,
@@ -89,13 +100,28 @@ class BenchmarkRunner:
                     returned=len(out.results),
                     total_relevant=denom,
                     timestamp=_now(),
+                    ndcg=round(metrics.ndcg_at_k(flags, top_k), 6),
                 )
             )
 
-        return self._aggregate(results, top_k=top_k, failures=failures)
+        return self._aggregate(
+            results,
+            top_k=top_k,
+            failures=failures,
+            mean_rerank_gain=metrics.mean(reranking_gains),
+            mean_rewrite_gain=metrics.mean(query_rewriting_gains),
+            mean_hyde_gain=metrics.mean(hyde_gains),
+        )
 
     def _aggregate(
-        self, results: list[EvaluationResult], *, top_k: int, failures: int
+        self,
+        results: list[EvaluationResult],
+        *,
+        top_k: int,
+        failures: int,
+        mean_rerank_gain: float = 0.0,
+        mean_rewrite_gain: float = 0.0,
+        mean_hyde_gain: float = 0.0,
     ) -> EvaluationRun:
         per_category: dict[str, dict] = {}
         by_cat: dict[str, list[EvaluationResult]] = {}
@@ -108,6 +134,7 @@ class BenchmarkRunner:
                 "mean_precision_at_k": metrics.mean([r.precision_at_k for r in rs]),
                 "mean_mrr": metrics.mean([r.mrr for r in rs]),
                 "hit_rate": metrics.mean([r.hit_rate for r in rs]),
+                "mean_ndcg": metrics.mean([r.ndcg for r in rs]),
             }
 
         return EvaluationRun(
@@ -126,6 +153,10 @@ class BenchmarkRunner:
             corpus_size=self.corpus_size,
             failures=failures,
             timestamp=_now(),
+            mean_ndcg=metrics.mean([r.ndcg for r in results]),
+            reranking_gain=mean_rerank_gain,
+            query_rewriting_gain=mean_rewrite_gain,
+            hyde_gain=mean_hyde_gain,
             per_category=per_category,
             results=results,
         )

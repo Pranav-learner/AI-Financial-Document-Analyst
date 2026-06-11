@@ -31,7 +31,7 @@ from app.retrieval.search.search_exceptions import SearchError
 
 log = get_logger(__name__)
 
-VALID_TYPES = ("vector", "hybrid")
+VALID_TYPES = ("vector", "hybrid", "rag")
 
 
 class EvaluationStore:
@@ -147,6 +147,66 @@ class EvaluationService:
             latency_ms=outcome.timings.total_ms,
         )
 
+    async def _retrieve_rag(self, ex: GroundTruthExample, top_k: int) -> RetrievalOutput:
+        import time
+        from app.rag.service import AdvancedRAGService
+        from app.rag.strategy import get_strategy_config
+        from app.retrieval.evaluation import metrics
+
+        ctx = RetrievalContext(**ex.filters) if ex.filters else RetrievalContext()
+        strategy_str = ex.profile or "GENERAL_ANALYSIS"
+        strat_config = get_strategy_config(strategy_str)
+
+        try:
+            rag_service = AdvancedRAGService(self.session, query_embedder=self.vector.query_embedder)
+            t0 = time.monotonic()
+            context_pkg, steps, re_ranked, retrieved_results = await rag_service.retrieve_and_assemble(
+                query=ex.query,
+                context=ctx,
+                strategy=strategy_str,
+                top_k=top_k
+            )
+            total_pipeline_ms = steps.get("total_pipeline_ms", (time.monotonic() - t0) * 1000)
+
+            # Calculate baseline hybrid NDCG for gain analysis
+            try:
+                baseline_outcome = await self.hybrid.run(ex.query, ctx, top_k=top_k, profile=ex.profile)
+                flags_baseline = [ex.is_relevant(r) for r in baseline_outcome.results]
+                ndcg_baseline = metrics.ndcg_at_k(flags_baseline, top_k)
+            except Exception:
+                ndcg_baseline = 0.0
+
+            # Pre-rerank metrics
+            flags_pre = [ex.is_relevant(r) for r in retrieved_results]
+            ndcg_pre = metrics.ndcg_at_k(flags_pre, top_k)
+
+            # Post-rerank metrics
+            flags_post = [ex.is_relevant(r) for r in re_ranked]
+            ndcg_post = metrics.ndcg_at_k(flags_post, top_k)
+
+            # Compute gains
+            reranking_gain = round(ndcg_post - ndcg_pre, 6)
+
+            hyde_gain = 0.0
+            query_rewriting_gain = 0.0
+            if strat_config.hyde:
+                hyde_gain = round(ndcg_pre - ndcg_baseline, 6)
+            elif strat_config.query_rewriting:
+                query_rewriting_gain = round(ndcg_pre - ndcg_baseline, 6)
+
+            return RetrievalOutput(
+                results=re_ranked,
+                candidate_count=steps.get("retrieval", {}).get("merged_count", len(re_ranked)),
+                latency_ms=total_pipeline_ms,
+                extra={
+                    "reranking_gain": reranking_gain,
+                    "query_rewriting_gain": query_rewriting_gain,
+                    "hyde_gain": hyde_gain
+                }
+            )
+        except Exception as exc:
+            return RetrievalOutput(results=[], candidate_count=0, latency_ms=0.0, error=str(exc))
+
     # ---- public API ----------------------------------------------------------
 
     async def run(
@@ -159,7 +219,13 @@ class EvaluationService:
 
         runs: list[EvaluationRun] = []
         for rtype in types:
-            retrieve = self._retrieve_vector if rtype == "vector" else self._retrieve_hybrid
+            if rtype == "vector":
+                retrieve = self._retrieve_vector
+            elif rtype == "hybrid":
+                retrieve = self._retrieve_hybrid
+            else:
+                retrieve = self._retrieve_rag
+
             runner = BenchmarkRunner(retrieval_type=rtype, corpus_size=corpus)
             run = await runner.run(examples, retrieve, self._total_relevant, top_k=k)
             self.store.add(run)
@@ -172,6 +238,7 @@ class EvaluationService:
                 recall=run.mean_recall_at_k,
                 precision=run.mean_precision_at_k,
                 mrr=run.mean_mrr,
+                ndcg=run.mean_ndcg,
                 hit_rate=run.hit_rate,
             )
         return runs

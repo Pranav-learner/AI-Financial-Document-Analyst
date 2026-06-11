@@ -31,6 +31,7 @@ class EvaluationResultOut(BaseModel):
     returned: int
     total_relevant: int
     timestamp: str
+    ndcg: float = 0.0
 
 
 class EvaluationRunSummaryOut(BaseModel):
@@ -48,6 +49,10 @@ class EvaluationRunSummaryOut(BaseModel):
     failures: int
     timestamp: str
     per_category: dict
+    mean_ndcg: float = 0.0
+    reranking_gain: float = 0.0
+    query_rewriting_gain: float = 0.0
+    hyde_gain: float = 0.0
 
 
 class EvaluationRunOut(EvaluationRunSummaryOut):
