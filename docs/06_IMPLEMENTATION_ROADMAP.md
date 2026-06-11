@@ -23,6 +23,8 @@
    - ⭐ [Phase 2C Completion Report — Hybrid Retrieval Foundation](#phase-2c-completion-report--hybrid-retrieval-foundation)
    - ⭐ [Phase 2D Completion Report — Retrieval Evaluation & Observability](#phase-2d-completion-report--retrieval-evaluation--observability)
    - ⭐ [Phase 3A Completion Report — Financial Metric Extraction Foundation](#phase-3a-completion-report--financial-metric-extraction-foundation)
+   - ⭐ [Phase 3B Completion Report — Period Comparison Engine](#phase-3b-completion-report--period-comparison-engine)
+   - ⭐ [Phase 3C Completion Report — Financial Analytics Layer](#phase-3c-completion-report--financial-analytics-layer)
 3. [Technology Decisions Log](#3-technology-decisions-log)
 4. [Architecture Decision Records (ADR)](#4-architecture-decision-records-adr)
 5. [Implementation Log](#5-implementation-log)
@@ -71,7 +73,8 @@ Financial analysis is document-heavy, repetitive, and error-prone. Generic LLM c
 | **2D** | **Retrieval Evaluation & Observability** ✅ | Measure + benchmark | Metrics (Recall/Precision/MRR/Hit), ground-truth suite, runner, `/evaluation/*`, vector vs hybrid baselines | Retrieval quality measurable + baselined (DONE) |
 | **2E** | **Advanced Retrieval** | Rewrite + rerank | Query rewrite/HyDE, BGE re-rank, groundedness (each measured vs 2D baseline) | Higher-precision cited retrieval |
 | **3A** | **Financial Metric Extraction** ✅ | Typed metrics (no deltas) | Taxonomy, hybrid (rule+LLM) extraction, `financial_metrics`, `/metrics` | Validated, traceable metrics stored; gold accuracy 1.00 rule-only (DONE) |
-| **3B** | **Metric Deltas & Tables** | YoY/QoQ + table extraction | Table-aware extraction, period math (YoY/QoQ), trend prep | ≥95% extraction accuracy on a labeled gold set |
+| **3B** | **Metric Deltas & Tables** ✅ | YoY/QoQ + table extraction | Table-aware extraction, period math (YoY/QoQ), trend prep | ≥95% extraction accuracy on a labeled gold set (DONE) |
+| **3C** | **Financial Analytics Layer** ✅ | Ratio calculation, trends, signals | Ratios, trend classification, signal generation, validation | Validated, traceable ratios and signals stored (DONE) |
 | **4** | **Risk Intelligence** | Risks + evolution | Risk Analysis Agent, `risk_factors`, diff engine, `/risks` | Correct NEW/REMOVED/MODIFIED labeling |
 | **5** | **Management Tone Analysis** | Sentiment/confidence | Tone Agent, `tone_analysis`, rubric scoring, trends | Stable, rubric-anchored scores with citations |
 | **6** | **Advanced RAG** | Precision retrieval | Query rewrite, HyDE, **BGE re-ranking (`BAAI/bge-reranker-base`)**, metadata filtering, groundedness guard | Measurable retrieval-accuracy lift |
@@ -1402,8 +1405,71 @@ metadata). Real filings with dense tables will need the table-aware extraction n
 | Documentation updated | ✅ this report + ADR-017 + TDL-018 |
 
 ### Final Status
-> **PHASE 3A COMPLETED.** Phase 3B / YoY / QoQ / trend analysis / risk / tone / benchmarking /
-> memo / agents **NOT started — strictly out of scope.**
+> **PHASE 3A COMPLETED.**
+
+---
+
+## Phase 3B Completion Report — Period Comparison Engine
+
+> **Date:** 2026-06-11 · **Owner:** Lead Financial Analytics Engineer (nickg/pranav) · **Scope:** YoY / QoQ comparisons, calculation engine, metric matching, validation, and storage. **No trends, no narrative insights, no LLM summaries.**
+
+### Overview
+Phase 3B implements the deterministic comparison engine to calculate period-over-period differences (YoY and QoQ) for financial metrics. The engine pairs metrics across fiscal periods, computes absolute and percentage differences (handling zero-division and negative bases correctly), validates calculations, and stores them in the `metric_comparisons` table.
+
+### Features Implemented
+- **`metric_comparisons` table** (+migration `0007`) storing previous/current values, periods, and calculated changes.
+- **Year-over-Year (YoY) & Quarter-over-Quarter (QoQ) Math**: Exact arithmetic matching of annual and quarterly metrics.
+- **Robust Division by Zero**: Stores `NULL` for percentage change when previous value is zero, avoiding runtime crashes.
+- **Negative Base Handling**: Uses standard mathematical formulas for negative previous values.
+- **Idempotent Celery Task**: `generate_metric_comparisons_task` runs deterministically, cleans up previous comparisons, and updates report status to `COMPARED`.
+- **FastAPI Endpoints**: Scoped at report and company levels to retrieve lists, metric specific details, and breakdowns.
+- **Comparison Evaluation Runner**: Verified against a gold dataset with 100% calculation accuracy.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| `metric_comparisons` table implemented | ✅ migration `0007` (reversible) |
+| Period-over-period math (YoY/QoQ) | ✅ correct calculations for division by zero and negative bases |
+| Repository & storage integration | ✅ sync & async methods on `ReportRepository` |
+| Idempotent Celery task | ✅ `generate_metric_comparisons_task` |
+| APIs operational | ✅ report and company level endpoints |
+| Evaluation framework operational | ✅ gold set evaluation |
+
+### Final Status
+> **PHASE 3B COMPLETED.**
+
+---
+
+## Phase 3C Completion Report — Financial Analytics Layer
+
+> **Date:** 2026-06-11 · **Owner:** Lead Financial Analytics Engineer (pranav) · **Scope:** ratio calculation, trend classification, signal generation, validation, and storage. **No risk intelligence, tone analysis, benchmarking, investment memos, or LLM-generated narrative insights.**
+
+### Overview
+Phase 3C establishes the financial analytics layer, which deterministically calculates key financial ratios and generates analytical signals (e.g. growth, margin expansion, leverage change, and guidance alerts). All logic is fully rule-based and deterministic, keeping computation separate from unstructured text. Results are stored in the `financial_analytics` database table.
+
+### Features Implemented
+- **`financial_analytics` table** (+migration `20260611_0008`) storing ratio and signal types, severity categories, classifications, values, and explanations.
+- **Deterministic Ratio Calculator**: Computes Gross Margin, Operating Margin, Net Margin, Debt-to-Revenue, and Cash Flow Margin.
+- **Categorical Trend Classifier**: Maps numeric growth rates, margin changes, and leverage ratios to categorical trends (e.g. `STRONG_GROWTH`, `MARGIN_EXPANSION`, `DEBT_REDUCTION`).
+- **Signal Generator**: Processes metrics and comparisons to generate GROWTH, PROFITABILITY, LEVERAGE, CASH_FLOW, and GUIDANCE signals.
+- **Validator**: Checks computed ratios against impossible boundaries (e.g. gross margin > 1.0 or operating margin < -5.0) and dedupes signals.
+- **Idempotent Celery Task**: `generate_financial_analytics_task` processes a report, updates DB state, and marks report as `ANALYZED`.
+- **FastAPI Endpoints**: Scope retrieval by report or company, with endpoints for signals, ratios, and summary metrics.
+- **Offline Evaluation Runner**: Validates ratios, coverage, and classifications against `gold_dataset.json`.
+
+### Exit Criteria Verification
+| Criterion | Status |
+|---|---|
+| `financial_analytics` table implemented | ✅ migration `20260611_0008` (reversible) |
+| Deterministic Ratio Calculator | ✅ GROSS_MARGIN, OPERATING_MARGIN, NET_MARGIN, DEBT_TO_REVENUE, CASH_FLOW_MARGIN |
+| Trend Classifier & Signal Generator | ✅ GROWTH, PROFITABILITY, LEVERAGE, CASH_FLOW, GUIDANCE categories |
+| Repository & storage integration | ✅ sync & async methods on `ReportRepository` |
+| Idempotent Celery task | ✅ `generate_financial_analytics_task` updates Report status to `ANALYZED` |
+| APIs operational | ✅ report/company analytics list, signals, ratios, and summary |
+| Evaluation framework operational | ✅ gold set evaluation |
+
+### Final Status
+> **PHASE 3C COMPLETED.** Phase 4 / Risk Intelligence **NOT started — strictly out of scope.**
 
 ---
 

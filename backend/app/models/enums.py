@@ -30,6 +30,8 @@ class ReportStatus(str, Enum):
     EXTRACTED = "EXTRACTED"      # financial metrics extracted and stored (Phase 3A done)
     COMPARING = "COMPARING"      # worker is generating period comparisons (Phase 3B)
     COMPARED = "COMPARED"        # period comparisons generated and stored (Phase 3B done)
+    ANALYZING = "ANALYZING"      # worker is generating financial analytics (Phase 3C)
+    ANALYZED = "ANALYZED"        # financial analytics generated and stored (Phase 3C done)
     FAILED = "FAILED"            # a processing step failed (see error_message / logs)
 
 

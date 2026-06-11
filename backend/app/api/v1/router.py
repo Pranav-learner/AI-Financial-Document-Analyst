@@ -10,6 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    analytics,
     chunks,
     comparisons,
     embeddings,
@@ -43,6 +44,9 @@ api_router.include_router(metrics.router, prefix="/reports", tags=["metrics"])
 
 # Period comparisons (Phase 3B) — report + company scoped; full paths inside.
 api_router.include_router(comparisons.router, tags=["comparisons"])
+
+# Financial analytics (Phase 3C) — report + company scoped; full paths inside.
+api_router.include_router(analytics.router, tags=["analytics"])
 
 # --- Business routers (added per phase) ---------------------------------------
 # api_router.include_router(metrics.router,   prefix="/reports",   tags=["metrics"])    # Phase 3

@@ -9,6 +9,7 @@ from app.models.document_chunk import DocumentChunk
 from app.models.enums import ReportStatus, ReportType
 from app.models.financial_metric import FinancialMetric
 from app.models.metric_comparison import MetricComparison
+from app.models.financial_analytics import FinancialAnalytics
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
@@ -18,6 +19,7 @@ __all__ = [
     "DocumentChunk",
     "FinancialMetric",
     "MetricComparison",
+    "FinancialAnalytics",
     "Report",
     "ReportPage",
     "ReportSection",

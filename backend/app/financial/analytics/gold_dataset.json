@@ -1,0 +1,107 @@
+{
+  "scenarios": [
+    {
+      "id": "scenario_healthy_growth",
+      "company_id": "00000000-0000-0000-0000-000000000001",
+      "report_id": "11111111-1111-1111-1111-111111111111",
+      "metrics": [
+        {"name": "REVENUE", "value": 1000.0},
+        {"name": "GROSS_PROFIT", "value": 600.0},
+        {"name": "OPERATING_INCOME", "value": 200.0},
+        {"name": "NET_INCOME", "value": 150.0},
+        {"name": "TOTAL_DEBT", "value": 200.0},
+        {"name": "OPERATING_CASH_FLOW", "value": 250.0},
+        {"name": "FREE_CASH_FLOW", "value": 200.0}
+      ],
+      "comparisons": [
+        {
+          "metric_name": "REVENUE",
+          "comparison_type": "YOY",
+          "current_value": 1000.0,
+          "previous_value": 800.0,
+          "percentage_change": 0.25
+        },
+        {
+          "metric_name": "NET_INCOME",
+          "comparison_type": "YOY",
+          "current_value": 150.0,
+          "previous_value": 80.0,
+          "percentage_change": 0.875
+        },
+        {
+          "metric_name": "GROSS_MARGIN",
+          "comparison_type": "YOY",
+          "current_value": 0.60,
+          "previous_value": 0.50,
+          "absolute_change": 0.10
+        },
+        {
+          "metric_name": "TOTAL_DEBT",
+          "comparison_type": "YOY",
+          "current_value": 200.0,
+          "previous_value": 200.0,
+          "percentage_change": 0.00
+        },
+        {
+          "metric_name": "FREE_CASH_FLOW",
+          "comparison_type": "YOY",
+          "current_value": 200.0,
+          "previous_value": 100.0,
+          "percentage_change": 1.00
+        }
+      ],
+      "historical_metrics": [],
+      "expected_ratios": [
+        {"name": "GROSS_MARGIN", "value": 0.60},
+        {"name": "OPERATING_MARGIN", "value": 0.20},
+        {"name": "NET_MARGIN", "value": 0.15},
+        {"name": "DEBT_TO_REVENUE", "value": 0.20},
+        {"name": "CASH_FLOW_MARGIN", "value": 0.25}
+      ],
+      "expected_signals": [
+        {
+          "code": "REVENUE_GROWTH_YOY",
+          "type": "GROWTH",
+          "classification": "STRONG_GROWTH",
+          "severity": "VERY_POSITIVE",
+          "value": 0.25
+        },
+        {
+          "code": "NET_INCOME_GROWTH_YOY",
+          "type": "PROFITABILITY",
+          "classification": "STRONG_GROWTH",
+          "severity": "VERY_POSITIVE",
+          "value": 0.875
+        },
+        {
+          "code": "GROSS_MARGIN_CHANGE_YOY",
+          "type": "PROFITABILITY",
+          "classification": "MARGIN_EXPANSION",
+          "severity": "POSITIVE",
+          "value": 0.10
+        },
+        {
+          "code": "DEBT_CHANGE_YOY",
+          "type": "LEVERAGE",
+          "classification": "DEBT_UNCHANGED",
+          "severity": "NEUTRAL",
+          "value": 0.00
+        },
+        {
+          "code": "LEVERAGE_IMPROVEMENT_YOY",
+          "type": "LEVERAGE",
+          "classification": "LEVERAGE_IMPROVEMENT",
+          "severity": "POSITIVE",
+          "value": -0.05
+        },
+        {
+          "code": "CASH_GENERATION_IMPROVEMENT_YOY",
+          "type": "CASH_FLOW",
+          "classification": "CASH_GENERATION_IMPROVEMENT",
+          "severity": "POSITIVE",
+          "value": 1.00
+        }
+      ]
+    }
+  ]
+}

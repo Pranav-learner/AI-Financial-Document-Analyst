@@ -23,6 +23,7 @@ from app.models.document_chunk import DocumentChunk
 from app.models.enums import EmbeddingStatus, ReportStatus, ReportType
 from app.models.financial_metric import FinancialMetric
 from app.models.metric_comparison import MetricComparison
+from app.models.financial_analytics import FinancialAnalytics
 from app.models.report import Report
 from app.models.report_page import ReportPage
 from app.models.report_section import ReportSection
@@ -261,6 +262,59 @@ class ReportRepository:
                 MetricComparison.metric_name == metric_name,
             )
             .order_by(MetricComparison.comparison_type.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
+
+    # ---- Phase 3C: financial analytics -------------------------------------
+
+    async def get_analytics_by_report(
+        self, report_id: uuid.UUID
+    ) -> list[FinancialAnalytics]:
+        stmt = (
+            select(FinancialAnalytics)
+            .where(FinancialAnalytics.report_id == report_id)
+            .order_by(FinancialAnalytics.created_at.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
+
+    async def get_analytics_by_company(
+        self, company_id: uuid.UUID, *, signal_type: str | None = None
+    ) -> list[FinancialAnalytics]:
+        stmt = select(FinancialAnalytics).where(FinancialAnalytics.company_id == company_id)
+        if signal_type is not None:
+            stmt = stmt.where(FinancialAnalytics.signal_type == signal_type)
+        stmt = stmt.order_by(FinancialAnalytics.created_at.asc())
+        return list((await self.session.scalars(stmt)).all())
+
+    async def get_analytics_by_company_signals(
+        self, company_id: uuid.UUID
+    ) -> list[FinancialAnalytics]:
+        # Filter out ratios
+        stmt = (
+            select(FinancialAnalytics)
+            .where(
+                FinancialAnalytics.company_id == company_id,
+                ~FinancialAnalytics.signal_code.in_([
+                    "GROSS_MARGIN", "OPERATING_MARGIN", "NET_MARGIN", "DEBT_TO_REVENUE", "CASH_FLOW_MARGIN"
+                ])
+            )
+            .order_by(FinancialAnalytics.created_at.asc())
+        )
+        return list((await self.session.scalars(stmt)).all())
+
+    async def get_analytics_by_company_ratios(
+        self, company_id: uuid.UUID
+    ) -> list[FinancialAnalytics]:
+        # Filter for ratios only
+        stmt = (
+            select(FinancialAnalytics)
+            .where(
+                FinancialAnalytics.company_id == company_id,
+                FinancialAnalytics.signal_code.in_([
+                    "GROSS_MARGIN", "OPERATING_MARGIN", "NET_MARGIN", "DEBT_TO_REVENUE", "CASH_FLOW_MARGIN"
+                ])
+            )
+            .order_by(FinancialAnalytics.created_at.asc())
         )
         return list((await self.session.scalars(stmt)).all())
 
@@ -531,5 +585,33 @@ class SyncReportRepository:
 
     def mark_compared(self, report: Report) -> None:
         report.status = ReportStatus.COMPARED
+        report.processing_completed_at = datetime.now(UTC)
+        self.session.commit()
+
+    # ---- Phase 3C: financial analytics -------------------------------------
+
+    def mark_analyzing(self, report: Report) -> None:
+        report.status = ReportStatus.ANALYZING
+        report.error_message = None
+        self.session.commit()
+
+    def get_company_comparisons(self, company_id: uuid.UUID) -> list[MetricComparison]:
+        return list(
+            self.session.query(MetricComparison)
+            .filter(MetricComparison.company_id == company_id)
+            .all()
+        )
+
+    def replace_report_analytics(self, report_id: uuid.UUID, rows: list[dict]) -> int:
+        """Rebuild analytics for this report (idempotent)."""
+        self.session.query(FinancialAnalytics).filter(
+            FinancialAnalytics.report_id == report_id
+        ).delete(synchronize_session=False)
+        self.session.add_all([FinancialAnalytics(**r) for r in rows])
+        self.session.commit()
+        return len(rows)
+
+    def mark_analyzed(self, report: Report) -> None:
+        report.status = ReportStatus.ANALYZED
         report.processing_completed_at = datetime.now(UTC)
         self.session.commit()

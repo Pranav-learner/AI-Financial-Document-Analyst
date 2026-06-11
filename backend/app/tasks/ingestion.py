@@ -15,6 +15,7 @@ import uuid
 from app.core.logging import get_logger
 from app.db.session import SyncSessionLocal
 from app.financial.comparison import ComparisonService, MetricPoint
+from app.financial.analytics import AnalyticsBuilder
 from app.financial.extraction import ChunkInput, HybridExtractor
 from app.ingestion.chunking import ChunkGenerator, ReportContext, SectionInput
 from app.models.financial_metric import FinancialMetric
@@ -458,6 +459,75 @@ def generate_metric_comparisons_task(self, report_id: str) -> dict:
 
         except Exception as exc:  # noqa: BLE001 - record as FAILED, log, no crash-loop
             log.error("comparison.task_failure", report_id=report_id, error=str(exc))
+            session.rollback()
+            failed = repo.get_report(rid)
+            if failed is not None:
+                repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
+            return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+
+
+@celery_app.task(
+    bind=True,
+    name="app.tasks.extraction.generate_financial_analytics_task",
+    acks_late=True,
+    max_retries=2,
+    default_retry_delay=30,
+)
+def generate_financial_analytics_task(self, report_id: str) -> dict:
+    """Generate deterministic ratios, signals, and trend classifications for a report (Phase 3C).
+
+    Workflow: load report → ANALYZING → load metrics, comparisons, and company's
+    historical metrics → generate ratios & signals → validate → store → ANALYZED.
+    Deterministic (no LLM). Idempotent. Routed to the `extraction` queue.
+    """
+    rid = uuid.UUID(report_id)
+    log.info("analytics.task_start", report_id=report_id)
+
+    with SyncSessionLocal() as session:
+        repo = SyncReportRepository(session)
+        report = repo.get_report(rid)
+        if report is None:
+            log.warning("analytics.report_missing", report_id=report_id)
+            return {"report_id": report_id, "status": "MISSING"}
+
+        try:
+            repo.mark_analyzing(report)
+
+            if report.company_id is None:
+                repo.replace_report_analytics(rid, [])
+                repo.mark_analyzed(report)
+                log.info("analytics.no_company", report_id=report_id)
+                return {"report_id": report_id, "status": "ANALYZED", "analytics": 0}
+
+            metrics = repo.get_report_metrics(rid)
+            comparisons = repo.get_company_comparisons(report.company_id)
+            
+            # Filter comparisons to only those anchored to this report's metrics
+            report_metric_ids = {m.id for m in metrics}
+            report_comparisons = [c for c in comparisons if c.metric_id in report_metric_ids]
+
+            # Get historical metrics for guidance comparisons
+            company_metrics = repo.get_company_metrics(report.company_id)
+
+            db_rows, warnings = AnalyticsBuilder().build_analytics(
+                company_id=report.company_id,
+                report_id=rid,
+                metrics=metrics,
+                comparisons=report_comparisons,
+                company_historical_metrics=company_metrics,
+            )
+
+            count = repo.replace_report_analytics(rid, db_rows)
+            repo.mark_analyzed(report)
+
+            log.info(
+                "analytics.task_success", report_id=report_id, analytics=count,
+                warnings=len(warnings),
+            )
+            return {"report_id": report_id, "status": "ANALYZED", "analytics": count, "warnings": len(warnings)}
+
+        except Exception as exc:  # noqa: BLE001
+            log.error("analytics.task_failure", report_id=report_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:
