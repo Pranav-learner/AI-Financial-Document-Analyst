@@ -2161,6 +2161,10 @@ Phase 10A implements the React-based Analyst Workspace & Visualization Layer. It
 | 2026-06-11 | 5  | Management Tone Intelligence | pranav | Management Tone Extraction, Tone Evolution, Storage, and APIs | ✅ Completed |
 | 2026-06-11 | 6  | Advanced Retrieval & RAG | pranav | Query Rewriting, HyDE, BGE Reranking, Token Budgeter, Citation Grounding, XML context builder, RAG APIs, and Evaluation Service | ✅ Completed |
 | 2026-06-11 | 7 | Multi-Agent Orchestration | pranav | LangGraph supervisor + graph, checkpointing, shared state, API, unit & integration tests | ✅ Completed |
+| 2026-06-12 | 8 | Competitor Benchmarking | pranav | Competitor comparison extraction, cohort ratings, and Benchmarking APIs | ✅ Completed |
+| 2026-06-12 | 9 | Investment Memo Engine | pranav | Memo template building, automated section generations, PDF exports, and Memo APIs | ✅ Completed |
+| 2026-06-12 | 10A | Analyst Workspace & Visualizations | pranav | Executive Dashboard, Financial charts, Risk matrices, and Management Tone visuals | ✅ Completed |
+| 2026-06-12 | 10B | Frontend Design System & Demo Polish | pranav | Scaffolded UI design system tokens/components, keyboard sidebar controls, Guided flow widget, telemetry diagnostics, high-fidelity skeletons, refined pages (Benchmark, Memo, Agent, Management), and unit test suites | ✅ Completed |
 
 > _Add a row per meaningful change. Mark status: ⬜ Todo · 🟡 In progress · ✅ Completed · ⛔ Blocked._
 

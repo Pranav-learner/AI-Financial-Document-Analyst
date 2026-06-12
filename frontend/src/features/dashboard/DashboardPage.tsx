@@ -1,9 +1,10 @@
 import PageHeader from "@/components/PageHeader";
 import MetricCard from "@/components/MetricCard";
-import LoadingPanel from "@/components/LoadingPanel";
-import ErrorState from "@/components/ErrorState";
+import Skeleton from "@/design-system/components/Skeleton";
+import ErrorFallback from "@/design-system/patterns/ErrorFallback";
 import EmptyState from "@/components/EmptyState";
 import { useReports } from "@/hooks/useReports";
+import { useObservability } from "@/hooks/useObservability";
 import {
   BarChart3,
   ShieldAlert,
@@ -11,21 +12,72 @@ import {
   FileText,
   Clock,
   Activity,
+  Pin,
+  ExternalLink,
+  PlusCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Button from "@/design-system/components/Button";
+
+// Pinned examples for hacker/presentation demo speed
+const PINNED_EXAMPLES = [
+  {
+    name: "Apple Inc. (AAPL)",
+    type: "10-K (Annual)",
+    year: "2025",
+    desc: "Premium consumer tech filing featuring complex segment analysis.",
+    badge: "Tech Leader",
+  },
+  {
+    name: "Tesla Inc. (TSLA)",
+    type: "10-Q (Q3)",
+    year: "2025",
+    desc: "High volatility risks, ESG evolution, and intense capex allocations.",
+    badge: "Auto & Energy",
+  },
+];
 
 /** Executive Dashboard — high-level company intelligence overview. */
 export default function DashboardPage() {
   const { data, isLoading, isError, refetch } = useReports(20, 0);
+  const { trackInteraction } = useObservability();
 
-  if (isLoading) return <LoadingPanel rows={6} />;
-  if (isError)
-    return <ErrorState message="Failed to load dashboard data." onRetry={() => refetch()} />;
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton variant="text" className="w-1/3 h-8" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Skeleton variant="card" />
+          <Skeleton variant="card" />
+          <Skeleton variant="card" />
+          <Skeleton variant="card" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton variant="table" />
+          <Skeleton variant="table" />
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <ErrorFallback
+        title="Dashboard Failure"
+        message="Could not establish connection to the company data registers."
+        resetErrorBoundary={refetch}
+      />
+    );
+  }
 
   const reports = data?.items ?? [];
   const latestReport = reports[0];
   const processed = reports.filter((r) => ["EMBEDDED", "COMPLETED", "READY"].includes(r.status));
   const failed = reports.filter((r) => r.status === "FAILED");
+
+  const handlePinnedClick = (companyName: string) => {
+    trackInteraction("Pinned Example Clicked", companyName);
+  };
 
   return (
     <div className="space-y-6 animate-slide-up">
@@ -37,25 +89,92 @@ export default function DashboardPage() {
       {/* Quick Stats */}
       <div className="card-grid">
         <MetricCard
-          label="Total Reports"
+          label="Total Filings"
           value={data?.total ?? 0}
-          icon={<BarChart3 className="w-5 h-5" />}
+          icon={<BarChart3 className="w-5 h-5 text-brand-600" />}
         />
         <MetricCard
-          label="Processed"
+          label="Processed & Indexed"
           value={processed.length}
-          icon={<Activity className="w-5 h-5" />}
+          icon={<Activity className="w-5 h-5 text-success" />}
         />
         <MetricCard
-          label="Failed"
+          label="Extraction Errors"
           value={failed.length}
-          icon={<ShieldAlert className="w-5 h-5" />}
+          icon={<ShieldAlert className="w-5 h-5 text-danger" />}
         />
         <MetricCard
-          label="Latest Filing"
+          label="Latest Filing Type"
           value={latestReport?.report_type ?? "—"}
-          icon={<FileText className="w-5 h-5" />}
+          icon={<FileText className="w-5 h-5 text-warning" />}
         />
+      </div>
+
+      {/* Demo Guidance and Pinned Examples */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="md:col-span-2 space-y-6">
+          {/* Pinned Examples */}
+          <div className="glass-panel p-5">
+            <h3 className="section-title flex items-center gap-2 mb-4">
+              <Pin className="w-4 h-4 text-brand-600" />
+              Demo Pinned Examples
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {PINNED_EXAMPLES.map((ex) => (
+                <div
+                  key={ex.name}
+                  className="border border-surface-200 rounded-lg p-4 hover:border-brand-300 transition-colors bg-white flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex justify-between items-start">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded bg-brand-50 text-brand-700">
+                        {ex.badge}
+                      </span>
+                      <span className="text-[11px] text-surface-400 font-mono">
+                        FY {ex.year}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-surface-900 mt-2">{ex.name}</h4>
+                    <p className="text-xs text-surface-500 mt-1">{ex.desc}</p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-surface-100 flex justify-between items-center">
+                    <span className="text-xs text-surface-400 font-medium">{ex.type}</span>
+                    <Link
+                      to="/financial"
+                      onClick={() => handlePinnedClick(ex.name)}
+                      className="text-xs font-semibold text-brand-600 hover:text-brand-700 flex items-center gap-1"
+                    >
+                      Analyze <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Upload Action */}
+        <div className="glass-panel p-5 bg-gradient-to-br from-brand-600 to-brand-800 text-white flex flex-col justify-between">
+          <div>
+            <span className="text-[10px] font-bold tracking-wider uppercase opacity-75">
+              Workspace Tool
+            </span>
+            <h3 className="text-lg font-bold mt-1">Ingest Financial Report</h3>
+            <p className="text-xs text-brand-100 mt-2 leading-relaxed">
+              Upload PDF SEC filings (10-K, 10-Q) directly. Our extraction service will capture, index, embed, and normalise all metrics automatically.
+            </p>
+          </div>
+          <div className="mt-6">
+            <Button
+              variant="secondary"
+              className="w-full justify-center flex items-center gap-2"
+              onClick={() => trackInteraction("Upload Report Clicked", "Quick Upload")}
+            >
+              <PlusCircle className="w-4 h-4" />
+              Upload Filing PDF
+            </Button>
+          </div>
+        </div>
       </div>
 
       {/* Quick Navigation */}
@@ -86,7 +205,7 @@ export default function DashboardPage() {
           <Link
             key={to}
             to={to}
-            className="glass-panel-hover p-5 flex items-start gap-4 group"
+            className="glass-panel-hover p-5 flex items-start gap-4 group bg-white"
           >
             <div
               className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${color}`}
@@ -105,45 +224,67 @@ export default function DashboardPage() {
 
       {/* Recent Activity Feed */}
       <div className="glass-panel">
-        <div className="px-5 py-4 border-b border-surface-100">
+        <div className="px-5 py-4 border-b border-surface-100 flex justify-between items-center">
           <h3 className="section-title flex items-center gap-2">
             <Clock className="w-4 h-4 text-surface-400" />
             Recent Activity
           </h3>
+          <span className="text-xs text-surface-400 font-mono">Real-time status updates</span>
         </div>
         <div className="divide-y divide-surface-100">
           {reports.length === 0 ? (
-            <EmptyState
-              title="No activity yet"
-              description="Upload a financial document to get started."
-            />
+            <div className="p-8">
+              <EmptyState
+                title="No reports processed yet"
+                description="Upload a filing PDF using the quick actions to begin analysis."
+              />
+            </div>
           ) : (
             reports.slice(0, 8).map((r) => (
               <div
                 key={r.id}
-                className="px-5 py-3 flex items-center justify-between hover:bg-surface-50 transition-colors"
+                className="px-5 py-3.5 flex items-center justify-between hover:bg-surface-50/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div
-                    className={`w-2 h-2 rounded-full shrink-0 ${
+                    className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                       r.status === "FAILED"
                         ? "bg-danger"
                         : ["EMBEDDED", "COMPLETED", "READY"].includes(r.status)
-                          ? "bg-success"
+                          ? "bg-success animate-pulse"
                           : "bg-warning"
                     }`}
                   />
                   <div>
-                    <span className="text-sm font-medium text-surface-800">
+                    <span className="text-sm font-semibold text-surface-900">
                       {r.original_filename ?? `Report ${r.id.slice(0, 8)}`}
                     </span>
-                    <span className="text-xs text-surface-400 ml-2">
+                    <span className="text-xs text-surface-500 ml-3">
                       {r.report_type} · {r.year}
                       {r.quarter ? ` Q${r.quarter}` : ""}
                     </span>
                   </div>
                 </div>
-                <span className="badge-neutral">{r.status}</span>
+                <div className="flex items-center gap-4">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      r.status === "FAILED"
+                        ? "bg-danger-light text-danger-dark"
+                        : ["EMBEDDED", "COMPLETED", "READY"].includes(r.status)
+                          ? "bg-success-light text-success-dark"
+                          : "bg-warning-light text-warning-dark"
+                    }`}
+                  >
+                    {r.status}
+                  </span>
+                  <Link
+                    to="/financial"
+                    onClick={() => trackInteraction("Analyze Action Clicked", r.id)}
+                    className="text-xs font-semibold text-brand-600 hover:underline"
+                  >
+                    Open View
+                  </Link>
+                </div>
               </div>
             ))
           )}
