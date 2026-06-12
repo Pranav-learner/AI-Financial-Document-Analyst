@@ -1,0 +1,56 @@
+# syntax=docker/dockerfile:1
+
+# --- Stage 1: Build dependencies ---
+FROM python:3.11-slim AS builder
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends build-essential libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install --target=/build/wheels -r requirements.txt
+
+# --- Stage 2: Final lightweight runner ---
+FROM python:3.11-slim AS runner
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/app/.local/bin:$PATH" \
+    PYTHONPATH="/app"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libpq-dev curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a non-privileged system user
+RUN groupadd -g 10001 appgroup \
+    && useradd -u 10001 -g appgroup -m -s /sbin/nologin appuser
+
+WORKDIR /app
+
+# Copy installed dependencies from builder
+COPY --from=builder /build/wheels /usr/local/lib/python3.11/site-packages
+COPY --from=builder /build/wheels/bin /usr/local/bin
+
+# Copy app code
+COPY --chown=appuser:appgroup app/ /app/app
+COPY --chown=appuser:appgroup migrations/ /app/migrations
+COPY --chown=appuser:appgroup alembic.ini /app/alembic.ini
+
+# Create storage upload directory with appuser permissions
+RUN mkdir -p /app/data/uploads \
+    && chown -R appuser:appgroup /app/data/uploads
+
+USER appuser
+
+EXPOSE 8000
+
+# Production-grade startup using uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-config", "app/core/logging.py"]

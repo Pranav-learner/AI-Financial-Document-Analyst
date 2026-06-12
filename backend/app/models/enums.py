@@ -201,3 +201,12 @@ class MemoType(str, Enum):
     BENCHMARK_COMPARISON = "BENCHMARK_COMPARISON"
 
 
+class UserRole(str, Enum):
+    """User roles for authentication and authorization (Phase 11)."""
+
+    ADMIN = "ADMIN"
+    ANALYST = "ANALYST"
+    VIEWER = "VIEWER"
+
+
+

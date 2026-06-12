@@ -1,0 +1,58 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "docker"
+  },
+  "services": {
+    "postgres": {
+      "source": "pgvector/pgvector:pg16",
+      "variables": {
+        "POSTGRES_DB": "financial_analyst_prod",
+        "POSTGRES_USER": "analyst"
+      }
+    },
+    "redis": {
+      "source": "redis:7-alpine",
+      "variables": {
+        "APPENDONLY": "yes"
+      }
+    },
+    "backend": {
+      "source": "./backend",
+      "dockerfile": "Dockerfile.prod",
+      "variables": {
+        "APP_ENV": "production",
+        "DEBUG": "false",
+        "LOG_FORMAT": "json",
+        "DATABASE_URL": "postgresql+asyncpg://${{postgres.POSTGRES_USER}}:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{postgres.POSTGRES_DB}}",
+        "DATABASE_URL_SYNC": "postgresql+psycopg://${{postgres.POSTGRES_USER}}:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{postgres.POSTGRES_DB}}",
+        "REDIS_URL": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/0",
+        "CELERY_BROKER_URL": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/1",
+        "CELERY_RESULT_BACKEND": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/2",
+        "STORAGE_BACKEND": "s3"
+      }
+    },
+    "worker": {
+      "source": "./backend",
+      "dockerfile": "Dockerfile.prod",
+      "startCommand": "celery -A app.tasks.celery_app.celery_app worker --loglevel=INFO -Q default,ingestion,extraction",
+      "variables": {
+        "APP_ENV": "production",
+        "DEBUG": "false",
+        "DATABASE_URL": "postgresql+asyncpg://${{postgres.POSTGRES_USER}}:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{postgres.POSTGRES_DB}}",
+        "DATABASE_URL_SYNC": "postgresql+psycopg://${{postgres.POSTGRES_USER}}:${{postgres.POSTGRES_PASSWORD}}@${{postgres.RAILWAY_PRIVATE_DOMAIN}}:5432/${{postgres.POSTGRES_DB}}",
+        "REDIS_URL": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/0",
+        "CELERY_BROKER_URL": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/1",
+        "CELERY_RESULT_BACKEND": "redis://default:${{redis.REDISPASSWORD}}@${{redis.RAILWAY_PRIVATE_DOMAIN}}:${{redis.REDISPORT}}/2",
+        "STORAGE_BACKEND": "s3"
+      }
+    },
+    "frontend": {
+      "source": "./frontend",
+      "dockerfile": "Dockerfile.prod",
+      "variables": {
+        "VITE_API_BASE_URL": "https://${{backend.RAILWAY_PUBLIC_DOMAIN}}/api/v1"
+      }
+    }
+  }
+}

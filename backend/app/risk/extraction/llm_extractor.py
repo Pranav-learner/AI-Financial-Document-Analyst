@@ -111,6 +111,17 @@ class RiskLLMExtractor:
         return self._client
 
     def _generate(self, text: str) -> str:
+        if app_settings.demo_mode:
+            return json.dumps([
+                {
+                    "risk_name": "Currency Fluctuation Risk",
+                    "risk_description": "Exposure to foreign exchange volatility affecting international sales and profits.",
+                    "category": "Market Risk",
+                    "severity": "HIGH",
+                    "confidence": 0.85
+                }
+            ])
+
         from google.genai import types
 
         client = self._get_client()

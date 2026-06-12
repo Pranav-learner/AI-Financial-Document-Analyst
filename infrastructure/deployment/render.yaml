@@ -1,0 +1,116 @@
+# =============================================================================
+# Render Blueprint Specification (Staging/Production)
+# =============================================================================
+services:
+  # ---- Backend API Web Service ----
+  - type: web
+    name: fda-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 4
+    rootDir: backend
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: false
+      - key: LOG_FORMAT
+        value: json
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fda-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+
+  # ---- Celery Background Worker ----
+  - type: worker
+    name: fda-celery-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.tasks.celery_app.celery_app worker --loglevel=INFO -Q default,ingestion,extraction
+    rootDir: backend
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DEBUG
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fda-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          name: fda-redis
+          type: redis
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: STORAGE_BACKEND
+        value: s3
+      - key: S3_BUCKET
+        sync: false
+      - key: S3_ACCESS_KEY_ID
+        sync: false
+      - key: S3_SECRET_ACCESS_KEY
+        sync: false
+
+  # ---- React Frontend Web Service ----
+  - type: web
+    name: fda-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    rootDir: frontend
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          name: fda-backend
+          property: url
+        path: /api/v1
+
+# ---- Database & Redis dependencies ----
+databases:
+  - name: fda-db
+    plan: starter
+    ipAllowList: []
+
+redis:
+  - name: fda-redis
+    plan: starter
+    ipAllowList: []

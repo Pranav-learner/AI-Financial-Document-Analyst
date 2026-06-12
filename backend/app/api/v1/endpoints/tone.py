@@ -7,9 +7,10 @@ from collections import defaultdict
 from fastapi import APIRouter, Depends, Query, status, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
-from app.models.enums import Sentiment
+from app.models.enums import Sentiment, UserRole
 from app.models.management_tone import ManagementTone
 from app.models.tone_evolution import ToneEvolution
 from app.repositories.report_repository import ReportRepository
@@ -96,6 +97,7 @@ async def get_report_tone_detail(
     "/reports/{report_id}/tone/extract",
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger management tone extraction task",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def trigger_tone_extraction(
     report_id: uuid.UUID,

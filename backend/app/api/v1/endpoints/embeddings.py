@@ -16,10 +16,11 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.config import settings
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
-from app.models.enums import EmbeddingStatus
+from app.models.enums import EmbeddingStatus, UserRole
 from app.repositories.report_repository import ReportRepository
 from app.schemas.embedding import (
     EmbeddingGenerateResponse,
@@ -36,6 +37,7 @@ router = APIRouter()
     response_model=EmbeddingGenerateResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger embedding generation for a report's chunks",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def generate_embeddings(
     report_id: uuid.UUID,

@@ -12,10 +12,11 @@ import uuid
 from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
 from app.ingestion.services.report_ingestion_service import ReportIngestionService
-from app.models.enums import ReportType
+from app.models.enums import ReportType, UserRole
 from app.repositories.report_repository import ReportRepository
 from app.schemas.report import (
     ChunkListResponse,
@@ -45,6 +46,7 @@ router = APIRouter()
     response_model=ReportUploadResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Upload a financial PDF for ingestion",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def upload_report(
     file: UploadFile = File(..., description="PDF document (10-K, 10-Q, transcript)"),

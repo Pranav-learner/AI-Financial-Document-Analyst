@@ -9,7 +9,9 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.db.session import get_db
+from app.models.enums import UserRole
 from app.retrieval.evaluation import (
     VALID_TYPES,
     EvaluationRun,
@@ -54,6 +56,7 @@ def _summary_out(run: EvaluationRun) -> EvaluationRunSummaryOut:
     "/run",
     response_model=EvaluationRunResponse,
     summary="Run the retrieval benchmark suite and record results",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def run_evaluation(
     payload: EvaluationRunRequest,

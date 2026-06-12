@@ -9,8 +9,10 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
+from app.models.enums import UserRole
 from app.models.financial_analytics import FinancialAnalytics
 from app.repositories.report_repository import ReportRepository
 from app.schemas.analytics import (
@@ -19,6 +21,8 @@ from app.schemas.analytics import (
     AnalyticsOut,
     AnalyticsSummaryResponse,
 )
+from app.services.cache_service import cache_endpoint
+from app.services.rate_limiter import RateLimitCheck
 from app.tasks.ingestion import generate_financial_analytics_task
 
 router = APIRouter()
@@ -49,6 +53,7 @@ def _out(a: FinancialAnalytics) -> AnalyticsOut:
     response_model=AnalyticsListResponse,
     summary="Financial analytics for a report",
 )
+@cache_endpoint(ttl=300, prefix="analytics:report")
 async def report_analytics(
     report_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
@@ -65,6 +70,10 @@ async def report_analytics(
     response_model=AnalyticsGenerateResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger financial analytics generation for a report",
+    dependencies=[
+        Depends(RoleChecker(UserRole.ANALYST)),
+        Depends(RateLimitCheck(limit=10, window_seconds=60, scope="user")),
+    ],
 )
 async def generate_analytics(
     report_id: uuid.UUID,
@@ -91,6 +100,7 @@ async def generate_analytics(
     response_model=AnalyticsListResponse,
     summary="All financial analytics for a company",
 )
+@cache_endpoint(ttl=300, prefix="analytics:company")
 async def company_analytics(
     company_id: uuid.UUID,
     signal_type: str | None = Query(None, description="Filter by signal type (e.g. GROWTH, PROFITABILITY)"),
@@ -108,6 +118,7 @@ async def company_analytics(
     response_model=AnalyticsListResponse,
     summary="Retrieve signals for a company (ratios excluded)",
 )
+@cache_endpoint(ttl=300, prefix="analytics:signals")
 async def company_analytics_signals(
     company_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
@@ -124,6 +135,7 @@ async def company_analytics_signals(
     response_model=AnalyticsListResponse,
     summary="Retrieve ratios for a company (signals excluded)",
 )
+@cache_endpoint(ttl=300, prefix="analytics:ratios")
 async def company_analytics_ratios(
     company_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
@@ -140,6 +152,7 @@ async def company_analytics_ratios(
     response_model=AnalyticsSummaryResponse,
     summary="All analytics results for a company summarized",
 )
+@cache_endpoint(ttl=300, prefix="analytics:summary")
 async def company_analytics_summary(
     company_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),

@@ -34,6 +34,7 @@ redis~=5.2
 
 # --- Logging / observability ---
 structlog~=24.4
+prometheus-client~=0.25.0
 
 # --- Security (scaffolded; auth implemented in Phase 11) ---
 passlib[bcrypt]~=1.7

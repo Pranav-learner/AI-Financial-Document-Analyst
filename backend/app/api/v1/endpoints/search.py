@@ -13,7 +13,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+from app.core.prompt_injection import guard_prompt
 from app.db.session import get_db
+from app.services.cache_service import cache_endpoint
+from app.services.rate_limiter import RateLimitCheck
 from app.retrieval.hybrid import (
     HybridRetrievalService,
     RetrievalContext,
@@ -72,11 +75,14 @@ def _timings_out(outcome: SearchOutcome) -> SearchTimingsOut:
     "/vector",
     response_model=SearchResponse,
     summary="Vector similarity search (top-K semantically relevant chunks)",
+    dependencies=[Depends(RateLimitCheck(limit=60, window_seconds=60, scope="user"))],
 )
+@cache_endpoint(ttl=300, prefix="search:vector")
 async def vector_search(
     payload: SearchRequest,
     service: VectorSearchService = Depends(get_search_service),
 ) -> SearchResponse:
+    guard_prompt(payload.query)
     outcome = await service.search(payload.query, top_k=payload.top_k)
     return SearchResponse(
         query=payload.query,
@@ -91,11 +97,13 @@ async def vector_search(
     "/debug",
     response_model=SearchDebugResponse,
     summary="Vector search diagnostics (query embedding stats + scores + timings)",
+    dependencies=[Depends(RateLimitCheck(limit=60, window_seconds=60, scope="user"))],
 )
 async def debug_search(
     payload: SearchRequest,
     service: VectorSearchService = Depends(get_search_service),
 ) -> SearchDebugResponse:
+    guard_prompt(payload.query)
     outcome, stats = await service.run(payload.query, top_k=payload.top_k)
     return SearchDebugResponse(
         query=payload.query,
@@ -131,11 +139,14 @@ def _hybrid_timings(outcome: HybridOutcome) -> HybridTimingsOut:
     "/hybrid",
     response_model=HybridSearchResponse,
     summary="Hybrid retrieval: metadata filters + vector search",
+    dependencies=[Depends(RateLimitCheck(limit=60, window_seconds=60, scope="user"))],
 )
+@cache_endpoint(ttl=300, prefix="search:hybrid")
 async def hybrid_search(
     payload: HybridSearchRequest,
     service: HybridRetrievalService = Depends(get_hybrid_service),
 ) -> HybridSearchResponse:
+    guard_prompt(payload.query)
     outcome = await service.run(
         payload.query, _context(payload), top_k=payload.top_k, profile=payload.profile
     )
@@ -155,11 +166,13 @@ async def hybrid_search(
     "/hybrid/debug",
     response_model=HybridDebugResponse,
     summary="Hybrid retrieval diagnostics (filters + candidate count + params + scores)",
+    dependencies=[Depends(RateLimitCheck(limit=60, window_seconds=60, scope="user"))],
 )
 async def hybrid_debug(
     payload: HybridSearchRequest,
     service: HybridRetrievalService = Depends(get_hybrid_service),
 ) -> HybridDebugResponse:
+    guard_prompt(payload.query)
     outcome = await service.run(
         payload.query, _context(payload), top_k=payload.top_k, profile=payload.profile
     )

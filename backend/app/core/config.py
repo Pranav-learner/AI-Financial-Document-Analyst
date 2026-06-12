@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     app_env: Environment = Environment.LOCAL
     app_name: str = "ai-financial-document-analyst"
     debug: bool = False
+    demo_mode: bool = False
     log_level: str = "INFO"
     log_format: LogFormat = LogFormat.CONSOLE
 

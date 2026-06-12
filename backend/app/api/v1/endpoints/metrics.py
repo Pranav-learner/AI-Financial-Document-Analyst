@@ -10,8 +10,10 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
+from app.models.enums import UserRole
 from app.models.financial_metric import FinancialMetric
 from app.repositories.report_repository import ReportRepository
 from app.schemas.metric import (
@@ -107,6 +109,7 @@ async def metrics_summary(
     response_model=MetricExtractResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger financial-metric extraction for a report",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def extract_metrics(
     report_id: uuid.UUID,

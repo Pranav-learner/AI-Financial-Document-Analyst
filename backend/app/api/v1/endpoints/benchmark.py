@@ -8,6 +8,9 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
+from app.services.rate_limiter import RateLimitCheck
+from app.services.cache_service import cache_endpoint
 from app.benchmarking.benchmark_models import (
     BenchmarkComparisonRequest,
     BenchmarkComparisonResponse,
@@ -20,6 +23,7 @@ from app.benchmarking.benchmark_service import BenchmarkService
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
 from app.models.benchmark import BenchmarkResult, BenchmarkRun, BenchmarkSummary
+from app.models.enums import UserRole
 from app.tasks.benchmark import run_benchmark_task
 
 router = APIRouter()
@@ -30,6 +34,10 @@ router = APIRouter()
     response_model=BenchmarkRunResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Enqueue a new competitor benchmarking run",
+    dependencies=[
+        Depends(RoleChecker(UserRole.ANALYST)),
+        Depends(RateLimitCheck(limit=10, window_seconds=60, scope="user")),
+    ],
 )
 async def create_benchmark_run(
     payload: BenchmarkRunCreate,
@@ -75,6 +83,7 @@ async def get_benchmark_run(
     response_model=list[BenchmarkResultResponse],
     summary="Get detailed dimension results for a benchmark run",
 )
+@cache_endpoint(ttl=300, prefix="benchmark:results")
 async def get_benchmark_results(
     run_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
@@ -96,6 +105,7 @@ async def get_benchmark_results(
     response_model=list[BenchmarkSummaryResponse],
     summary="Get company-level scores and overall ranks for a benchmark run",
 )
+@cache_endpoint(ttl=300, prefix="benchmark:summary")
 async def get_benchmark_summary(
     run_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
@@ -117,6 +127,7 @@ async def get_benchmark_summary(
     response_model=BenchmarkComparisonResponse,
     summary="Synchronously compare a company cohort in-memory",
 )
+@cache_endpoint(ttl=300, prefix="benchmark:compare")
 async def compare_cohort_sync(
     payload: BenchmarkComparisonRequest,
     db: AsyncSession = Depends(get_db),

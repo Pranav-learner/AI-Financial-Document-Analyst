@@ -20,6 +20,23 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.exceptions import AppError
 from app.core.logging import configure_logging, get_logger
+from app.core.observability import PrometheusMiddleware, metrics_endpoint
+from app.core.security_headers import SecurityHeadersMiddleware
+def verify_production_config() -> None:
+    """Validate that production environment has secure secrets and connections configured."""
+    if settings.app_env.value == "production":
+        errors = []
+        if settings.jwt_secret == "changeme":
+            errors.append("JWT_SECRET is set to default 'changeme'")
+        if not settings.gemini_api_key:
+            errors.append("GEMINI_API_KEY is empty")
+        if "localhost" in settings.database_url or "127.0.0.1" in settings.database_url:
+            errors.append("DATABASE_URL points to localhost")
+        if "localhost" in settings.redis_url or "127.0.0.1" in settings.redis_url:
+            errors.append("REDIS_URL points to localhost")
+
+        if errors:
+            raise ValueError(f"Startup validation failed: {', '.join(errors)}")
 
 
 @asynccontextmanager
@@ -27,6 +44,11 @@ async def lifespan(app: FastAPI):
     """Startup/shutdown hooks. Configure logging once; clean up on exit."""
     configure_logging()
     log = get_logger(__name__)
+    try:
+        verify_production_config()
+    except Exception as e:
+        log.critical("app.startup_failed", error=str(e))
+        raise
     log.info("app.startup", env=settings.app_env.value, name=settings.app_name)
     yield
     log.info("app.shutdown")
@@ -47,6 +69,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(PrometheusMiddleware)
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 # ---- Request-id middleware ---------------------------------------------------
@@ -96,4 +120,10 @@ async def root() -> dict:
         "service": settings.app_name,
         "docs": "/docs",
         "health": f"{settings.api_v1_prefix}/health",
+        "metrics": "/metrics",
     }
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics() -> Response:
+    return metrics_endpoint()

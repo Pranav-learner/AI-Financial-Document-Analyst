@@ -11,7 +11,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions import NotFoundError
+from app.core.prompt_injection import guard_prompt
 from app.db.session import get_db
+from app.services.rate_limiter import RateLimitCheck
 from app.repositories.conversation_repository import ConversationRepository
 from app.agents.financial_analyst.agent import run_financial_agent
 from app.schemas.agent import (
@@ -151,11 +153,13 @@ async def get_thread_messages(
     "/chat",
     response_model=ChatResponse,
     summary="Send a message to the financial analyst agent",
+    dependencies=[Depends(RateLimitCheck(limit=10, window_seconds=60, scope="user"))],
 )
 async def agent_chat(
     payload: ChatRequest,
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
+    guard_prompt(payload.message)
     repo = ConversationRepository(db)
     
     # 1. Resolve or create thread

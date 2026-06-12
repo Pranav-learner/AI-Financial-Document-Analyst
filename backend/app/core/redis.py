@@ -1,0 +1,19 @@
+"""Redis async client setup (Phase 11)."""
+
+from __future__ import annotations
+
+import redis.asyncio as aioredis
+
+from app.core.config import settings
+
+# Initialize global Redis client with decoding enabled
+redis_client: aioredis.Redis = aioredis.from_url(
+    settings.redis_url,
+    encoding="utf-8",
+    decode_responses=True,
+)
+
+
+async def get_redis() -> aioredis.Redis:
+    """Dependency provider for Redis client."""
+    return redis_client

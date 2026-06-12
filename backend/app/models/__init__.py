@@ -6,7 +6,7 @@ autogenerate and relationship resolution see them. Add new models here per phase
 
 from app.models.company import Company
 from app.models.document_chunk import DocumentChunk
-from app.models.enums import ReportStatus, ReportType
+from app.models.enums import ReportStatus, ReportType, UserRole
 from app.models.financial_metric import FinancialMetric
 from app.models.metric_comparison import MetricComparison
 from app.models.financial_analytics import FinancialAnalytics
@@ -21,6 +21,8 @@ from app.models.conversation_thread import ConversationThread
 from app.models.conversation_message import ConversationMessage
 from app.models.benchmark import BenchmarkRun, BenchmarkResult, BenchmarkSummary
 from app.models.memo import InvestmentMemo, MemoSection
+from app.models.user import User
+from app.models.refresh_token import RefreshToken
 
 __all__ = [
     "Company",
@@ -44,6 +46,10 @@ __all__ = [
     "BenchmarkSummary",
     "InvestmentMemo",
     "MemoSection",
+    "User",
+    "RefreshToken",
+    "UserRole",
 ]
+
 
 

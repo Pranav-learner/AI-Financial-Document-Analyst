@@ -10,8 +10,10 @@ import uuid
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
 from app.core.exceptions import NotFoundError
 from app.db.session import get_db
+from app.models.enums import UserRole
 from app.models.risk_factor import RiskFactor
 from app.models.risk_evolution import RiskEvolution
 from app.repositories.report_repository import ReportRepository
@@ -84,6 +86,7 @@ async def list_report_risks(
     response_model=RiskExtractResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Trigger risk factor extraction for a report",
+    dependencies=[Depends(RoleChecker(UserRole.ANALYST))],
 )
 async def extract_risks(
     report_id: uuid.UUID,

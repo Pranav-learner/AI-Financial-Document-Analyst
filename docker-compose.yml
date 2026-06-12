@@ -19,7 +19,7 @@ services:
       POSTGRES_PASSWORD: analyst
       POSTGRES_DB: financial_analyst
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro

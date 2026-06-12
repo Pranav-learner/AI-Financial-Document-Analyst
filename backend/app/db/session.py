@@ -28,6 +28,8 @@ engine = create_async_engine(
     echo=settings.db_echo,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
+    pool_recycle=1800,
+    pool_timeout=30,
     pool_pre_ping=True,
 )
 
@@ -64,6 +66,8 @@ sync_engine = create_engine(
     echo=settings.db_echo,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
+    pool_recycle=1800,
+    pool_timeout=30,
     pool_pre_ping=True,
 )
 

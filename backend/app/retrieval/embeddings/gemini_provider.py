@@ -143,6 +143,14 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
 
     def _embed_once(self, texts: list[str], task_type: str | None = None) -> list[Embedding]:
         """Single un-retried call to the provider. Returns raw vectors."""
+        if app_settings.demo_mode:
+            mock_vectors = []
+            for i, text in enumerate(texts):
+                # Generate deterministic non-zero normalized mock vector
+                val = 1.0 / math.sqrt(self._dimension)
+                mock_vectors.append([val] * self._dimension)
+            return mock_vectors
+
         from google.genai import types  # lazy import
 
         client = self._get_client()

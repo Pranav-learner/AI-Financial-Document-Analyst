@@ -1,0 +1,102 @@
+# =============================================================================
+# AI Financial Document Analyst — Production Orchestration
+# -----------------------------------------------------------------------------
+# Services: postgres · redis · backend (FastAPI) · worker (Celery) · frontend (Nginx)
+# Usage:    docker compose -f docker-compose.prod.yml up --build -d
+# =============================================================================
+
+services:
+  # ---- PostgreSQL database (hardened with persistent volume) ----
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: fda_postgres_prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-analyst}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-SECURE_PASSWORD_CHANGE_ME}
+      POSTGRES_DB: ${POSTGRES_DB:-financial_analyst_prod}
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-analyst} -d ${POSTGRES_DB:-financial_analyst_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fda_prod_net
+
+  # ---- Redis cache, rate limiter & broker ----
+  redis:
+    image: redis:7-alpine
+    container_name: fda_redis_prod
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-SECURE_REDIS_PASSWORD_CHANGE_ME}"]
+    volumes:
+      - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-SECURE_REDIS_PASSWORD_CHANGE_ME}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fda_prod_net
+
+  # ---- FastAPI production backend API ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: fda_backend_prod
+    env_file:
+      - .env.production
+    ports:
+      - "8000:8000"
+    volumes:
+      - uploads_prod_data:/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fda_prod_net
+
+  # ---- Celery production worker ----
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    container_name: fda_worker_prod
+    command: celery -A app.tasks.celery_app.celery_app worker --loglevel=INFO -Q default,ingestion,extraction
+    env_file:
+      - .env.production
+    volumes:
+      - uploads_prod_data:/app/data/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fda_prod_net
+
+  # ---- Production Web Server (SPA served via Nginx) ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    container_name: fda_frontend_prod
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - fda_prod_net
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
+  uploads_prod_data:
+
+networks:
+  fda_prod_net:
+    driver: bridge

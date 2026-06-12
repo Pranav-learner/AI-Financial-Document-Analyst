@@ -67,4 +67,10 @@ celery_app.conf.update(
     task_default_retry_delay=10,         # seconds before first retry
     task_max_retries=3,                  # exponential backoff configured per task
     result_expires=60 * 60 * 24,         # results live 24h in the backend
+    # Hard/Soft time limits (timeouts) to prevent hanging tasks
+    task_time_limit=300,                 # 5 minutes hard limit
+    task_soft_time_limit=240,            # 4 minutes soft limit
+    # Worker limits to prevent memory leaks in long-running processes
+    worker_max_tasks_per_child=100,      # restart worker child process after 100 tasks
+    worker_max_memory_per_child=512000,  # restart worker child process if RAM exceeds 512MB
 )

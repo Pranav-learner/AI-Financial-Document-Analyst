@@ -102,9 +102,19 @@ class LLMBasedToneAnalyzer:
             from google import genai
             self._client = genai.Client(api_key=self._api_key)
         return self._client
-
     def _generate(self, text: str) -> str:
+        if app_settings.demo_mode:
+            return json.dumps({
+                "sentiment": "POSITIVE",
+                "confidence_level": "CONFIDENT",
+                "hedging_strength": 0.15,
+                "positive_strength": 0.8,
+                "negative_strength": 0.05,
+                "confidence": 0.9
+            })
+
         from google.genai import types
+        from app.core.observability import GEMINI_TOKEN_USAGE
 
         client = self._get_client()
         try:
@@ -117,6 +127,16 @@ class LLMBasedToneAnalyzer:
                     temperature=0.0,
                 ),
             )
+            try:
+                if hasattr(resp, "usage_metadata") and resp.usage_metadata:
+                    in_tokens = getattr(resp.usage_metadata, "prompt_token_count", 0) or 0
+                    out_tokens = getattr(resp.usage_metadata, "candidates_token_count", 0) or 0
+                    if in_tokens:
+                        GEMINI_TOKEN_USAGE.labels(model=self._model, token_type="input").inc(in_tokens)
+                    if out_tokens:
+                        GEMINI_TOKEN_USAGE.labels(model=self._model, token_type="output").inc(out_tokens)
+            except Exception:
+                pass
         except Exception as exc:
             raise self._classify(exc) from exc
         return resp.text or "{}"

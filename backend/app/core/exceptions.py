@@ -54,3 +54,25 @@ class PdfParseError(AppError):
 
     status_code = 422
     code = "PDF_PARSE_ERROR"
+
+
+class AuthenticationError(AppError):
+    """Raised when authentication credentials fail or are invalid."""
+
+    status_code = 401
+    code = "AUTHENTICATION_ERROR"
+
+
+class ForbiddenError(AppError):
+    """Raised when permissions are insufficient."""
+
+    status_code = 403
+    code = "FORBIDDEN"
+
+
+class DuplicateUserError(AppError):
+    """Raised when registering a user with an already existing email."""
+
+    status_code = 409
+    code = "DUPLICATE_USER"
+

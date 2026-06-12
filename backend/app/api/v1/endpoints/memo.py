@@ -8,10 +8,13 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import RoleChecker
+from app.services.rate_limiter import RateLimitCheck
+from app.services.cache_service import CacheService, cache_endpoint
 from app.core.exceptions import NotFoundError, ValidationError
 from app.db.session import get_db
 from app.models.memo import InvestmentMemo, MemoSection
-from app.models.enums import MemoStatus
+from app.models.enums import MemoStatus, UserRole
 from app.memo.memo_models import (
     MemoGenerationRequest,
     MemoGenerationResponse,
@@ -30,6 +33,10 @@ router = APIRouter()
     response_model=MemoGenerationResponse,
     status_code=status.HTTP_202_ACCEPTED,
     summary="Enqueue a new investment memo generation task",
+    dependencies=[
+        Depends(RoleChecker(UserRole.ANALYST)),
+        Depends(RateLimitCheck(limit=10, window_seconds=60, scope="user")),
+    ],
 )
 async def generate_memo(
     payload: MemoGenerationRequest,
@@ -76,7 +83,6 @@ async def generate_memo(
         message="Memo generation task enqueued successfully."
     )
 
-
 @router.get(
     "/{memo_id}",
     response_model=MemoDetailsResponse,
@@ -87,6 +93,11 @@ async def get_memo_details(
     db: AsyncSession = Depends(get_db),
 ) -> MemoDetailsResponse:
     """Retrieve an investment memo including status and all sections."""
+    cache_key = f"memo:details:{memo_id}"
+    cached_val = await CacheService.get(cache_key)
+    if cached_val:
+        return MemoDetailsResponse(**cached_val)
+
     stmt = select(InvestmentMemo).where(InvestmentMemo.id == memo_id)
     res = await db.execute(stmt)
     memo = res.scalars().first()
@@ -99,7 +110,7 @@ async def get_memo_details(
     sections = sec_res.scalars().all()
 
     # Build response model
-    return MemoDetailsResponse(
+    details = MemoDetailsResponse(
         id=memo.id,
         company_id=memo.company_id,
         report_id=memo.report_id,
@@ -126,6 +137,11 @@ async def get_memo_details(
             for s in sections
         ]
     )
+
+    if memo.status == MemoStatus.COMPLETED:
+        await CacheService.set(cache_key, details.model_dump(), ttl=3600)
+
+    return details
 
 
 @router.get(
