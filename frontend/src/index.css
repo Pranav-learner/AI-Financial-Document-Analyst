@@ -1,3 +1,103 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-positive: #22c55e;
+    --color-negative: #ef4444;
+    --color-neutral: #64748b;
+    --color-brand: #6366f1;
+    --sidebar-width: 260px;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-50 text-surface-800;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-sm border border-surface-200 rounded-xl shadow-card;
+  }
+
+  .glass-panel-hover {
+    @apply glass-panel transition-shadow duration-200 hover:shadow-card-hover;
+  }
+
+  .metric-value {
+    @apply text-2xl font-semibold tracking-tight text-surface-900;
+  }
+
+  .metric-label {
+    @apply text-xs font-medium uppercase tracking-wider text-surface-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply badge bg-success-light text-success-dark;
+  }
+
+  .badge-warning {
+    @apply badge bg-warning-light text-warning-dark;
+  }
+
+  .badge-danger {
+    @apply badge bg-danger-light text-danger-dark;
+  }
+
+  .badge-info {
+    @apply badge bg-info-light text-info-dark;
+  }
+
+  .badge-neutral {
+    @apply badge bg-surface-100 text-surface-600;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-surface-600
+           transition-all duration-150 hover:bg-surface-100 hover:text-surface-900;
+  }
+
+  .nav-link-active {
+    @apply nav-link bg-brand-50 text-brand-700 hover:bg-brand-100;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-surface-900;
+  }
+
+  .page-title {
+    @apply text-2xl font-bold text-surface-900 tracking-tight;
+  }
+
+  .card-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-4;
+  }
+}
