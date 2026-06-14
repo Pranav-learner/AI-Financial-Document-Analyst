@@ -1,0 +1,1226 @@
+.F                                                                       [100%]
+=================================== FAILURES ===================================
+___________________________ test_tone_api_endpoints ____________________________
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 81, in collapse_excgroups
+  |     yield
+  |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 192, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 344, in from_call
+    |     result: TResult | None = func()
+    |                              ~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 246, in <lambda>
+    |     lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+    |             ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512, in __call__
+    |     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+    |            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    |     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+    |            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 167, in _multicall
+    |     raise exception
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 139, in _multicall
+    |     teardown.throw(exception)
+    |     ~~~~~~~~~~~~~~^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/logging.py", line 850, in pytest_runtest_call
+    |     yield
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 139, in _multicall
+    |     teardown.throw(exception)
+    |     ~~~~~~~~~~~~~~^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/capture.py", line 900, in pytest_runtest_call
+    |     return (yield)
+    |             ^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 139, in _multicall
+    |     teardown.throw(exception)
+    |     ~~~~~~~~~~~~~~^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 53, in run_old_style_hookwrapper
+    |     return result.get_result()
+    |            ~~~~~~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_result.py", line 103, in get_result
+    |     raise exc.with_traceback(tb)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 38, in run_old_style_hookwrapper
+    |     res = yield
+    |           ^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 139, in _multicall
+    |     teardown.throw(exception)
+    |     ~~~~~~~~~~~~~~^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/skipping.py", line 263, in pytest_runtest_call
+    |     return (yield)
+    |             ^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121, in _multicall
+    |     res = hook_impl.function(*args)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/runner.py", line 178, in pytest_runtest_call
+    |     item.runtest()
+    |     ~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py", line 549, in runtest
+    |     super().runtest()
+    |     ~~~~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/python.py", line 1671, in runtest
+    |     self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+    |     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_hooks.py", line 512, in __call__
+    |     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+    |            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_manager.py", line 120, in _hookexec
+    |     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+    |            ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 167, in _multicall
+    |     raise exception
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 139, in _multicall
+    |     teardown.throw(exception)
+    |     ~~~~~~~~~~~~~~^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 53, in run_old_style_hookwrapper
+    |     return result.get_result()
+    |            ~~~~~~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_result.py", line 103, in get_result
+    |     raise exc.with_traceback(tb)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 38, in run_old_style_hookwrapper
+    |     res = yield
+    |           ^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pluggy/_callers.py", line 121, in _multicall
+    |     res = hook_impl.function(*args)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/_pytest/python.py", line 157, in pytest_pyfunc_call
+    |     result = testfunction(**testargs)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py", line 1069, in inner
+    |     _loop.run_until_complete(task)
+    |     ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+    |   File "/usr/lib/python3.14/asyncio/base_events.py", line 719, in run_until_complete
+    |     return future.result()
+    |            ~~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/tests/integration/test_tone_api.py", line 135, in test_tone_api_endpoints
+    |     resp = await api_client.get(f"{PREFIX}/reports/{report_2024_id}/tone")
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1768, in get
+    |     return await self.request(
+    |            ^^^^^^^^^^^^^^^^^^^
+    |     ...<9 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1540, in request
+    |     return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1629, in send
+    |     response = await self._send_handling_auth(
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<4 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    |     response = await self._send_handling_redirects(
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    |     response = await self._send_single_request(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    |     response = await transport.handle_async_request(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_transports/asgi.py", line 170, in handle_async_request
+    |     await self.app(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1159, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/applications.py", line 90, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/main.py", line 85, in request_context_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/core/security_headers.py", line 12, in dispatch
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/core/observability.py", line 49, in dispatch
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 457, in app
+    |     solved_result = await solve_dependencies(
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<6 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 649, in solve_dependencies
+    |     solved_result = await solve_dependencies(
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<9 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 649, in solve_dependencies
+    |     solved_result = await solve_dependencies(
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<9 lines>...
+    |     )
+    |     ^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 678, in solve_dependencies
+    |     solved = await call(**solved_result.values)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/tests/integration/conftest.py", line 82, in _override_get_current_user
+    |     return User(
+    |         id=uuid.UUID("00000000-0000-0000-0000-000000000000"),
+    |     ...<3 lines>...
+    |         hashed_password="hashed_password",
+    |     )
+    |   File "<string>", line 4, in __init__
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 596, in _initialize_instance
+    |     with util.safe_reraise():
+    |          ~~~~~~~~~~~~~~~~~^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    |     raise exc_value.with_traceback(exc_tb)
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 594, in _initialize_instance
+    |     manager.original_init(*mixed[1:], **kwargs)
+    |     ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/decl_base.py", line 2179, in _declarative_constructor
+    |     raise TypeError(
+    |         "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+    |     )
+    | TypeError: 'hashed_password' is an invalid keyword argument for User
+    +------------------------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/tests/integration/test_tone_api.py", line 135, in test_tone_api_endpoints
+    resp = await api_client.get(f"{PREFIX}/reports/{report_2024_id}/tone")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1768, in get
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1540, in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1629, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1657, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1694, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_client.py", line 1730, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/httpx/_transports/asgi.py", line 170, in handle_async_request
+    await self.app(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/main.py", line 85, in request_context_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/core/security_headers.py", line 12, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/app/core/observability.py", line 49, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 457, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 649, in solve_dependencies
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 649, in solve_dependencies
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py", line 678, in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/tests/integration/conftest.py", line 82, in _override_get_current_user
+    return User(
+        id=uuid.UUID("00000000-0000-0000-0000-000000000000"),
+    ...<3 lines>...
+        hashed_password="hashed_password",
+    )
+  File "<string>", line 4, in __init__
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 596, in _initialize_instance
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py", line 122, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py", line 594, in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/sqlalchemy/orm/decl_base.py", line 2179, in _declarative_constructor
+    raise TypeError(
+        "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+    )
+TypeError: 'hashed_password' is an invalid keyword argument for User
+
+The above exception was the direct cause of the following exception:
+
+api_client = <httpx.AsyncClient object at 0x7fd76483dd30>
+sync_session = <sqlalchemy.orm.session.Session object at 0x7fd7648a4180>
+
+    @pytest.mark.integration
+    async def test_tone_api_endpoints(api_client: AsyncClient, sync_session: Session) -> None:
+        company_id, report_2023_id, report_2024_id = _seed_company_and_reports(sync_session)
+    
+        # Ingest and generate evolution
+        extract_management_tone_task(str(report_2023_id))
+        extract_management_tone_task(str(report_2024_id))
+    
+        # Test GET /reports/{report_id}/tone
+>       resp = await api_client.get(f"{PREFIX}/reports/{report_2024_id}/tone")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_tone_api.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.14/site-packages/httpx/_client.py:1768: in get
+    return await self.request(
+.venv/lib/python3.14/site-packages/httpx/_client.py:1540: in request
+    return await self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:1629: in send
+    response = await self._send_handling_auth(
+.venv/lib/python3.14/site-packages/httpx/_client.py:1657: in _send_handling_auth
+    response = await self._send_handling_redirects(
+.venv/lib/python3.14/site-packages/httpx/_client.py:1694: in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_client.py:1730: in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/httpx/_transports/asgi.py:170: in handle_async_request
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/applications.py:1159: in __call__
+    await super().__call__(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/applications.py:90: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:162: in __exit__
+    self.gen.throw(value)
+.venv/lib/python3.14/site-packages/starlette/_utils.py:87: in collapse_excgroups
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/main.py:85: in request_context_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:162: in __exit__
+    self.gen.throw(value)
+.venv/lib/python3.14/site-packages/starlette/_utils.py:87: in collapse_excgroups
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/core/security_headers.py:12: in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:191: in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/contextlib.py:162: in __exit__
+    self.gen.throw(value)
+.venv/lib/python3.14/site-packages/starlette/_utils.py:87: in collapse_excgroups
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:193: in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/core/observability.py:49: in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:168: in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+.venv/lib/python3.14/site-packages/starlette/middleware/base.py:144: in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+.venv/lib/python3.14/site-packages/starlette/middleware/cors.py:88: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:660: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:680: in app
+    await route.handle(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/routing.py:276: in handle
+    await self.app(scope, receive, send)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:134: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+.venv/lib/python3.14/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+.venv/lib/python3.14/site-packages/fastapi/routing.py:120: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/fastapi/routing.py:457: in app
+    solved_result = await solve_dependencies(
+.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py:649: in solve_dependencies
+    solved_result = await solve_dependencies(
+.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py:649: in solve_dependencies
+    solved_result = await solve_dependencies(
+.venv/lib/python3.14/site-packages/fastapi/dependencies/utils.py:678: in solve_dependencies
+    solved = await call(**solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/integration/conftest.py:82: in _override_get_current_user
+    return User(
+<string>:4: in __init__
+    ???
+.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py:596: in _initialize_instance
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/sqlalchemy/util/langhelpers.py:122: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv/lib/python3.14/site-packages/sqlalchemy/orm/state.py:594: in _initialize_instance
+    manager.original_init(*mixed[1:], **kwargs)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <User id=00000000-0000-0000-0000-000000000000 email='test@example.com' role=ADMIN>
+kwargs = {'email': 'test@example.com', 'hashed_password': 'hashed_password', 'id': UUID('00000000-0000-0000-0000-000000000000'), 'is_active': True, ...}
+cls_ = <class 'app.models.user.User'>, k = 'hashed_password'
+
+    def _declarative_constructor(self: Any, **kwargs: Any) -> None:
+        """A simple constructor that allows initialization from kwargs.
+    
+        Sets attributes on the constructed instance using the names and
+        values in ``kwargs``.
+    
+        Only keys that are present as
+        attributes of the instance's class are allowed. These could be,
+        for example, any mapped columns or relationships.
+        """
+        cls_ = type(self)
+        for k in kwargs:
+            if not hasattr(cls_, k):
+>               raise TypeError(
+                    "%r is an invalid keyword argument for %s" % (k, cls_.__name__)
+                )
+E               TypeError: 'hashed_password' is an invalid keyword argument for User
+
+.venv/lib/python3.14/site-packages/sqlalchemy/orm/decl_base.py:2179: TypeError
+---------------------------- Captured stdout setup -----------------------------
+2026-06-14T09:08:01.062733Z [info     ] app.startup                    env=local name=ai-financial-document-analyst
+----------------------------- Captured stdout call -----------------------------
+BEGIN (implicit)
+INSERT INTO companies (name, ticker, sector, industry) VALUES (%(name)s::VARCHAR, %(ticker)s::VARCHAR, %(sector)s::VARCHAR, %(industry)s::VARCHAR) RETURNING companies.id, companies.created_at, companies.updated_at
+[cached since 0.4732s ago] {'name': 'Tone Test Company', 'ticker': 'TTC', 'sector': 'Technology', 'industry': 'Software'}
+COMMIT
+BEGIN (implicit)
+INSERT INTO reports (company_id, report_type, year, quarter, original_filename, storage_path, status, total_pages, error_message, processing_started_at, processing_completed_at) VALUES (%(company_id)s::UUID, %(report_type)s, %(year)s::INTEGER, %(quarter)s::INTEGER, %(original_filename)s::VARCHAR, %(storage_path)s::VARCHAR, %(status)s, %(total_pages)s::INTEGER, %(error_message)s::VARCHAR, %(processing_started_at)s::TIMESTAMP WITH TIME ZONE, %(processing_completed_at)s::TIMESTAMP WITH TIME ZONE) RETURNING reports.uploaded_at, reports.updated_at, reports.id
+[cached since 0.4588s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_type': 'TEN_K', 'year': 2023, 'quarter': None, 'original_filename': 'ttc_2023_10k.pdf', 'storage_path': 'reports/2023/ttc_2023_10k.pdf', 'status': 'CHUNKED', 'total_pages': 1, 'error_message': None, 'processing_started_at': None, 'processing_completed_at': None}
+COMMIT
+BEGIN (implicit)
+INSERT INTO reports (company_id, report_type, year, quarter, original_filename, storage_path, status, total_pages, error_message, processing_started_at, processing_completed_at) VALUES (%(company_id)s::UUID, %(report_type)s, %(year)s::INTEGER, %(quarter)s::INTEGER, %(original_filename)s::VARCHAR, %(storage_path)s::VARCHAR, %(status)s, %(total_pages)s::INTEGER, %(error_message)s::VARCHAR, %(processing_started_at)s::TIMESTAMP WITH TIME ZONE, %(processing_completed_at)s::TIMESTAMP WITH TIME ZONE) RETURNING reports.uploaded_at, reports.updated_at, reports.id
+[cached since 0.4676s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_type': 'TEN_K', 'year': 2024, 'quarter': None, 'original_filename': 'ttc_2024_10k.pdf', 'storage_path': 'reports/2024/ttc_2024_10k.pdf', 'status': 'CHUNKED', 'total_pages': 1, 'error_message': None, 'processing_started_at': None, 'processing_completed_at': None}
+COMMIT
+BEGIN (implicit)
+INSERT INTO document_chunks (report_id, section_id, chunk_index, chunk_text, token_count, start_page, end_page, metadata, embedding, embedding_status, embedding_model, embedding_generated_at) VALUES (%(report_id)s::UUID, %(section_id)s::UUID, %(chunk ... 253 characters truncated ... WITH TIME ZONE) RETURNING document_chunks.created_at, document_chunks.updated_at, document_chunks.id
+[cached since 0.4537s ago (insertmanyvalues) 1/2 (ordered; batch not supported)] {'report_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'section_id': None, 'chunk_index': 0, 'chunk_text': 'We face significant headwinds. The volatile market may disrupt our operations.', 'token_count': 15, 'start_page': None, 'end_page': None, 'metadata': Jsonb({'normalized_section_name': 'Manage ... (105 chars)), 'embedding': None, 'embedding_status': 'PENDING', 'embedding_model': None, 'embedding_generated_at': None}
+INSERT INTO document_chunks (report_id, section_id, chunk_index, chunk_text, token_count, start_page, end_page, metadata, embedding, embedding_status, embedding_model, embedding_generated_at) VALUES (%(report_id)s::UUID, %(section_id)s::UUID, %(chunk ... 253 characters truncated ... WITH TIME ZONE) RETURNING document_chunks.created_at, document_chunks.updated_at, document_chunks.id
+[insertmanyvalues 2/2 (ordered; batch not supported)] {'report_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'section_id': None, 'chunk_index': 0, 'chunk_text': 'Our company delivered exceptional performance. We expect continued growth.', 'token_count': 17, 'start_page': None, 'end_page': None, 'metadata': Jsonb({'normalized_section_name': 'Manage ... (105 chars)), 'embedding': None, 'embedding_status': 'PENDING', 'embedding_model': None, 'embedding_generated_at': None}
+COMMIT
+2026-06-14T09:08:01.105186Z [info     ] tone_extraction.task_start     report_id=a89c11b0-68e1-494b-8d25-6eaa005b2ae7
+BEGIN (implicit)
+SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.id = %(pk_1)s::UUID
+[cached since 0.4452s ago] {'pk_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+UPDATE reports SET status=%(status)s, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+[cached since 0.4426s ago] {'status': 'TONE_EXTRACTING', 'reports_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+COMMIT
+BEGIN (implicit)
+SELECT document_chunks.report_id AS document_chunks_report_id, document_chunks.section_id AS document_chunks_section_id, document_chunks.chunk_index AS document_chunks_chunk_index, document_chunks.chunk_text AS document_chunks_chunk_text, document_chunks.token_count AS document_chunks_token_count, document_chunks.start_page AS document_chunks_start_page, document_chunks.end_page AS document_chunks_end_page, document_chunks.metadata AS document_chunks_metadata, document_chunks.embedding AS document_chunks_embedding, document_chunks.embedding_status AS document_chunks_embedding_status, document_chunks.embedding_model AS document_chunks_embedding_model, document_chunks.embedding_generated_at AS document_chunks_embedding_generated_at, document_chunks.created_at AS document_chunks_created_at, document_chunks.updated_at AS document_chunks_updated_at, document_chunks.id AS document_chunks_id 
+FROM document_chunks 
+WHERE document_chunks.report_id = %(report_id_1)s::UUID AND ((document_chunks.metadata @> %(metadata_1)s::JSONB) OR (document_chunks.metadata @> %(metadata_2)s::JSONB) OR (document_chunks.metadata @> %(metadata_3)s::JSONB) OR (document_chunks.metadata @> %(metadata_4)s::JSONB) OR (document_chunks.metadata @> %(metadata_5)s::JSONB) OR (document_chunks.metadata @> %(metadata_6)s::JSONB) OR (document_chunks.metadata @> %(metadata_7)s::JSONB) OR (document_chunks.metadata @> %(metadata_8)s::JSONB)) ORDER BY document_chunks.chunk_index ASC
+[cached since 0.4376s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'metadata_1': Jsonb({'normalized_section_name': 'Manage ... (52 chars)), 'metadata_2': Jsonb({'normalized_section_name': 'CEO Co ... (45 chars)), 'metadata_3': Jsonb({'normalized_section_name': 'CFO Co ... (45 chars)), 'metadata_4': Jsonb({'normalized_section_name': 'Prepar ... (47 chars)), 'metadata_5': Jsonb({'normalized_section_name': 'Questi ... (48 chars)), 'metadata_6': Jsonb({'normalized_section_name': 'Forwar ... (47 chars)), 'metadata_7': Jsonb({'normalized_section_name': 'MD&A'}), 'metadata_8': Jsonb({'normalized_section_name': 'Shareh ... (50 chars))}
+2026-06-14T09:08:01.125266Z [warning  ] tone_extraction.consensus_discrepancy chunk_id=71819da7-e5d4-4b5f-9030-a5160cf6fa80 llm_confidence=CONFIDENT llm_sentiment=POSITIVE rule_confidence=VERY_CAUTIOUS rule_sentiment=NEGATIVE
+2026-06-14T09:08:01.125598Z [info     ] tone_extraction.run_complete   agreements=0 chunks_processed=1 disagreements=1 duration_seconds=0.001 llm_errors=0 llm_hits=1 records=1 rule_hits=1 validation_failures=0
+DELETE FROM management_tone WHERE management_tone.report_id = %(report_id_1)s::UUID
+[cached since 0.4274s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INSERT INTO management_tone (company_id, report_id, source_chunk_id, source_type, sentiment, confidence_level, hedging_score, positive_score, negative_score, confidence_score, extraction_method, source_text) VALUES (%(company_id)s::UUID, %(report_id)s::UUID, %(source_chunk_id)s::UUID, %(source_type)s::VARCHAR, %(sentiment)s::VARCHAR, %(confidence_level)s::VARCHAR, %(hedging_score)s, %(positive_score)s, %(negative_score)s, %(confidence_score)s, %(extraction_method)s::VARCHAR, %(source_text)s::VARCHAR) RETURNING management_tone.created_at, management_tone.updated_at, management_tone.id
+[cached since 0.4261s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'source_chunk_id': UUID('71819da7-e5d4-4b5f-9030-a5160cf6fa80'), 'source_type': 'Management Commentary', 'sentiment': 'NEGATIVE', 'confidence_level': 'VERY_CAUTIOUS', 'hedging_score': 1.0, 'positive_score': 0.0, 'negative_score': 0.5, 'confidence_score': 0.5, 'extraction_method': 'RULE_BASED', 'source_text': 'We face significant headwinds. The volatile market may disrupt our operations.'}
+COMMIT
+BEGIN (implicit)
+SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.company_id = %(company_id_1)s::UUID
+[cached since 0.4212s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e')}
+SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+[cached since 0.4171s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+2026-06-14T09:08:01.146229Z [info     ] tone_evolution.run_complete    company_id=UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e') evolutions=0 total_matches=1
+DELETE FROM tone_evolution WHERE tone_evolution.company_id = %(company_id_1)s::UUID AND (tone_evolution.current_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID))
+[cached since 0.4139s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+COMMIT
+BEGIN (implicit)
+UPDATE reports SET status=%(status)s, processing_completed_at=%(processing_completed_at)s::TIMESTAMP WITH TIME ZONE, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+[cached since 0.4127s ago] {'status': 'TONE_EXTRACTED', 'processing_completed_at': datetime.datetime(2026, 6, 14, 9, 8, 1, 152922, tzinfo=datetime.timezone.utc), 'reports_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+COMMIT
+2026-06-14T09:08:01.162978Z [info     ] tone_extraction.task_success   agreements=0 chunks_processed=1 disagreements=1 duration_seconds=0.001 evolutions=0 llm_errors=0 llm_hits=1 report_id=a89c11b0-68e1-494b-8d25-6eaa005b2ae7 rule_hits=1 tones=1 validation_failures=0
+2026-06-14T09:08:01.163557Z [info     ] tone_extraction.task_start     report_id=518e0acd-0fbc-4c11-ac78-3fba87e75177
+BEGIN (implicit)
+SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.id = %(pk_1)s::UUID
+[cached since 0.5037s ago] {'pk_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+UPDATE reports SET status=%(status)s, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+[cached since 0.501s ago] {'status': 'TONE_EXTRACTING', 'reports_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+COMMIT
+BEGIN (implicit)
+SELECT document_chunks.report_id AS document_chunks_report_id, document_chunks.section_id AS document_chunks_section_id, document_chunks.chunk_index AS document_chunks_chunk_index, document_chunks.chunk_text AS document_chunks_chunk_text, document_chunks.token_count AS document_chunks_token_count, document_chunks.start_page AS document_chunks_start_page, document_chunks.end_page AS document_chunks_end_page, document_chunks.metadata AS document_chunks_metadata, document_chunks.embedding AS document_chunks_embedding, document_chunks.embedding_status AS document_chunks_embedding_status, document_chunks.embedding_model AS document_chunks_embedding_model, document_chunks.embedding_generated_at AS document_chunks_embedding_generated_at, document_chunks.created_at AS document_chunks_created_at, document_chunks.updated_at AS document_chunks_updated_at, document_chunks.id AS document_chunks_id 
+FROM document_chunks 
+WHERE document_chunks.report_id = %(report_id_1)s::UUID AND ((document_chunks.metadata @> %(metadata_1)s::JSONB) OR (document_chunks.metadata @> %(metadata_2)s::JSONB) OR (document_chunks.metadata @> %(metadata_3)s::JSONB) OR (document_chunks.metadata @> %(metadata_4)s::JSONB) OR (document_chunks.metadata @> %(metadata_5)s::JSONB) OR (document_chunks.metadata @> %(metadata_6)s::JSONB) OR (document_chunks.metadata @> %(metadata_7)s::JSONB) OR (document_chunks.metadata @> %(metadata_8)s::JSONB)) ORDER BY document_chunks.chunk_index ASC
+[cached since 0.4955s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'metadata_1': Jsonb({'normalized_section_name': 'Manage ... (52 chars)), 'metadata_2': Jsonb({'normalized_section_name': 'CEO Co ... (45 chars)), 'metadata_3': Jsonb({'normalized_section_name': 'CFO Co ... (45 chars)), 'metadata_4': Jsonb({'normalized_section_name': 'Prepar ... (47 chars)), 'metadata_5': Jsonb({'normalized_section_name': 'Questi ... (48 chars)), 'metadata_6': Jsonb({'normalized_section_name': 'Forwar ... (47 chars)), 'metadata_7': Jsonb({'normalized_section_name': 'MD&A'}), 'metadata_8': Jsonb({'normalized_section_name': 'Shareh ... (50 chars))}
+2026-06-14T09:08:01.185334Z [warning  ] tone_extraction.consensus_discrepancy chunk_id=368d3fad-38ac-4eaf-a88e-d0aed5c5dc67 llm_confidence=CONFIDENT llm_sentiment=POSITIVE rule_confidence=VERY_CONFIDENT rule_sentiment=POSITIVE
+2026-06-14T09:08:01.185678Z [info     ] tone_extraction.run_complete   agreements=0 chunks_processed=1 disagreements=1 duration_seconds=0.001 llm_errors=0 llm_hits=1 records=1 rule_hits=1 validation_failures=0
+DELETE FROM management_tone WHERE management_tone.report_id = %(report_id_1)s::UUID
+[cached since 0.4877s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INSERT INTO management_tone (company_id, report_id, source_chunk_id, source_type, sentiment, confidence_level, hedging_score, positive_score, negative_score, confidence_score, extraction_method, source_text) VALUES (%(company_id)s::UUID, %(report_id)s::UUID, %(source_chunk_id)s::UUID, %(source_type)s::VARCHAR, %(sentiment)s::VARCHAR, %(confidence_level)s::VARCHAR, %(hedging_score)s, %(positive_score)s, %(negative_score)s, %(confidence_score)s, %(extraction_method)s::VARCHAR, %(source_text)s::VARCHAR) RETURNING management_tone.created_at, management_tone.updated_at, management_tone.id
+[cached since 0.4853s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'source_chunk_id': UUID('368d3fad-38ac-4eaf-a88e-d0aed5c5dc67'), 'source_type': 'Management Commentary', 'sentiment': 'POSITIVE', 'confidence_level': 'VERY_CONFIDENT', 'hedging_score': 0.0, 'positive_score': 0.5, 'negative_score': 0.0, 'confidence_score': 0.5, 'extraction_method': 'RULE_BASED', 'source_text': 'Our company delivered exceptional performance. We expect continued growth.'}
+COMMIT
+BEGIN (implicit)
+SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.company_id = %(company_id_1)s::UUID
+[cached since 0.4802s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e')}
+SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+[cached since 0.4777s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+[cached since 0.481s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+2026-06-14T09:08:01.209883Z [info     ] tone_evolution.run_complete    company_id=UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e') evolutions=1 total_matches=1
+DELETE FROM tone_evolution WHERE tone_evolution.company_id = %(company_id_1)s::UUID AND (tone_evolution.current_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_2)s::UUID) AND tone_evolution.current_tone_id IS NULL)
+[cached since 0.3778s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'report_id_2': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INSERT INTO tone_evolution (company_id, current_tone_id, previous_tone_id, evolution_type, confidence_score, explanation) VALUES (%(company_id)s::UUID, %(current_tone_id)s::UUID, %(previous_tone_id)s::UUID, %(evolution_type)s::VARCHAR, %(confidence_score)s, %(explanation)s::VARCHAR) RETURNING tone_evolution.created_at, tone_evolution.updated_at, tone_evolution.id
+[cached since 0.3756s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'current_tone_id': UUID('f9a14d30-9bf6-4e50-a660-41abba14bf0f'), 'previous_tone_id': UUID('9f741f28-51f5-4d58-a9a0-ca153a903865'), 'evolution_type': 'MORE_POSITIVE', 'confidence_score': 0.5, 'explanation': 'Sentiment improved from NEGATIVE to POSITIVE in Management Commentary.'}
+COMMIT
+BEGIN (implicit)
+UPDATE reports SET status=%(status)s, processing_completed_at=%(processing_completed_at)s::TIMESTAMP WITH TIME ZONE, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+[cached since 0.4817s ago] {'status': 'TONE_EXTRACTED', 'processing_completed_at': datetime.datetime(2026, 6, 14, 9, 8, 1, 222309, tzinfo=datetime.timezone.utc), 'reports_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+COMMIT
+2026-06-14T09:08:01.229993Z [info     ] tone_extraction.task_success   agreements=0 chunks_processed=1 disagreements=1 duration_seconds=0.001 evolutions=1 llm_errors=0 llm_hits=1 report_id=518e0acd-0fbc-4c11-ac78-3fba87e75177 rule_hits=1 tones=1 validation_failures=0
+------------------------------ Captured log call -------------------------------
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO companies (name, ticker, sector, industry) VALUES (%(name)s::VARCHAR, %(ticker)s::VARCHAR, %(sector)s::VARCHAR, %(industry)s::VARCHAR) RETURNING companies.id, companies.created_at, companies.updated_at
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4732s ago] {'name': 'Tone Test Company', 'ticker': 'TTC', 'sector': 'Technology', 'industry': 'Software'}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO reports (company_id, report_type, year, quarter, original_filename, storage_path, status, total_pages, error_message, processing_started_at, processing_completed_at) VALUES (%(company_id)s::UUID, %(report_type)s, %(year)s::INTEGER, %(quarter)s::INTEGER, %(original_filename)s::VARCHAR, %(storage_path)s::VARCHAR, %(status)s, %(total_pages)s::INTEGER, %(error_message)s::VARCHAR, %(processing_started_at)s::TIMESTAMP WITH TIME ZONE, %(processing_completed_at)s::TIMESTAMP WITH TIME ZONE) RETURNING reports.uploaded_at, reports.updated_at, reports.id
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4588s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_type': 'TEN_K', 'year': 2023, 'quarter': None, 'original_filename': 'ttc_2023_10k.pdf', 'storage_path': 'reports/2023/ttc_2023_10k.pdf', 'status': 'CHUNKED', 'total_pages': 1, 'error_message': None, 'processing_started_at': None, 'processing_completed_at': None}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO reports (company_id, report_type, year, quarter, original_filename, storage_path, status, total_pages, error_message, processing_started_at, processing_completed_at) VALUES (%(company_id)s::UUID, %(report_type)s, %(year)s::INTEGER, %(quarter)s::INTEGER, %(original_filename)s::VARCHAR, %(storage_path)s::VARCHAR, %(status)s, %(total_pages)s::INTEGER, %(error_message)s::VARCHAR, %(processing_started_at)s::TIMESTAMP WITH TIME ZONE, %(processing_completed_at)s::TIMESTAMP WITH TIME ZONE) RETURNING reports.uploaded_at, reports.updated_at, reports.id
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4676s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_type': 'TEN_K', 'year': 2024, 'quarter': None, 'original_filename': 'ttc_2024_10k.pdf', 'storage_path': 'reports/2024/ttc_2024_10k.pdf', 'status': 'CHUNKED', 'total_pages': 1, 'error_message': None, 'processing_started_at': None, 'processing_completed_at': None}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1846 INSERT INTO document_chunks (report_id, section_id, chunk_index, chunk_text, token_count, start_page, end_page, metadata, embedding, embedding_status, embedding_model, embedding_generated_at) VALUES (%(report_id)s::UUID, %(section_id)s::UUID, %(chunk ... 253 characters truncated ... WITH TIME ZONE) RETURNING document_chunks.created_at, document_chunks.updated_at, document_chunks.id
+INFO     sqlalchemy.engine.Engine:base.py:1846 [cached since 0.4537s ago (insertmanyvalues) 1/2 (ordered; batch not supported)] {'report_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'section_id': None, 'chunk_index': 0, 'chunk_text': 'We face significant headwinds. The volatile market may disrupt our operations.', 'token_count': 15, 'start_page': None, 'end_page': None, 'metadata': Jsonb({'normalized_section_name': 'Manage ... (105 chars)), 'embedding': None, 'embedding_status': 'PENDING', 'embedding_model': None, 'embedding_generated_at': None}
+INFO     sqlalchemy.engine.Engine:base.py:1846 INSERT INTO document_chunks (report_id, section_id, chunk_index, chunk_text, token_count, start_page, end_page, metadata, embedding, embedding_status, embedding_model, embedding_generated_at) VALUES (%(report_id)s::UUID, %(section_id)s::UUID, %(chunk ... 253 characters truncated ... WITH TIME ZONE) RETURNING document_chunks.created_at, document_chunks.updated_at, document_chunks.id
+INFO     sqlalchemy.engine.Engine:base.py:1846 [insertmanyvalues 2/2 (ordered; batch not supported)] {'report_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'section_id': None, 'chunk_index': 0, 'chunk_text': 'Our company delivered exceptional performance. We expect continued growth.', 'token_count': 17, 'start_page': None, 'end_page': None, 'metadata': Jsonb({'normalized_section_name': 'Manage ... (105 chars)), 'embedding': None, 'embedding_status': 'PENDING', 'embedding_model': None, 'embedding_generated_at': None}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.id = %(pk_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4452s ago] {'pk_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 UPDATE reports SET status=%(status)s, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4426s ago] {'status': 'TONE_EXTRACTING', 'reports_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT document_chunks.report_id AS document_chunks_report_id, document_chunks.section_id AS document_chunks_section_id, document_chunks.chunk_index AS document_chunks_chunk_index, document_chunks.chunk_text AS document_chunks_chunk_text, document_chunks.token_count AS document_chunks_token_count, document_chunks.start_page AS document_chunks_start_page, document_chunks.end_page AS document_chunks_end_page, document_chunks.metadata AS document_chunks_metadata, document_chunks.embedding AS document_chunks_embedding, document_chunks.embedding_status AS document_chunks_embedding_status, document_chunks.embedding_model AS document_chunks_embedding_model, document_chunks.embedding_generated_at AS document_chunks_embedding_generated_at, document_chunks.created_at AS document_chunks_created_at, document_chunks.updated_at AS document_chunks_updated_at, document_chunks.id AS document_chunks_id 
+FROM document_chunks 
+WHERE document_chunks.report_id = %(report_id_1)s::UUID AND ((document_chunks.metadata @> %(metadata_1)s::JSONB) OR (document_chunks.metadata @> %(metadata_2)s::JSONB) OR (document_chunks.metadata @> %(metadata_3)s::JSONB) OR (document_chunks.metadata @> %(metadata_4)s::JSONB) OR (document_chunks.metadata @> %(metadata_5)s::JSONB) OR (document_chunks.metadata @> %(metadata_6)s::JSONB) OR (document_chunks.metadata @> %(metadata_7)s::JSONB) OR (document_chunks.metadata @> %(metadata_8)s::JSONB)) ORDER BY document_chunks.chunk_index ASC
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4376s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'metadata_1': Jsonb({'normalized_section_name': 'Manage ... (52 chars)), 'metadata_2': Jsonb({'normalized_section_name': 'CEO Co ... (45 chars)), 'metadata_3': Jsonb({'normalized_section_name': 'CFO Co ... (45 chars)), 'metadata_4': Jsonb({'normalized_section_name': 'Prepar ... (47 chars)), 'metadata_5': Jsonb({'normalized_section_name': 'Questi ... (48 chars)), 'metadata_6': Jsonb({'normalized_section_name': 'Forwar ... (47 chars)), 'metadata_7': Jsonb({'normalized_section_name': 'MD&A'}), 'metadata_8': Jsonb({'normalized_section_name': 'Shareh ... (50 chars))}
+INFO     sqlalchemy.engine.Engine:base.py:1848 DELETE FROM management_tone WHERE management_tone.report_id = %(report_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4274s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO management_tone (company_id, report_id, source_chunk_id, source_type, sentiment, confidence_level, hedging_score, positive_score, negative_score, confidence_score, extraction_method, source_text) VALUES (%(company_id)s::UUID, %(report_id)s::UUID, %(source_chunk_id)s::UUID, %(source_type)s::VARCHAR, %(sentiment)s::VARCHAR, %(confidence_level)s::VARCHAR, %(hedging_score)s, %(positive_score)s, %(negative_score)s, %(confidence_score)s, %(extraction_method)s::VARCHAR, %(source_text)s::VARCHAR) RETURNING management_tone.created_at, management_tone.updated_at, management_tone.id
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4261s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7'), 'source_chunk_id': UUID('71819da7-e5d4-4b5f-9030-a5160cf6fa80'), 'source_type': 'Management Commentary', 'sentiment': 'NEGATIVE', 'confidence_level': 'VERY_CAUTIOUS', 'hedging_score': 1.0, 'positive_score': 0.0, 'negative_score': 0.5, 'confidence_score': 0.5, 'extraction_method': 'RULE_BASED', 'source_text': 'We face significant headwinds. The volatile market may disrupt our operations.'}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.company_id = %(company_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4212s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4171s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 DELETE FROM tone_evolution WHERE tone_evolution.company_id = %(company_id_1)s::UUID AND (tone_evolution.current_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID))
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4139s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 UPDATE reports SET status=%(status)s, processing_completed_at=%(processing_completed_at)s::TIMESTAMP WITH TIME ZONE, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4127s ago] {'status': 'TONE_EXTRACTED', 'processing_completed_at': datetime.datetime(2026, 6, 14, 9, 8, 1, 152922, tzinfo=datetime.timezone.utc), 'reports_id': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.id = %(pk_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.5037s ago] {'pk_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 UPDATE reports SET status=%(status)s, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.501s ago] {'status': 'TONE_EXTRACTING', 'reports_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT document_chunks.report_id AS document_chunks_report_id, document_chunks.section_id AS document_chunks_section_id, document_chunks.chunk_index AS document_chunks_chunk_index, document_chunks.chunk_text AS document_chunks_chunk_text, document_chunks.token_count AS document_chunks_token_count, document_chunks.start_page AS document_chunks_start_page, document_chunks.end_page AS document_chunks_end_page, document_chunks.metadata AS document_chunks_metadata, document_chunks.embedding AS document_chunks_embedding, document_chunks.embedding_status AS document_chunks_embedding_status, document_chunks.embedding_model AS document_chunks_embedding_model, document_chunks.embedding_generated_at AS document_chunks_embedding_generated_at, document_chunks.created_at AS document_chunks_created_at, document_chunks.updated_at AS document_chunks_updated_at, document_chunks.id AS document_chunks_id 
+FROM document_chunks 
+WHERE document_chunks.report_id = %(report_id_1)s::UUID AND ((document_chunks.metadata @> %(metadata_1)s::JSONB) OR (document_chunks.metadata @> %(metadata_2)s::JSONB) OR (document_chunks.metadata @> %(metadata_3)s::JSONB) OR (document_chunks.metadata @> %(metadata_4)s::JSONB) OR (document_chunks.metadata @> %(metadata_5)s::JSONB) OR (document_chunks.metadata @> %(metadata_6)s::JSONB) OR (document_chunks.metadata @> %(metadata_7)s::JSONB) OR (document_chunks.metadata @> %(metadata_8)s::JSONB)) ORDER BY document_chunks.chunk_index ASC
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4955s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'metadata_1': Jsonb({'normalized_section_name': 'Manage ... (52 chars)), 'metadata_2': Jsonb({'normalized_section_name': 'CEO Co ... (45 chars)), 'metadata_3': Jsonb({'normalized_section_name': 'CFO Co ... (45 chars)), 'metadata_4': Jsonb({'normalized_section_name': 'Prepar ... (47 chars)), 'metadata_5': Jsonb({'normalized_section_name': 'Questi ... (48 chars)), 'metadata_6': Jsonb({'normalized_section_name': 'Forwar ... (47 chars)), 'metadata_7': Jsonb({'normalized_section_name': 'MD&A'}), 'metadata_8': Jsonb({'normalized_section_name': 'Shareh ... (50 chars))}
+INFO     sqlalchemy.engine.Engine:base.py:1848 DELETE FROM management_tone WHERE management_tone.report_id = %(report_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4877s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO management_tone (company_id, report_id, source_chunk_id, source_type, sentiment, confidence_level, hedging_score, positive_score, negative_score, confidence_score, extraction_method, source_text) VALUES (%(company_id)s::UUID, %(report_id)s::UUID, %(source_chunk_id)s::UUID, %(source_type)s::VARCHAR, %(sentiment)s::VARCHAR, %(confidence_level)s::VARCHAR, %(hedging_score)s, %(positive_score)s, %(negative_score)s, %(confidence_score)s, %(extraction_method)s::VARCHAR, %(source_text)s::VARCHAR) RETURNING management_tone.created_at, management_tone.updated_at, management_tone.id
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4853s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'source_chunk_id': UUID('368d3fad-38ac-4eaf-a88e-d0aed5c5dc67'), 'source_type': 'Management Commentary', 'sentiment': 'POSITIVE', 'confidence_level': 'VERY_CONFIDENT', 'hedging_score': 0.0, 'positive_score': 0.5, 'negative_score': 0.0, 'confidence_score': 0.5, 'extraction_method': 'RULE_BASED', 'source_text': 'Our company delivered exceptional performance. We expect continued growth.'}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT reports.company_id AS reports_company_id, reports.report_type AS reports_report_type, reports.year AS reports_year, reports.quarter AS reports_quarter, reports.original_filename AS reports_original_filename, reports.storage_path AS reports_storage_path, reports.status AS reports_status, reports.total_pages AS reports_total_pages, reports.error_message AS reports_error_message, reports.processing_started_at AS reports_processing_started_at, reports.processing_completed_at AS reports_processing_completed_at, reports.uploaded_at AS reports_uploaded_at, reports.updated_at AS reports_updated_at, reports.id AS reports_id 
+FROM reports 
+WHERE reports.company_id = %(company_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4802s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4777s ago] {'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT management_tone.company_id AS management_tone_company_id, management_tone.report_id AS management_tone_report_id, management_tone.source_chunk_id AS management_tone_source_chunk_id, management_tone.source_type AS management_tone_source_type, management_tone.sentiment AS management_tone_sentiment, management_tone.confidence_level AS management_tone_confidence_level, management_tone.hedging_score AS management_tone_hedging_score, management_tone.positive_score AS management_tone_positive_score, management_tone.negative_score AS management_tone_negative_score, management_tone.confidence_score AS management_tone_confidence_score, management_tone.extraction_method AS management_tone_extraction_method, management_tone.source_text AS management_tone_source_text, management_tone.created_at AS management_tone_created_at, management_tone.updated_at AS management_tone_updated_at, management_tone.id AS management_tone_id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.481s ago] {'report_id_1': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 DELETE FROM tone_evolution WHERE tone_evolution.company_id = %(company_id_1)s::UUID AND (tone_evolution.current_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_1)s::UUID) OR tone_evolution.previous_tone_id IN (SELECT management_tone.id 
+FROM management_tone 
+WHERE management_tone.report_id = %(report_id_2)s::UUID) AND tone_evolution.current_tone_id IS NULL)
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.3778s ago] {'company_id_1': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'report_id_1': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177'), 'report_id_2': UUID('a89c11b0-68e1-494b-8d25-6eaa005b2ae7')}
+INFO     sqlalchemy.engine.Engine:base.py:1848 INSERT INTO tone_evolution (company_id, current_tone_id, previous_tone_id, evolution_type, confidence_score, explanation) VALUES (%(company_id)s::UUID, %(current_tone_id)s::UUID, %(previous_tone_id)s::UUID, %(evolution_type)s::VARCHAR, %(confidence_score)s, %(explanation)s::VARCHAR) RETURNING tone_evolution.created_at, tone_evolution.updated_at, tone_evolution.id
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.3756s ago] {'company_id': UUID('f01a8b53-a1ab-4d40-9f1a-1c5fdf80ff6e'), 'current_tone_id': UUID('f9a14d30-9bf6-4e50-a660-41abba14bf0f'), 'previous_tone_id': UUID('9f741f28-51f5-4d58-a9a0-ca153a903865'), 'evolution_type': 'MORE_POSITIVE', 'confidence_score': 0.5, 'explanation': 'Sentiment improved from NEGATIVE to POSITIVE in Management Commentary.'}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 UPDATE reports SET status=%(status)s, processing_completed_at=%(processing_completed_at)s::TIMESTAMP WITH TIME ZONE, updated_at=now() WHERE reports.id = %(reports_id)s::UUID
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 0.4817s ago] {'status': 'TONE_EXTRACTED', 'processing_completed_at': datetime.datetime(2026, 6, 14, 9, 8, 1, 222309, tzinfo=datetime.timezone.utc), 'reports_id': UUID('518e0acd-0fbc-4c11-ac78-3fba87e75177')}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+--------------------------- Captured stdout teardown ---------------------------
+2026-06-14T09:08:02.007064Z [info     ] app.shutdown
+BEGIN (implicit)
+TRUNCATE memo_sections, investment_memos, benchmark_summaries, benchmark_results, benchmark_runs, conversation_messages, conversation_threads, risk_evolution, risk_factors, metric_comparisons, financial_metrics, document_chunks, report_sections, report_pages, reports, companies RESTART IDENTITY CASCADE
+[cached since 1.133s ago] {}
+COMMIT
+BEGIN (implicit)
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.235s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.242s ago] {'table_name': 'document_chunks', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.245s ago] {'table_name': 'financial_metrics', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.248s ago] {'table_name': 'metric_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.251s ago] {'table_name': 'financial_analytics', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.254s ago] {'table_name': 'risk_factors', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.257s ago] {'table_name': 'risk_evolution', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.26s ago] {'table_name': 'management_tone', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.262s ago] {'table_name': 'tone_evolution', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.265s ago] {'table_name': 'reports', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.27s ago] {'table_name': 'report_pages', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.273s ago] {'table_name': 'report_sections', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.275s ago] {'table_name': 'conversation_threads', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.277s ago] {'table_name': 'conversation_messages', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.279s ago] {'table_name': 'benchmark_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.281s ago] {'table_name': 'benchmark_results', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.283s ago] {'table_name': 'benchmark_summaries', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.286s ago] {'table_name': 'investment_memos', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.287s ago] {'table_name': 'memo_sections', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.289s ago] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+[cached since 2.291s ago] {'table_name': 'refresh_tokens', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+
+DROP TABLE tone_evolution
+[no key 0.00031s] {}
+
+DROP TABLE risk_evolution
+[no key 0.00033s] {}
+
+DROP TABLE metric_comparisons
+[no key 0.00046s] {}
+
+DROP TABLE management_tone
+[no key 0.00032s] {}
+
+DROP TABLE risk_factors
+[no key 0.00042s] {}
+
+DROP TABLE financial_metrics
+[no key 0.00035s] {}
+
+DROP TABLE memo_sections
+[no key 0.00034s] {}
+
+DROP TABLE document_chunks
+[no key 0.00030s] {}
+
+DROP TABLE investment_memos
+[no key 0.00033s] {}
+
+DROP TABLE conversation_messages
+[no key 0.00031s] {}
+
+DROP TABLE report_sections
+[no key 0.00030s] {}
+
+DROP TABLE report_pages
+[no key 0.00041s] {}
+
+DROP TABLE financial_analytics
+[no key 0.00029s] {}
+
+DROP TABLE refresh_tokens
+[no key 0.00033s] {}
+
+DROP TABLE benchmark_summaries
+[no key 0.00037s] {}
+
+DROP TABLE benchmark_results
+[no key 0.00052s] {}
+
+DROP TABLE conversation_threads
+[no key 0.00033s] {}
+
+DROP TABLE reports
+[no key 0.00022s] {}
+
+DROP TABLE users
+[no key 0.00038s] {}
+
+DROP TABLE benchmark_runs
+[no key 0.00040s] {}
+
+DROP TABLE companies
+[no key 0.00023s] {}
+COMMIT
+---------------------------- Captured log teardown -----------------------------
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 TRUNCATE memo_sections, investment_memos, benchmark_summaries, benchmark_results, benchmark_runs, conversation_messages, conversation_threads, risk_evolution, risk_factors, metric_comparisons, financial_metrics, document_chunks, report_sections, report_pages, reports, companies RESTART IDENTITY CASCADE
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 1.133s ago] {}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+INFO     sqlalchemy.engine.Engine:base.py:2712 BEGIN (implicit)
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.235s ago] {'table_name': 'companies', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.242s ago] {'table_name': 'document_chunks', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.245s ago] {'table_name': 'financial_metrics', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.248s ago] {'table_name': 'metric_comparisons', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.251s ago] {'table_name': 'financial_analytics', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.254s ago] {'table_name': 'risk_factors', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.257s ago] {'table_name': 'risk_evolution', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.26s ago] {'table_name': 'management_tone', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.262s ago] {'table_name': 'tone_evolution', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.265s ago] {'table_name': 'reports', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.27s ago] {'table_name': 'report_pages', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.273s ago] {'table_name': 'report_sections', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.275s ago] {'table_name': 'conversation_threads', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.277s ago] {'table_name': 'conversation_messages', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.279s ago] {'table_name': 'benchmark_runs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.281s ago] {'table_name': 'benchmark_results', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.283s ago] {'table_name': 'benchmark_summaries', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.286s ago] {'table_name': 'investment_memos', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.287s ago] {'table_name': 'memo_sections', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.289s ago] {'table_name': 'users', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s::VARCHAR, %(param_2)s::VARCHAR, %(param_3)s::VARCHAR, %(param_4)s::VARCHAR, %(param_5)s::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s::VARCHAR
+INFO     sqlalchemy.engine.Engine:base.py:1848 [cached since 2.291s ago] {'table_name': 'refresh_tokens', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE tone_evolution
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00031s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE risk_evolution
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00033s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE metric_comparisons
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00046s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE management_tone
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00032s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE risk_factors
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00042s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE financial_metrics
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00035s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE memo_sections
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00034s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE document_chunks
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00030s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE investment_memos
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00033s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE conversation_messages
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00031s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE report_sections
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00030s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE report_pages
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00041s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE financial_analytics
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00029s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE refresh_tokens
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00033s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE benchmark_summaries
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00037s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE benchmark_results
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00052s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE conversation_threads
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00033s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE reports
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00022s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE users
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00038s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE benchmark_runs
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00040s] {}
+INFO     sqlalchemy.engine.Engine:base.py:1848 
+DROP TABLE companies
+INFO     sqlalchemy.engine.Engine:base.py:1848 [no key 0.00023s] {}
+INFO     sqlalchemy.engine.Engine:base.py:2718 COMMIT
+=============================== warnings summary ===============================
+app/schemas/auth.py:32
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/schemas/auth.py:32: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class UserOut(BaseModel):
+
+app/benchmarking/benchmark_models.py:16
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/benchmarking/benchmark_models.py:16: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    company_ids: list[uuid.UUID] = Field(
+
+app/benchmarking/benchmark_models.py:77
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/benchmarking/benchmark_models.py:77: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    company_ids: list[uuid.UUID] = Field(
+
+app/memo/memo_models.py:33
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/memo/memo_models.py:33: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class MemoDetailsResponse(BaseModel):
+
+app/memo/memo_models.py:54
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/memo/memo_models.py:54: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class MemoSectionOut(BaseModel):
+
+.venv/lib/python3.14/site-packages/google/genai/types.py:42
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/google/genai/types.py:42: DeprecationWarning: '_UnionGenericAlias' is deprecated and slated for removal in Python 3.17
+    VersionedUnionType = Union[builtin_types.UnionType, _UnionGenericAlias]
+
+app/api/v1/endpoints/memo.py:181
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/api/v1/endpoints/memo.py:181: FastAPIDeprecationWarning: `regex` has been deprecated, please use `pattern` instead
+    format: str = Query("markdown", regex="^(markdown|json)$"),
+
+app/schemas/tone.py:31
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/schemas/tone.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ManagementToneResponse(ManagementToneBase):
+
+app/schemas/tone.py:43
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/schemas/tone.py:43: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ToneEvolutionResponse(BaseModel):
+
+.venv/lib/python3.14/site-packages/langgraph/cache/base/__init__.py:8
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/langgraph/cache/base/__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+    from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485
+.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485
+.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485
+.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485
+.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/langgraph/_internal/_runnable.py:485: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    asyncio.iscoroutinefunction(func)
+
+app/schemas/agent.py:37
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/schemas/agent.py:37: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ThreadOut(BaseModel):
+
+app/schemas/agent.py:48
+  /home/pranav/Documents/AI Financial Document Analyst/backend/app/schemas/agent.py:48: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class MessageOut(BaseModel):
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:1216: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    return asyncio.get_event_loop_policy()
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:874: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    _restore_event_loop_policy(asyncio.get_event_loop_policy()),
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:772: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    old_loop_policy = asyncio.get_event_loop_policy()
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:777: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(policy)
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:1183: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:889: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:794: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(old_loop_policy)
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:942: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:966: DeprecationWarning: 'asyncio.set_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    asyncio.set_event_loop_policy(previous_policy)
+
+tests/integration/test_tone_api.py::test_tone_tasks_ingestion_and_evolution
+tests/integration/test_tone_api.py::test_tone_api_endpoints
+  /home/pranav/Documents/AI Financial Document Analyst/backend/.venv/lib/python3.14/site-packages/pytest_asyncio/plugin.py:978: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+    policy = asyncio.get_event_loop_policy()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_tone_api.py::test_tone_api_endpoints - TypeErro...
+1 failed, 1 passed, 36 warnings in 2.52s

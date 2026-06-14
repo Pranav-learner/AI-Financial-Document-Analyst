@@ -100,6 +100,10 @@ class GeminiEmbeddingProvider(EmbeddingProvider):
     # ---- interface -----------------------------------------------------------
 
     @property
+    def enabled(self) -> bool:
+        return bool(self._api_key)
+
+    @property
     def model_name(self) -> str:
         return self._model
 

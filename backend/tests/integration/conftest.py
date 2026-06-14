@@ -75,7 +75,21 @@ async def api_client(monkeypatch: pytest.MonkeyPatch) -> AsyncGenerator[AsyncCli
         async with AsyncSessionLocal() as session:
             yield session
 
+    async def _override_get_current_user():
+        from app.models.user import User
+        from app.models.enums import UserRole
+        import uuid
+        return User(
+            id=uuid.UUID("00000000-0000-0000-0000-000000000000"),
+            email="test@example.com",
+            role=UserRole.ADMIN,
+            is_active=True,
+            password_hash="hashed_password",
+        )
+
+    from app.api.deps import get_current_user
     app.dependency_overrides[get_db] = _override_get_db
+    app.dependency_overrides[get_current_user] = _override_get_current_user
 
     class _Task:
         def delay(self, *args, **kwargs) -> None:  # no broker in tests

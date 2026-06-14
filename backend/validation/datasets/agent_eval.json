@@ -1,0 +1,50 @@
+{
+  "description": "Phase 12 agent evaluation dataset. Each case scopes to a demo company and asserts the classified intent (tool selection), expected grounding, and answer signal keywords. Company tickers resolve to seeded demo company ids at runtime.",
+  "cases": [
+    {
+      "id": "fin-revenue",
+      "category": "financial",
+      "ticker": "DEMO-APX",
+      "query": "What was Apex Robotics' total revenue and net margin in fiscal 2024?",
+      "expected_intent": ["METRIC_EXTRACTION", "RAG_RETRIEVAL"],
+      "expect_citations": true,
+      "answer_keywords": ["48", "revenue"]
+    },
+    {
+      "id": "risk-top",
+      "category": "risk",
+      "ticker": "DEMO-APX",
+      "query": "What are the principal risk factors disclosed by Apex Robotics?",
+      "expected_intent": ["RISK_ANALYSIS"],
+      "expect_citations": true,
+      "answer_keywords": ["supply", "risk"]
+    },
+    {
+      "id": "risk-critical",
+      "category": "risk",
+      "ticker": "DEMO-BLT",
+      "query": "Does Bolt Dynamics disclose any critical cybersecurity risk?",
+      "expected_intent": ["RISK_ANALYSIS"],
+      "expect_citations": true,
+      "answer_keywords": ["cyber", "security"]
+    },
+    {
+      "id": "tone-sentiment",
+      "category": "tone",
+      "ticker": "DEMO-CTX",
+      "query": "How would you characterize management's tone and sentiment for Cortex Systems?",
+      "expected_intent": ["TONE_ANALYSIS"],
+      "expect_citations": true,
+      "answer_keywords": ["tone", "cautious", "negative", "sentiment"]
+    },
+    {
+      "id": "mixed-thesis",
+      "category": "mixed",
+      "ticker": "DEMO-APX",
+      "query": "Summarize the overall investment picture for Apex Robotics, covering financials, risks, and management tone.",
+      "expected_intent": ["RAG_RETRIEVAL", "RISK_ANALYSIS", "METRIC_EXTRACTION", "TONE_ANALYSIS"],
+      "expect_citations": false,
+      "answer_keywords": ["risk", "margin", "cash"]
+    }
+  ]
+}

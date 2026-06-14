@@ -5,11 +5,12 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.benchmarking.comparison_builder import ComparisonBuilder
-from app.benchmarking.exceptions import BenchmarkEngineError, MissingReportError
+from app.benchmarking.exceptions import (
+    BenchmarkEngineError,
+    CompanyNotFoundError,
+    MissingReportError,
+)
 from app.benchmarking.ranking_engine import RankingEngine
 from app.benchmarking.score_calculator import ScoreCalculator
 from app.benchmarking.validators import BenchmarkValidator
@@ -17,6 +18,8 @@ from app.core.logging import get_logger
 from app.models.benchmark import BenchmarkResult, BenchmarkRun, BenchmarkSummary
 from app.models.company import Company
 from app.models.enums import BenchmarkDimension, BenchmarkStatus
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 log = get_logger(__name__)
 
@@ -73,7 +76,8 @@ class BenchmarkService:
             res = await self.db.execute(stmt)
             company = res.scalars().first()
             if not company:
-                raise BenchmarkEngineError(f"Company ID {cid} not found in database")
+                # Unknown company id is a client error (404), not a server fault.
+                raise CompanyNotFoundError(f"Company ID {cid} not found in database")
             company_map[cid] = company
         return company_map
 

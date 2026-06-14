@@ -1,0 +1,107 @@
+{
+  "name": "Load Test",
+  "ok": true,
+  "passed": 4,
+  "failed": 0,
+  "warned": 0,
+  "duration_s": 3.646,
+  "measurements": {
+    "concurrency": 10,
+    "total_requests": 60,
+    "scenarios": {
+      "concurrent reports list": {
+        "total": 60,
+        "concurrency": 10,
+        "succeeded": 60,
+        "throttled_429": 0,
+        "failed": 0,
+        "success_rate": 1.0,
+        "wall_s": 1.255,
+        "throughput_rps": 47.8,
+        "latency": {
+          "count": 60,
+          "avg_ms": 180.9,
+          "median_ms": 96.9,
+          "p95_ms": 621.7,
+          "min_ms": 45.0,
+          "max_ms": 626.2
+        },
+        "status_breakdown": {
+          "200": 60
+        }
+      },
+      "concurrent hybrid queries": {
+        "total": 60,
+        "concurrency": 10,
+        "succeeded": 60,
+        "throttled_429": 0,
+        "failed": 0,
+        "success_rate": 1.0,
+        "wall_s": 0.612,
+        "throughput_rps": 98.1,
+        "latency": {
+          "count": 60,
+          "avg_ms": 78.5,
+          "median_ms": 73.5,
+          "p95_ms": 143.7,
+          "min_ms": 19.7,
+          "max_ms": 152.6
+        },
+        "status_breakdown": {
+          "200": 60
+        }
+      },
+      "concurrent vector queries": {
+        "total": 60,
+        "concurrency": 10,
+        "succeeded": 60,
+        "throttled_429": 0,
+        "failed": 0,
+        "success_rate": 1.0,
+        "wall_s": 0.66,
+        "throughput_rps": 90.9,
+        "latency": {
+          "count": 60,
+          "avg_ms": 79.6,
+          "median_ms": 81.1,
+          "p95_ms": 120.2,
+          "min_ms": 34.0,
+          "max_ms": 134.5
+        },
+        "status_breakdown": {
+          "200": 60
+        }
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "concurrent reports list",
+      "passed": true,
+      "detail": "60/60 2xx @ c=10, 47.8 rps, p95=621.7ms, worst=626.2ms, 5xx/net-fail=0",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "concurrent hybrid queries",
+      "passed": true,
+      "detail": "60/60 2xx @ c=10, 98.1 rps, p95=143.7ms, worst=152.6ms, 5xx/net-fail=0",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "concurrent vector queries",
+      "passed": true,
+      "detail": "60/60 2xx @ c=10, 90.9 rps, p95=120.2ms, worst=134.5ms, 5xx/net-fail=0",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "rate limiter protects under burst (no 5xx)",
+      "passed": true,
+      "detail": "no throttling at this level",
+      "warn": false,
+      "data": {}
+    }
+  ]
+}

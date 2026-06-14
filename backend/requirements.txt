@@ -36,8 +36,11 @@ redis~=5.2
 structlog~=24.4
 prometheus-client~=0.25.0
 
-# --- Security (scaffolded; auth implemented in Phase 11) ---
-passlib[bcrypt]~=1.7
+# --- Security (auth implemented in Phase 11) ---
+# bcrypt is used directly by app/core/security.py. passlib 1.7.x is unmaintained
+# and its bcrypt backend is broken against bcrypt>=4.1 (Phase 12 bug sweep), so
+# we depend on bcrypt explicitly and no longer route hashing through passlib.
+bcrypt~=5.0
 python-jose[cryptography]~=3.3
 
 # --- Deferred until their phase (kept here as a manifest, intentionally off) ---
@@ -45,3 +48,4 @@ langgraph~=0.2               # Phase 7 — multi-agent orchestration
 langchain-core~=0.3          # Phase 7
 httpx~=0.27                  # OpenRouter fallback client (Phase 3)
 FlagEmbedding                # Phase 6 — BAAI/bge-reranker-base
+email-validator>=2.3.0

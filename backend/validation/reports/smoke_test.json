@@ -1,0 +1,146 @@
+{
+  "name": "Smoke Test",
+  "ok": true,
+  "passed": 19,
+  "failed": 0,
+  "warned": 0,
+  "duration_s": 2.726,
+  "measurements": {
+    "data_seeded": true
+  },
+  "checks": [
+    {
+      "name": "health endpoint 200",
+      "passed": true,
+      "detail": "HTTP 200 in 20ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "readiness probe 200",
+      "passed": true,
+      "detail": "database=ok, redis=ok, celery=ok, gemini=ok, storage=ok",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "dependency database ok",
+      "passed": true,
+      "detail": "ok",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "dependency redis ok",
+      "passed": true,
+      "detail": "ok",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "dependency celery ok",
+      "passed": true,
+      "detail": "ok",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "dependency storage ok",
+      "passed": true,
+      "detail": "ok",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "openapi served",
+      "passed": true,
+      "detail": "73 paths",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "auth: register+login",
+      "passed": true,
+      "detail": "token len 187",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "auth: /me returns identity",
+      "passed": true,
+      "detail": "HTTP 200",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "auth gating: 401 without token",
+      "passed": true,
+      "detail": "HTTP 401",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "reports list 200",
+      "passed": true,
+      "detail": "HTTP 200, total=3",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "demo data present",
+      "passed": true,
+      "detail": "3 reports",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "read report risks",
+      "passed": true,
+      "detail": "HTTP 200 in 26ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "read report tone",
+      "passed": true,
+      "detail": "HTTP 200 in 23ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "read report metrics",
+      "passed": true,
+      "detail": "HTTP 200 in 24ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "read report sections",
+      "passed": true,
+      "detail": "HTTP 200 in 14ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "read report chunks",
+      "passed": true,
+      "detail": "HTTP 200 in 30ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "hybrid search 200",
+      "passed": true,
+      "detail": "HTTP 200 in 37ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "evaluation benchmarks listed",
+      "passed": true,
+      "detail": "HTTP 200",
+      "warn": false,
+      "data": {}
+    }
+  ]
+}

@@ -85,7 +85,7 @@ def cache_endpoint(ttl: int = 3600, prefix: str = "endpoint") -> Callable:
                     continue
                 # For schemas/Pydantic objects, serialize them
                 if hasattr(v, "model_dump"):
-                    key_parts.append(f"{k}:{json.dumps(v.model_dump(), sort_keys=True)}")
+                    key_parts.append(f"{k}:{json.dumps(v.model_dump(mode='json'), sort_keys=True)}")
                 else:
                     key_parts.append(f"{k}:{str(v)}")
 
@@ -109,9 +109,9 @@ def cache_endpoint(ttl: int = 3600, prefix: str = "endpoint") -> Callable:
             # Store in cache (if it is a Pydantic model or dict)
             try:
                 if hasattr(result, "model_dump"):
-                    serialized_res = result.model_dump()
+                    serialized_res = result.model_dump(mode='json')
                 elif isinstance(result, list) and all(hasattr(item, "model_dump") for item in result):
-                    serialized_res = [item.model_dump() for item in result]
+                    serialized_res = [item.model_dump(mode='json') for item in result]
                 else:
                     serialized_res = result
 

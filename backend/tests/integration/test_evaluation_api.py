@@ -118,7 +118,7 @@ async def test_run_evaluation_both_and_metrics(
     )
     assert resp.status_code == 200, resp.text
     runs = resp.json()["runs"]
-    assert {r["retrieval_type"] for r in runs} == {"vector", "hybrid"}
+    assert {r["retrieval_type"] for r in runs} == {"vector", "hybrid", "rag"}
     for r in runs:
         assert r["num_queries"] == 9
         assert r["failures"] == 0

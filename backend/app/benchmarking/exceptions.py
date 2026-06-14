@@ -24,6 +24,12 @@ class MissingReportError(NotFoundError):
     code = "MISSING_REPORT"
 
 
+class CompanyNotFoundError(NotFoundError):
+    """Raised when a requested company ID does not exist (client error, HTTP 404)."""
+
+    code = "COMPANY_NOT_FOUND"
+
+
 class InvalidWeightConfigError(ValidationError):
     """Raised when benchmarking dimension weight configurations are invalid."""
 

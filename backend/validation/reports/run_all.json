@@ -1,0 +1,1868 @@
+{
+  "phase": "12",
+  "overall_ok": true,
+  "duration_s": 21.2,
+  "totals": {
+    "passed": 118,
+    "failed": 0,
+    "warned": 8
+  },
+  "suites": [
+    {
+      "name": "Deployment Audit",
+      "ok": true,
+      "passed": 31,
+      "failed": 0,
+      "warned": 2,
+      "duration_s": 21.219,
+      "measurements": {
+        "migration_count": 14
+      },
+      "checks": [
+        {
+          "name": "docker-compose (dev)",
+          "passed": true,
+          "detail": "docker-compose.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "docker-compose (prod)",
+          "passed": true,
+          "detail": "docker-compose.prod.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "backend Dockerfile",
+          "passed": true,
+          "detail": "backend/Dockerfile",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "backend Dockerfile.prod",
+          "passed": true,
+          "detail": "backend/Dockerfile.prod",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "frontend Dockerfile.prod",
+          "passed": true,
+          "detail": "frontend/Dockerfile.prod",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod image runs as non-root",
+          "passed": true,
+          "detail": "found in backend/Dockerfile.prod",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod image multi-worker uvicorn",
+          "passed": true,
+          "detail": "found in backend/Dockerfile.prod",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "env example (root)",
+          "passed": true,
+          "detail": ".env.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "env example (production)",
+          "passed": true,
+          "detail": ".env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod env documents DATABASE_URL",
+          "passed": true,
+          "detail": "found in .env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod env documents REDIS_URL",
+          "passed": true,
+          "detail": "found in .env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod env documents GEMINI_API_KEY",
+          "passed": true,
+          "detail": "found in .env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod env documents JWT_SECRET",
+          "passed": true,
+          "detail": "found in .env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod env documents CELERY_BROKER_URL",
+          "passed": true,
+          "detail": "found in .env.production.example",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "alembic config",
+          "passed": true,
+          "detail": "backend/alembic.ini",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "alembic migrations present",
+          "passed": true,
+          "detail": "14 revisions",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "migrations auto-applied on deploy",
+          "passed": false,
+          "detail": "no `alembic upgrade head` in entrypoint/compose \u2014 must be run manually before first boot",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "celery worker service defined",
+          "passed": true,
+          "detail": "found in docker-compose.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "redis service defined",
+          "passed": true,
+          "detail": "found in docker-compose.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod redis password-protected",
+          "passed": true,
+          "detail": "found in docker-compose.prod.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "frontend build script",
+          "passed": true,
+          "detail": "found in frontend/package.json",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "frontend build output committed",
+          "passed": true,
+          "detail": "frontend/dist/index.html",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "frontend API base configurable",
+          "passed": true,
+          "detail": "found in frontend/src/services/api.ts",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "startup validates prod secrets",
+          "passed": true,
+          "detail": "found in backend/app/main.py",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "prod config rejects default JWT secret",
+          "passed": true,
+          "detail": "found in backend/app/main.py",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "GitHub Actions CI",
+          "passed": true,
+          "detail": ".github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI runs pytest",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI runs ruff lint",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI builds frontend",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI runs frontend tests (vitest)",
+          "passed": false,
+          "detail": "not found in .github/workflows/ci.yml",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "render manifest",
+          "passed": true,
+          "detail": "infrastructure/deployment/render.yaml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "railway manifest",
+          "passed": true,
+          "detail": "infrastructure/deployment/railway.json",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "vercel manifest",
+          "passed": true,
+          "detail": "infrastructure/deployment/vercel.json",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Smoke Test",
+      "ok": true,
+      "passed": 19,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 21.216,
+      "measurements": {
+        "data_seeded": true
+      },
+      "checks": [
+        {
+          "name": "health endpoint 200",
+          "passed": true,
+          "detail": "HTTP 200 in 5ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "readiness probe 200",
+          "passed": true,
+          "detail": "database=ok, redis=ok, celery=ok, gemini=ok, storage=ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency database ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency redis ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency celery ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency storage ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "openapi served",
+          "passed": true,
+          "detail": "73 paths",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "auth: register+login",
+          "passed": true,
+          "detail": "token len 187",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "auth: /me returns identity",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "auth gating: 401 without token",
+          "passed": true,
+          "detail": "HTTP 401",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "reports list 200",
+          "passed": true,
+          "detail": "HTTP 200, total=3",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "demo data present",
+          "passed": true,
+          "detail": "3 reports",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "read report risks",
+          "passed": true,
+          "detail": "HTTP 200 in 27ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "read report tone",
+          "passed": true,
+          "detail": "HTTP 200 in 25ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "read report metrics",
+          "passed": true,
+          "detail": "HTTP 200 in 27ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "read report sections",
+          "passed": true,
+          "detail": "HTTP 200 in 26ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "read report chunks",
+          "passed": true,
+          "detail": "HTTP 200 in 48ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "hybrid search 200",
+          "passed": true,
+          "detail": "HTTP 200 in 19ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "evaluation benchmarks listed",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "E2E Validation",
+      "ok": true,
+      "passed": 12,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 18.957,
+      "measurements": {
+        "stages_validated": 12,
+        "stages_passed": 12
+      },
+      "checks": [
+        {
+          "name": "Upload\u2192Process: report in terminal status",
+          "passed": true,
+          "detail": "status=TONE_EXTRACTED",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Section extraction produced sections",
+          "passed": true,
+          "detail": "3 sections",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Chunking produced chunks",
+          "passed": true,
+          "detail": "3 chunks",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Embeddings present for chunks",
+          "passed": true,
+          "detail": "{'report_id': '64f29cfa-2a13-5931-9788-911094e2ac15', 'total_chunks': 3, 'embedded_chunks': 3, 'missing_chunks': 0, 'dimension': 768, 'model': 'gemini-embedding-001', 'fully_embedded': True}",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Retrieval: hybrid search returns hits",
+          "passed": true,
+          "detail": "HTTP 200, 5 hits",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Retrieval: RAG assembles grounded context",
+          "passed": true,
+          "detail": "HTTP 200, 5 citations",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Financial extraction produced metrics",
+          "passed": true,
+          "detail": "7 metrics",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Risk extraction produced risks",
+          "passed": true,
+          "detail": "2 risks",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Tone extraction produced tone",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Benchmarking ranks the cohort",
+          "passed": true,
+          "detail": "3/3 ranked",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Memo available & completed",
+          "passed": true,
+          "detail": "HTTP 200, status=COMPLETED",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "Agent endpoint responds",
+          "passed": true,
+          "detail": "HTTP 200 (LLM degraded \u2014 see agent_eval)",
+          "warn": true,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Performance Benchmark",
+      "ok": true,
+      "passed": 8,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 17.417,
+      "measurements": {
+        "iterations": 20,
+        "latency_ms": {
+          "health": {
+            "count": 20,
+            "avg_ms": 2.7,
+            "median_ms": 2.8,
+            "p95_ms": 3.0,
+            "min_ms": 2.3,
+            "max_ms": 3.2
+          },
+          "reports_list": {
+            "count": 20,
+            "avg_ms": 15.7,
+            "median_ms": 15.8,
+            "p95_ms": 20.5,
+            "min_ms": 11.4,
+            "max_ms": 23.1
+          },
+          "report_risks": {
+            "count": 20,
+            "avg_ms": 19.0,
+            "median_ms": 19.4,
+            "p95_ms": 23.2,
+            "min_ms": 14.6,
+            "max_ms": 23.5
+          },
+          "report_tone": {
+            "count": 20,
+            "avg_ms": 18.9,
+            "median_ms": 18.8,
+            "p95_ms": 22.3,
+            "min_ms": 14.9,
+            "max_ms": 22.9
+          },
+          "report_metrics": {
+            "count": 20,
+            "avg_ms": 20.4,
+            "median_ms": 20.0,
+            "p95_ms": 25.0,
+            "min_ms": 16.1,
+            "max_ms": 25.7
+          },
+          "hybrid_search": {
+            "count": 20,
+            "avg_ms": 16.7,
+            "median_ms": 17.1,
+            "p95_ms": 19.0,
+            "min_ms": 11.3,
+            "max_ms": 21.3
+          },
+          "vector_search": {
+            "count": 20,
+            "avg_ms": 16.9,
+            "median_ms": 17.0,
+            "p95_ms": 20.5,
+            "min_ms": 12.7,
+            "max_ms": 22.2
+          },
+          "company_risk_summary": {
+            "count": 20,
+            "avg_ms": 20.8,
+            "median_ms": 19.7,
+            "p95_ms": 27.8,
+            "min_ms": 12.5,
+            "max_ms": 32.9
+          }
+        }
+      },
+      "checks": [
+        {
+          "name": "health",
+          "passed": true,
+          "detail": "avg=2.7ms median=2.8ms p95=3.0ms worst=3.2ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "reports_list",
+          "passed": true,
+          "detail": "avg=15.7ms median=15.8ms p95=20.5ms worst=23.1ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "report_risks",
+          "passed": true,
+          "detail": "avg=19.0ms median=19.4ms p95=23.2ms worst=23.5ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "report_tone",
+          "passed": true,
+          "detail": "avg=18.9ms median=18.8ms p95=22.3ms worst=22.9ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "report_metrics",
+          "passed": true,
+          "detail": "avg=20.4ms median=20.0ms p95=25.0ms worst=25.7ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "hybrid_search",
+          "passed": true,
+          "detail": "avg=16.7ms median=17.1ms p95=19.0ms worst=21.3ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "vector_search",
+          "passed": true,
+          "detail": "avg=16.9ms median=17.0ms p95=20.5ms worst=22.2ms (n=20)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "company_risk_summary",
+          "passed": true,
+          "detail": "avg=20.8ms median=19.7ms p95=27.8ms worst=32.9ms (n=20)",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Retrieval Evaluation",
+      "ok": true,
+      "passed": 8,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 14.776,
+      "measurements": {
+        "runs": {
+          "vector": {
+            "run_id": "e0bf33db-b69c-4076-b4c7-b3372316a4c0",
+            "retrieval_type": "vector",
+            "top_k": 10,
+            "num_queries": 9,
+            "mean_recall_at_k": 0.0,
+            "mean_precision_at_k": 0.0,
+            "mean_mrr": 0.0,
+            "hit_rate": 0.0,
+            "mean_latency_ms": 12.291111,
+            "mean_candidate_reduction_pct": 0.0,
+            "corpus_size": 9,
+            "failures": 0,
+            "timestamp": "2026-06-14T10:56:55.742154+00:00",
+            "per_category": {
+              "FINANCIAL_STATEMENTS": {
+                "num_queries": 3,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GENERAL": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GUIDANCE": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "MANAGEMENT": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "RISK": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              }
+            },
+            "mean_ndcg": 0.0,
+            "reranking_gain": 0.0,
+            "query_rewriting_gain": 0.0,
+            "hyde_gain": 0.0,
+            "results": [
+              {
+                "query": "supply chain risk",
+                "category": "RISK",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 28.25,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.621030+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cybersecurity and data breach risk",
+                "category": "RISK",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 8.67,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.633242+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "operating margin",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 7.26,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.644918+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cash flow",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 9.1,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.658810+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "capital expenditure",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 11.35,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.675446+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "future outlook",
+                "category": "GUIDANCE",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 11.14,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.691757+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "forward guidance for next fiscal year",
+                "category": "GUIDANCE",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 11.87,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.710092+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "management discussion and analysis of results",
+                "category": "MANAGEMENT",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 12.56,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.727952+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "company business overview",
+                "category": "GENERAL",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 10.42,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.741959+00:00",
+                "ndcg": 0.0
+              }
+            ]
+          },
+          "hybrid": {
+            "run_id": "2eb4901d-3139-490a-a8ae-2fb076ba5a3f",
+            "retrieval_type": "hybrid",
+            "top_k": 10,
+            "num_queries": 9,
+            "mean_recall_at_k": 0.0,
+            "mean_precision_at_k": 0.0,
+            "mean_mrr": 0.0,
+            "hit_rate": 0.0,
+            "mean_latency_ms": 8.798889,
+            "mean_candidate_reduction_pct": 88.888889,
+            "corpus_size": 9,
+            "failures": 0,
+            "timestamp": "2026-06-14T10:56:55.861616+00:00",
+            "per_category": {
+              "FINANCIAL_STATEMENTS": {
+                "num_queries": 3,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GENERAL": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GUIDANCE": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "MANAGEMENT": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "RISK": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              }
+            },
+            "mean_ndcg": 0.0,
+            "reranking_gain": 0.0,
+            "query_rewriting_gain": 0.0,
+            "hyde_gain": 0.0,
+            "results": [
+              {
+                "query": "supply chain risk",
+                "category": "RISK",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 10.5,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.771109+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cybersecurity and data breach risk",
+                "category": "RISK",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 6.99,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.780431+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "operating margin",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 9.95,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.792961+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cash flow",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 7.17,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.802663+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "capital expenditure",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 9.14,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.815550+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "future outlook",
+                "category": "GUIDANCE",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 12.48,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.831552+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "forward guidance for next fiscal year",
+                "category": "GUIDANCE",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 7.05,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.840780+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "management discussion and analysis of results",
+                "category": "MANAGEMENT",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 6.25,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.849435+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "company business overview",
+                "category": "GENERAL",
+                "retrieval_type": "hybrid",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 9.66,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:56:55.861474+00:00",
+                "ndcg": 0.0
+              }
+            ]
+          },
+          "rag": {
+            "run_id": "2b5323e1-ed55-444f-b870-79347aabbbfa",
+            "retrieval_type": "rag",
+            "top_k": 10,
+            "num_queries": 9,
+            "mean_recall_at_k": 0.0,
+            "mean_precision_at_k": 0.0,
+            "mean_mrr": 0.0,
+            "hit_rate": 0.0,
+            "mean_latency_ms": 683.845556,
+            "mean_candidate_reduction_pct": 22.222222,
+            "corpus_size": 9,
+            "failures": 0,
+            "timestamp": "2026-06-14T10:57:02.176215+00:00",
+            "per_category": {
+              "FINANCIAL_STATEMENTS": {
+                "num_queries": 3,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GENERAL": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "GUIDANCE": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "MANAGEMENT": {
+                "num_queries": 1,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              },
+              "RISK": {
+                "num_queries": 2,
+                "mean_recall_at_k": 0.0,
+                "mean_precision_at_k": 0.0,
+                "mean_mrr": 0.0,
+                "hit_rate": 0.0,
+                "mean_ndcg": 0.0
+              }
+            },
+            "mean_ndcg": 0.0,
+            "reranking_gain": 0.0,
+            "query_rewriting_gain": 0.0,
+            "hyde_gain": 0.0,
+            "results": [
+              {
+                "query": "supply chain risk",
+                "category": "RISK",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 4953.25,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:00.849784+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cybersecurity and data breach risk",
+                "category": "RISK",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 1091.33,
+                "candidate_count": 0,
+                "candidate_reduction_pct": 100.0,
+                "returned": 0,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:01.955948+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "operating margin",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 19.25,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:01.995995+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cash flow",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 15.85,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.023078+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "capital expenditure",
+                "category": "FINANCIAL_STATEMENTS",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 12.85,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.047145+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "future outlook",
+                "category": "GUIDANCE",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 14.53,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.078525+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "forward guidance for next fiscal year",
+                "category": "GUIDANCE",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 15.01,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.112095+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "management discussion and analysis of results",
+                "category": "MANAGEMENT",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 16.83,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.143196+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "company business overview",
+                "category": "GENERAL",
+                "retrieval_type": "rag",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 15.71,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-14T10:57:02.176019+00:00",
+                "ndcg": 0.0
+              }
+            ]
+          }
+        }
+      },
+      "checks": [
+        {
+          "name": "vector: pipeline executed & metrics returned",
+          "passed": true,
+          "detail": "recall_at_k=0.0, precision_at_k=0.0, mrr=0.0, hit_rate=0.0, ndcg=0.0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "vector: queries evaluated",
+          "passed": true,
+          "detail": "num_queries=9, corpus_size=9, latency=12.291111ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "hybrid: pipeline executed & metrics returned",
+          "passed": true,
+          "detail": "recall_at_k=0.0, precision_at_k=0.0, mrr=0.0, hit_rate=0.0, ndcg=0.0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "hybrid: queries evaluated",
+          "passed": true,
+          "detail": "num_queries=9, corpus_size=9, latency=8.798889ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rag: pipeline executed & metrics returned",
+          "passed": true,
+          "detail": "recall_at_k=0.0, precision_at_k=0.0, mrr=0.0, hit_rate=0.0, ndcg=0.0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rag: queries evaluated",
+          "passed": true,
+          "detail": "num_queries=9, corpus_size=9, latency=683.845556ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "hybrid recall \u2265 vector baseline",
+          "passed": true,
+          "detail": "vector=0 hybrid=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "RAG exposes stage-attribution gains",
+          "passed": true,
+          "detail": "reranking_gain=0.0, query_rewriting_gain=0.0, hyde_gain=0.0",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Memo Evaluation",
+      "ok": true,
+      "passed": 13,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 8.163,
+      "measurements": {
+        "section_count": 3,
+        "citation_count": 4,
+        "citation_coverage": 1.0,
+        "grounding_rate": 1.0
+      },
+      "checks": [
+        {
+          "name": "memo detail 200",
+          "passed": true,
+          "detail": "status=COMPLETED",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "memo is COMPLETED",
+          "passed": true,
+          "detail": "COMPLETED",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "executive summary present",
+          "passed": true,
+          "detail": "229 chars",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "section completeness",
+          "passed": true,
+          "detail": "have=['Bear Case', 'Bull Case', 'Investment Thesis']",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "bull case present & non-empty",
+          "passed": true,
+          "detail": "129 chars",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "bear case present & non-empty",
+          "passed": true,
+          "detail": "123 chars",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "bear case names a risk",
+          "passed": true,
+          "detail": "mentions risk/downside",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "citations endpoint 200",
+          "passed": true,
+          "detail": "4 citations",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "citation coverage \u2265 80% of sections",
+          "passed": true,
+          "detail": "3/3 sections cite (100%)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "grounding rate = 100%",
+          "passed": true,
+          "detail": "4/4 citations grounded (100%)",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "citations reference this report",
+          "passed": true,
+          "detail": "all report_id match",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "export markdown",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "export json",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Benchmark Evaluation",
+      "ok": true,
+      "passed": 9,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 8.078,
+      "measurements": {
+        "actual_order": [
+          "DEMO-APX",
+          "DEMO-BLT",
+          "DEMO-CTX"
+        ],
+        "summaries": [
+          {
+            "company_id": "42f1ec8c-0a5f-577e-857b-243c43cfd66f",
+            "company_name": "Apex Robotics Inc.",
+            "ticker": "DEMO-APX",
+            "scores": {
+              "FINANCIAL": 100.0,
+              "RISK": 100.0,
+              "TONE": 100.0,
+              "CAPITAL_ALLOCATION": 100.0
+            },
+            "rank": 1
+          },
+          {
+            "company_id": "8a0ce784-7b30-5393-9b8b-34e4c4ec8766",
+            "company_name": "Bolt Dynamics Corp.",
+            "ticker": "DEMO-BLT",
+            "scores": {
+              "FINANCIAL": 36.898061288305186,
+              "RISK": 50.0,
+              "TONE": 72.30263157894737,
+              "CAPITAL_ALLOCATION": 37.5
+            },
+            "rank": 2
+          },
+          {
+            "company_id": "6c98d9b1-800b-5341-84df-97516e1502f9",
+            "company_name": "Cortex Systems plc",
+            "ticker": "DEMO-CTX",
+            "scores": {
+              "FINANCIAL": 0.0,
+              "RISK": 83.33333333333333,
+              "TONE": 50.0,
+              "CAPITAL_ALLOCATION": 0.0
+            },
+            "rank": 3
+          }
+        ]
+      },
+      "checks": [
+        {
+          "name": "benchmark compare 200",
+          "passed": true,
+          "detail": "HTTP 200 in 73ms",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "all cohort members summarised",
+          "passed": true,
+          "detail": "3/3",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "every company has scores + rank",
+          "passed": true,
+          "detail": "3/3",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "ranks are a valid 1..N permutation",
+          "passed": true,
+          "detail": "ranks=[1, 2, 3]",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "ranking matches known ground truth",
+          "passed": true,
+          "detail": "expected=['DEMO-APX', 'DEMO-BLT', 'DEMO-CTX'] actual=['DEMO-APX', 'DEMO-BLT', 'DEMO-CTX']",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "strongest company scores above weakest",
+          "passed": true,
+          "detail": "APX_mean_dim=100.0 CTX_mean_dim=33.3",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "all four scoring dimensions populated",
+          "passed": true,
+          "detail": "populated=['FINANCIAL', 'RISK', 'TONE', 'CAPITAL_ALLOCATION']",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "duplicate-company input handled gracefully",
+          "passed": true,
+          "detail": "HTTP 422",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "unknown company id \u2192 404 (not 500)",
+          "passed": true,
+          "detail": "HTTP 404",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Security Audit",
+      "ok": true,
+      "passed": 11,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 7.964,
+      "measurements": {
+        "login_status_sequence": [
+          401,
+          401,
+          401,
+          429,
+          429,
+          429,
+          429,
+          429
+        ]
+      },
+      "checks": [
+        {
+          "name": "authn: anonymous \u2192 401",
+          "passed": true,
+          "detail": "HTTP 401",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "authn: malformed token \u2192 401",
+          "passed": true,
+          "detail": "HTTP 401",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rbac: viewer blocked from analyst action (403)",
+          "passed": true,
+          "detail": "HTTP 403",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rbac: viewer allowed to read (200)",
+          "passed": true,
+          "detail": "HTTP 200",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "upload validation: non-PDF rejected (4xx)",
+          "passed": true,
+          "detail": "HTTP 422",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "header: content-security-policy",
+          "passed": true,
+          "detail": "default-src 'self'; frame-ancestors 'none'; object-src 'none';",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "header: x-frame-options",
+          "passed": true,
+          "detail": "DENY",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "header: x-content-type-options",
+          "passed": true,
+          "detail": "nosniff",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "header: referrer-policy",
+          "passed": true,
+          "detail": "strict-origin-when-cross-origin",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "secret handling: no secrets in responses",
+          "passed": true,
+          "detail": "scanned /status + auth error bodies",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rate limiting: login limiter trips (429)",
+          "passed": true,
+          "detail": "statuses=[401, 401, 401, 429, 429, 429, 429, 429]",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Load Test",
+      "ok": true,
+      "passed": 4,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 5.059,
+      "measurements": {
+        "concurrency": 10,
+        "total_requests": 60,
+        "scenarios": {
+          "concurrent reports list": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 60,
+            "throttled_429": 0,
+            "failed": 0,
+            "success_rate": 1.0,
+            "wall_s": 0.703,
+            "throughput_rps": 85.4,
+            "latency": {
+              "count": 60,
+              "avg_ms": 90.4,
+              "median_ms": 92.4,
+              "p95_ms": 105.5,
+              "min_ms": 65.1,
+              "max_ms": 129.9
+            },
+            "status_breakdown": {
+              "200": 60
+            }
+          },
+          "concurrent hybrid queries": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 38,
+            "throttled_429": 22,
+            "failed": 0,
+            "success_rate": 0.633,
+            "wall_s": 0.59,
+            "throughput_rps": 101.7,
+            "latency": {
+              "count": 60,
+              "avg_ms": 74.8,
+              "median_ms": 69.5,
+              "p95_ms": 131.5,
+              "min_ms": 44.5,
+              "max_ms": 145.3
+            },
+            "status_breakdown": {
+              "200": 38,
+              "429": 22
+            }
+          },
+          "concurrent vector queries": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 40,
+            "throttled_429": 20,
+            "failed": 0,
+            "success_rate": 0.667,
+            "wall_s": 0.536,
+            "throughput_rps": 111.9,
+            "latency": {
+              "count": 60,
+              "avg_ms": 66.0,
+              "median_ms": 62.3,
+              "p95_ms": 102.6,
+              "min_ms": 29.7,
+              "max_ms": 116.5
+            },
+            "status_breakdown": {
+              "200": 40,
+              "429": 20
+            }
+          }
+        }
+      },
+      "checks": [
+        {
+          "name": "concurrent reports list",
+          "passed": true,
+          "detail": "60/60 2xx @ c=10, 85.4 rps, p95=105.5ms, worst=129.9ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "concurrent hybrid queries",
+          "passed": true,
+          "detail": "38/60 2xx @ c=10, 22 throttled(429), 101.7 rps, p95=131.5ms, worst=145.3ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "concurrent vector queries",
+          "passed": true,
+          "detail": "40/60 2xx @ c=10, 20 throttled(429), 111.9 rps, p95=102.6ms, worst=116.5ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rate limiter protects under burst (no 5xx)",
+          "passed": true,
+          "detail": "per-user 429 throttling observed \u2014 documented concurrency ceiling",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Agent Evaluation",
+      "ok": true,
+      "passed": 3,
+      "failed": 0,
+      "warned": 6,
+      "duration_s": 3.229,
+      "measurements": {
+        "llm_degraded": true,
+        "cases": 5,
+        "answered": 0,
+        "tool_selection_accuracy": 0.4,
+        "citation_accuracy": 0.0,
+        "answer_grounding": 0.8,
+        "evidence_coverage": 1.0
+      },
+      "checks": [
+        {
+          "name": "[financial] fin-revenue",
+          "passed": false,
+          "detail": "intent=RAG_RETRIEVAL (exp ['METRIC_EXTRACTION', 'RAG_RETRIEVAL'], hit); cites=0; findings=1; grounded=yes in 1.0s",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "[risk] risk-top",
+          "passed": false,
+          "detail": "intent=RAG_RETRIEVAL (exp ['RISK_ANALYSIS'], miss); cites=0; findings=1; grounded=yes in 0.6s",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "[risk] risk-critical",
+          "passed": false,
+          "detail": "intent=RAG_RETRIEVAL (exp ['RISK_ANALYSIS'], miss); cites=0; findings=1; grounded=yes in 0.5s",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "[tone] tone-sentiment",
+          "passed": false,
+          "detail": "intent=RAG_RETRIEVAL (exp ['TONE_ANALYSIS'], miss); cites=0; findings=1; grounded=no in 0.5s",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "[mixed] mixed-thesis",
+          "passed": true,
+          "detail": "intent=RAG_RETRIEVAL (exp ['RAG_RETRIEVAL', 'RISK_ANALYSIS', 'METRIC_EXTRACTION', 'TONE_ANALYSIS'], hit); cites=0; findings=1; grounded=yes in 0.6s",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "aggregate: tool-selection accuracy \u2265 0.6",
+          "passed": false,
+          "detail": "40% (2/5)",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "aggregate: citation accuracy \u2265 0.6",
+          "passed": false,
+          "detail": "0% (0/4)",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "aggregate: answer grounding \u2265 0.6",
+          "passed": true,
+          "detail": "80% (4/5)",
+          "warn": true,
+          "data": {}
+        },
+        {
+          "name": "aggregate: evidence coverage \u2265 0.6",
+          "passed": true,
+          "detail": "100% (5/5)",
+          "warn": true,
+          "data": {}
+        }
+      ]
+    }
+  ]
+}

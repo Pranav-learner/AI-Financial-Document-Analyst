@@ -159,7 +159,7 @@ async def agent_chat(
     payload: ChatRequest,
     db: AsyncSession = Depends(get_db),
 ) -> ChatResponse:
-    guard_prompt(payload.message)
+    guard_prompt(payload.query)
     repo = ConversationRepository(db)
     
     # 1. Resolve or create thread

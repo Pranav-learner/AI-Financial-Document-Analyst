@@ -1,0 +1,107 @@
+{
+  "name": "Memo Evaluation",
+  "ok": true,
+  "passed": 13,
+  "failed": 0,
+  "warned": 0,
+  "duration_s": 1.279,
+  "measurements": {
+    "section_count": 3,
+    "citation_count": 4,
+    "citation_coverage": 1.0,
+    "grounding_rate": 1.0
+  },
+  "checks": [
+    {
+      "name": "memo detail 200",
+      "passed": true,
+      "detail": "status=COMPLETED",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "memo is COMPLETED",
+      "passed": true,
+      "detail": "COMPLETED",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "executive summary present",
+      "passed": true,
+      "detail": "229 chars",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "section completeness",
+      "passed": true,
+      "detail": "have=['Bear Case', 'Bull Case', 'Investment Thesis']",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "bull case present & non-empty",
+      "passed": true,
+      "detail": "129 chars",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "bear case present & non-empty",
+      "passed": true,
+      "detail": "123 chars",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "bear case names a risk",
+      "passed": true,
+      "detail": "mentions risk/downside",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "citations endpoint 200",
+      "passed": true,
+      "detail": "4 citations",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "citation coverage \u2265 80% of sections",
+      "passed": true,
+      "detail": "3/3 sections cite (100%)",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "grounding rate = 100%",
+      "passed": true,
+      "detail": "4/4 citations grounded (100%)",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "citations reference this report",
+      "passed": true,
+      "detail": "all report_id match",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "export markdown",
+      "passed": true,
+      "detail": "HTTP 200",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "export json",
+      "passed": true,
+      "detail": "HTTP 200",
+      "warn": false,
+      "data": {}
+    }
+  ]
+}

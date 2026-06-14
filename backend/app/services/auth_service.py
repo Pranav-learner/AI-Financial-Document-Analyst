@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.exceptions import AuthenticationError, DuplicateUserError, NotFoundError
+from app.core.exceptions import AuthenticationError, DuplicateUserError
 from app.core.security import (
     create_access_token,
     create_refresh_token,
@@ -66,7 +66,7 @@ class AuthService:
 
         return user
 
-    @classmethod
+    @staticmethod
     async def login_user(
         db: AsyncSession,
         user: User,
@@ -76,7 +76,7 @@ class AuthService:
         refresh_token_str = create_refresh_token(subject=user.id)
 
         # Set expiration (7 days from now by default)
-        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        expires_at = datetime.now(UTC) + timedelta(days=7)
 
         token_record = RefreshToken(
             user_id=user.id,
@@ -103,7 +103,6 @@ class AuthService:
             payload = decode_token(refresh_token_str)
             if payload.get("type") != "refresh":
                 raise AuthenticationError("Invalid token type")
-            user_id = payload.get("sub")
         except Exception as e:
             raise AuthenticationError("Invalid refresh token") from e
 
@@ -115,7 +114,7 @@ class AuthService:
         if token_record is None or token_record.revoked:
             raise AuthenticationError("Refresh token has been revoked or is invalid")
 
-        if token_record.expires_at.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        if token_record.expires_at.replace(tzinfo=UTC) < datetime.now(UTC):
             raise AuthenticationError("Refresh token has expired")
 
         # Query user
@@ -132,7 +131,7 @@ class AuthService:
         # Generate new pair
         new_access_token = create_access_token(subject=user.id)
         new_refresh_token_str = create_refresh_token(subject=user.id)
-        new_expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        new_expires_at = datetime.now(UTC) + timedelta(days=7)
 
         new_token_record = RefreshToken(
             user_id=user.id,

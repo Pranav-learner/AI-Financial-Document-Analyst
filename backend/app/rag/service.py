@@ -3,20 +3,39 @@
 from __future__ import annotations
 
 import time
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
-from app.rag.query_rewriting.query_rewriter import QueryRewriter
-from app.rag.hyde.hyde_service import HyDEService
-from app.rag.reranking.rerank_service import RerankService
 from app.rag.context.context_builder import ContextBuilder
-from app.rag.strategy import get_strategy_config, RetrievalStrategy
+from app.rag.context.models import ContextPackage
+from app.rag.hyde.hyde_service import HyDEService
+from app.rag.query_rewriting.query_rewriter import QueryRewriter
+from app.rag.reranking.rerank_service import RerankService
+from app.rag.strategy import RetrievalStrategy, get_strategy_config
+from app.retrieval.embeddings.gemini_provider import GeminiEmbeddingProvider
 from app.retrieval.hybrid import HybridRetrievalService, RetrievalContext
 from app.retrieval.search.query_embedding import QueryEmbedder
-from app.retrieval.embeddings.gemini_provider import GeminiEmbeddingProvider
-from app.rag.context.models import ContextPackage
+from sqlalchemy.ext.asyncio import AsyncSession
 
 log = get_logger(__name__)
+
+
+# RAG strategies (app/rag/strategy.py) and hybrid-search profiles
+# (app/retrieval/hybrid/retrieval_profiles.py) are distinct vocabularies. Map the
+# former to the latter so the section-preference profile resolves; without this,
+# every strategy except RISK_ANALYSIS raised UnknownProfileError and broke agent
+# retrieval (Phase 12 bug sweep).
+_STRATEGY_TO_PROFILE = {
+    "GENERAL_ANALYSIS": "GENERAL",
+    "FINANCIAL_METRICS": "FINANCIAL_STATEMENTS",
+    "RISK_ANALYSIS": "RISK_ANALYSIS",
+    "TONE_ANALYSIS": "MANAGEMENT_TONE",
+    "GUIDANCE_ANALYSIS": "GUIDANCE",
+}
+
+
+def _resolve_profile(strategy_name: str | None) -> str:
+    """Translate a RAG strategy name into a hybrid-search profile name."""
+    return _STRATEGY_TO_PROFILE.get((strategy_name or "GENERAL_ANALYSIS").upper(), "GENERAL")
 
 
 class AdvancedRAGService:
@@ -130,7 +149,7 @@ class AdvancedRAGService:
                 query=q,
                 context=context,
                 top_k=depth,
-                profile=steps["resolved_strategy"]
+                profile=_resolve_profile(steps["resolved_strategy"]),
             )
             search_steps.append({
                 "query": q,

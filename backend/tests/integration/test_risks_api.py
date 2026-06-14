@@ -99,7 +99,9 @@ def test_risk_tasks_ingestion_and_evolution(sync_session: Session) -> None:
     # Verify risk factor was created
     rf_2023 = sync_session.query(RiskFactor).filter_by(report_id=report_2023_id).all()
     assert len(rf_2023) >= 1
-    assert rf_2023[0].severity == "LOW"  # matches "minor"
+    supply_chain_rf_2023 = next((r for r in rf_2023 if r.normalized_risk_name == "SUPPLY_CHAIN_RISK"), None)
+    assert supply_chain_rf_2023 is not None
+    assert supply_chain_rf_2023.severity == "LOW"  # matches "minor"
 
     # Mock Celery delay again
     with patch("app.tasks.ingestion.generate_risk_evolution_task.delay") as mock_delay:
@@ -111,7 +113,9 @@ def test_risk_tasks_ingestion_and_evolution(sync_session: Session) -> None:
 
     rf_2024 = sync_session.query(RiskFactor).filter_by(report_id=report_2024_id).all()
     assert len(rf_2024) >= 1
-    assert rf_2024[0].severity == "CRITICAL"  # matches "existential threat"
+    supply_chain_rf_2024 = next((r for r in rf_2024 if r.normalized_risk_name == "SUPPLY_CHAIN_RISK"), None)
+    assert supply_chain_rf_2024 is not None
+    assert supply_chain_rf_2024.severity == "CRITICAL"  # matches "existential threat"
 
     # 3. Generate risk evolution for 2024 report (since there is a prior 2023 report)
     res_evol = generate_risk_evolution_task(str(report_2024_id))
@@ -122,9 +126,10 @@ def test_risk_tasks_ingestion_and_evolution(sync_session: Session) -> None:
     evolutions = sync_session.query(RiskEvolution).filter_by(company_id=company_id).all()
     assert len(evolutions) >= 1
     # Check that it's ESCALATED_RISK since it went from LOW to CRITICAL
-    assert evolutions[0].evolution_type == "ESCALATED_RISK"
-    assert evolutions[0].previous_risk_id == rf_2023[0].id
-    assert evolutions[0].current_risk_id == rf_2024[0].id
+    sc_evol = next((e for e in evolutions if e.evolution_type == "ESCALATED_RISK"), None)
+    assert sc_evol is not None
+    assert sc_evol.previous_risk_id == supply_chain_rf_2023.id
+    assert sc_evol.current_risk_id == supply_chain_rf_2024.id
 
 
 @pytest.mark.integration
@@ -142,7 +147,8 @@ async def test_risks_api_endpoints(api_client: AsyncClient, sync_session: Sessio
     assert resp.status_code == 200
     listing = resp.json()
     assert listing["count"] >= 1
-    risk = listing["items"][0]
+    risk = next((r for r in listing["items"] if r["normalized_risk_name"] == "SUPPLY_CHAIN_RISK"), None)
+    assert risk is not None
     assert risk["risk_name"] is not None
     assert risk["severity"] == "CRITICAL"
     assert risk["category"] == "SUPPLY_CHAIN"

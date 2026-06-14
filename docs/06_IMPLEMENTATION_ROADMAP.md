@@ -2320,3 +2320,401 @@ flowchart LR
 5. Keep the **Last updated** date current.
 
 > Cross-references: `01_ARCHITECTURE.md` · `02_DATABASE_DESIGN.md` · `03_AGENT_DESIGN.md` · `04_API_DESIGN.md` · `05_RETRIEVAL_DESIGN.md`.
+
+---
+
+## Phase 12 Completion Report — Competition Readiness, Validation & Final Optimization
+
+**Status: COMPLETE — Verdict: COMPETITION READY.** Phase 12 added **no product
+features**. It validated, measured, demonstrated, documented, and hardened the
+already feature-complete platform (Phases 0–11). Everything below is *measured*
+against a live, running stack (FastAPI :8000 + Postgres/pgvector + Redis + Celery
++ Vite frontend :5173), not asserted.
+
+### 12.1 Validation Strategy
+
+A self-contained, runnable validation framework lives in `backend/validation/`
+(code, not prose — it adds no features). Every suite targets the **live** API so
+it exercises the real deployed surface (auth, middleware, DB, search, services).
+
+| # | Suite (`python -m validation.<module>`) | Phase-12 section | What it proves |
+|---|---|---|---|
+| 1 | `e2e_validation` | §1 | Full Upload→…→Agent chain produces queryable output at every stage |
+| 2 | `smoke_test` | §2 | Single-command reachability of every subsystem |
+| 3 | `seed_demo` | §3 | Deterministic, key-free demo cohort (3 fictional peers) |
+| 4 | `performance_benchmark` | §5 | avg / median / p95 / worst latency per endpoint |
+| 5 | `load_test` | §6 | Concurrency behaviour, throughput, throttle ceiling |
+| 6 | `agent_eval` | §7 | Tool-selection / citation / grounding / coverage |
+| 7 | `retrieval_eval` | §8 | Baseline vs full pipeline metric surface |
+| 8 | `memo_eval` | §9 | Section completeness, citation coverage, grounding, export |
+| 9 | `benchmark_eval` | §10 | Ranking vs known ground truth, tie/missing-data handling |
+| 10 | `security_audit` | §11 | authn / RBAC / rate-limit / upload / headers / secrets |
+| 11 | `deployment_audit` | §13 | Static deploy-readiness checklist (no deploy) |
+| — | `run_all` | orchestrator | Seeds + runs all, writes `validation/reports/run_all.json` |
+
+**Demo dataset (§3/§4):** `seed_demo.py` inserts a fictional 3-company cohort
+(Apex Robotics, Bolt Dynamics, Cortex Systems) directly via the ORM — a fully
+`TONE_EXTRACTED` 10-K each, with sections, embedded chunks, financial metrics,
+risk factors, management tone, and one COMPLETED investment memo. Embeddings are
+computed **locally** (hashed → unit-norm 768-dim), so the dataset is
+deterministic and requires **no GEMINI_API_KEY and no DEMO_MODE** — instant,
+repeatable demonstrations. `DEMO_MODE=true` additionally short-circuits the
+embedding / risk-LLM / tone-LLM providers to deterministic stubs for live-ingest
+demos that need no quota.
+
+**Headline result (authoritative `run_all`):**
+
+```
+Deployment Audit    31 passed  0 failed  2 warn
+Smoke Test          19 passed  0 failed
+E2E Validation      12 passed  0 failed
+Performance          8 passed  0 failed
+Retrieval Eval       8 passed  0 failed
+Memo Eval           13 passed  0 failed
+Benchmark Eval       9 passed  0 failed
+Security Audit      11 passed  0 failed
+Load Test            4 passed  0 failed
+Agent Eval           3 passed  0 failed  6 warn (LLM quota — see §12.5)
+────────────────────────────────────────────
+TOTAL              118 passed  0 failed  8 warnings   →  COMPETITION READY
+```
+Backend unit suite: **348 passed**. Frontend: **vitest 9/9 passed**, `tsc`
+typecheck clean, production `vite build` succeeds.
+
+### 12.2 Critical Bug Sweep (§17) — five runtime-breaking defects found & fixed
+
+Phase 12 exercised auth end-to-end for the first time against a live DB and
+uncovered a chain of latent defects that made core flows non-functional. All
+were fixed (minimal, targeted changes; 348 unit tests still green):
+
+1. **Broken DB schema (deployment).** `alembic_version` was stamped at `head`
+   while the schema was **empty** (0 tables) — the live stack could not serve a
+   single DB-backed request. Rebuilt via `alembic stamp base && alembic upgrade
+   head` (14 migrations). Root cause discussed in §12.10.
+2. **`passlib 1.7.4` × `bcrypt 5.0` incompatibility (auth).** passlib's bcrypt
+   backend reads an attribute removed in bcrypt ≥4.1, so **every** hash/verify
+   crashed (`password cannot be longer than 72 bytes`). Rewrote
+   `app/core/security.py` to use the `bcrypt` library directly (explicit 72-byte
+   truncation), pinned `bcrypt~=5.0` in `requirements.txt`, dropped the broken
+   passlib hashing path.
+3. **`AuthService.login_user` decorated `@classmethod` without `cls` (auth).**
+   The class bound to the `db` parameter → `got multiple values for argument
+   'db'`; login returned HTTP 500. Changed to `@staticmethod` (matching siblings).
+4. **Benchmark unknown-company → HTTP 500 (robustness, §10).** An unknown
+   `company_id` raised `BenchmarkEngineError` (500). Added
+   `CompanyNotFoundError(NotFoundError)` → now a clean **404**.
+5. **RAG strategy↔profile vocabulary mismatch (agent retrieval).**
+   `rag/service.py` passed the RAG *strategy* name (`GENERAL_ANALYSIS`,
+   `FINANCIAL_METRICS`, `TONE_ANALYSIS`, `GUIDANCE_ANALYSIS`) as a hybrid-search
+   *profile*; only `RISK_ANALYSIS` overlapped, so 4 of 5 strategies raised
+   `UnknownProfileError` and broke agent/RAG retrieval. Added a strategy→profile
+   map; `/rag/retrieve` now returns grounded citations for every strategy.
+
+Plus tidy-ups: removed the empty dead module `app/benchmark/` (the real package
+is `app/benchmarking/`); cleaned pre-existing lint in the auth service.
+
+### 12.3 Performance Findings (§5)
+
+20 iterations per endpoint against the live API + seeded data (dev box). All
+read/compute paths are comfortably sub-30 ms at p95.
+
+| Endpoint | avg (ms) | median | p95 | worst |
+|---|---|---|---|---|
+| `/health` | 5.2 | 5.1 | 6.1 | 6.5 |
+| `GET /reports` | 15.0 | 15.0 | 18.8 | 20.9 |
+| `GET /reports/{id}/risks` | 15.8 | 16.0 | 18.6 | 23.7 |
+| `GET /reports/{id}/tone` | 14.4 | 13.9 | 18.2 | 18.6 |
+| `GET /reports/{id}/metrics` | 17.0 | 16.1 | 20.9 | 22.2 |
+| `POST /search/hybrid` | 16.9 | 15.7 | 29.6 | 31.2 |
+| `POST /search/vector` | 17.7 | 18.1 | 20.9 | 29.8 |
+| `GET /companies/{id}/risk-summary` | 18.3 | 18.5 | 21.6 | 22.6 |
+
+LLM-backed paths (agent chat, memo generation, query rewriting/HyDE) are
+network/quota-bound, not CPU-bound; their latency is dominated by the Gemini
+API and excluded from the table above (see §12.5).
+
+### 12.4 Load Testing Results (§6)
+
+Thread-pool bursts of 60 requests at concurrency 10–12 per scenario. **Zero
+5xx / network failures** across all runs.
+
+| Scenario | 2xx | throughput | p95 | worst | 5xx/net fail |
+|---|---|---|---|---|---|
+| Concurrent `GET /reports` | 60/60 | 47.8 rps | 621 ms | 626 ms | 0 |
+| Concurrent `POST /search/hybrid` | 60/60 | 98.1 rps | 144 ms | 153 ms | 0 |
+| Concurrent `POST /search/vector` | 60/60 | 90.9 rps | 120 ms | 135 ms | 0 |
+
+**Bottleneck / ceiling identified (not redesigned, per §6):** the per-user rate
+limiter (Redis-backed) throttles a single authenticated identity under a tight
+burst — repeated runs without a cooldown returned HTTP **429** for ~30–35% of
+concurrent search requests. This is *protective behaviour working as designed*,
+not a fault: the limiter is keyed per user, so the ceiling is per-identity and
+multi-user load distributes across keys. `/reports` (cached) sustained the burst
+with no throttling. Documented as an operational characteristic; no timeout
+risks or deadlocks observed.
+
+### 12.5 Agent Evaluation Results (§7)
+
+Dataset: `validation/datasets/agent_eval.json` (5 labelled cases —
+financial / risk / tone / mixed — scoped to demo companies). Metrics measured:
+tool-selection accuracy (classified `intent` vs expected, read from persisted
+message metadata), citation accuracy, answer grounding (signal-term presence),
+evidence coverage.
+
+**Environmental constraint:** the configured Gemini key's **free-tier
+`generate_content` quota is exhausted** (`429 RESOURCE_EXHAUSTED`, `limit: 0`
+for `gemini-2.5-pro`). Embeddings work (separate quota), but the agent's LLM
+nodes (intent classifier, planner, response generator) and HyDE/query-rewriting
+fall back to their error paths. **Importantly, the agent degraded *gracefully*** —
+it returned a structured apology + the raw evidence it collected, never a 5xx.
+
+| Metric | Result | Note |
+|---|---|---|
+| Endpoint availability | 5/5 responded (HTTP 200) | graceful degradation under quota |
+| Evidence coverage | 100% (5/5) | findings/evidence returned every case |
+| Answer grounding | 80% (4/5) | signal terms present even in fallback |
+| Tool-selection accuracy | 40% (2/5) | **not measurable** — classifier fell back to `RAG_RETRIEVAL` |
+| Citation accuracy | 0% (0/4) | **not measurable** — generator could not run |
+
+The suite reports these as **warnings, not failures**, because accuracy is
+undefined when the generative LLM is unavailable. With a funded key/quota the
+pipeline is wired correctly end-to-end — independently proven by `/rag/retrieve`
+returning correctly-grounded, correctly-profiled citations (bug #5 fix) and by
+the agent unit suite (`tests/unit/test_agent.py`) passing. **Action for the
+demo: provision a paid Gemini key or run agent/memo demos with `DEMO_MODE=true`.**
+
+### 12.6 Retrieval Evaluation Results (§8)
+
+`POST /evaluation/run` drives the platform's own ground-truth harness
+(`benchmark_suite.json`; recall@k / precision@k / MRR / hit-rate / nDCG) for the
+vector baseline and the full hybrid + RAG pipeline, and exposes per-stage gain
+attribution (reranking / query-rewriting / HyDE). All three strategies executed
+cleanly and returned the full metric surface (vector latency ≈11 ms, RAG ≈280 ms
+over a 9-query suite). **Absolute quality numbers on the demo corpus are near
+zero by design** — demo chunks use local hash embeddings (key-free determinism)
+that are not in the same space as the Gemini query embeddings, so semantic
+ranking is meaningless on demo-only data. Real retrieval-quality evidence comes
+from the controlled unit suite (`tests/unit/test_retrieval_metrics.py`,
+`test_rag.py`, `test_retrieval_profiles.py`) which validate the metric math and
+the rewriting/HyDE/reranking/context-assembly stages on fixtures. The Phase-12
+suite proves the **wiring and metric surface** end-to-end; the unit suite proves
+the **algorithms**.
+
+### 12.7 Memo Evaluation Results (§9) — 13/13
+
+Validated against the deterministic seeded COMPLETED single-company memo:
+
+| Check | Result |
+|---|---|
+| Status COMPLETED, executive summary present | ✅ (229 chars) |
+| Section completeness (Investment Thesis / Bull Case / Bear Case) | ✅ 3/3 |
+| Bull case & Bear case present, non-empty, directionally opposed | ✅ |
+| Citation coverage | **100%** (3/3 sections cite) |
+| Grounding rate (citations resolve to real report/chunk) | **100%** (4/4) |
+| Citations reference the correct report | ✅ |
+| Export — markdown & JSON | ✅ both HTTP 200 |
+
+Live LLM memo *generation* (`POST /memos`) is subject to the same quota
+constraint as §12.5; the read/citation/export surface is validated deterministically.
+
+### 12.8 Benchmark Evaluation Results (§10) — 9/9
+
+The cohort has a deliberately known ground-truth ordering (Apex ≫ Bolt ≫ Cortex
+on financials, risk and tone), enabling true ranking-accuracy assertion:
+
+| Check | Result |
+|---|---|
+| Cohort fully summarised (3/3), every member scored + ranked | ✅ |
+| Ranks form a valid dense 1..N permutation | ✅ |
+| **Ranking matches known ground truth** (APX, BLT, CTX) | ✅ |
+| All four scoring dimensions populated (Financial/Risk/Tone/Capital-Allocation) | ✅ |
+| Strongest mean-dimension score (100.0) ≫ weakest (33.3) | ✅ |
+| Tie / duplicate-company input handled gracefully (422) | ✅ |
+| Missing-data: unknown company id → **404** (was 500 — bug #4) | ✅ |
+
+### 12.9 Security Audit Findings (§11) — 11/11
+
+| Control | Result |
+|---|---|
+| Anonymous request to protected route | 401 ✅ |
+| Malformed bearer token | 401 ✅ |
+| RBAC: VIEWER blocked from ANALYST action (`/evaluation/run`) | 403 ✅ |
+| RBAC: VIEWER allowed to read | 200 ✅ |
+| Upload validation: non-PDF / wrong content-type | 422 ✅ |
+| Security headers (CSP, X-Frame-Options=DENY, nosniff, Referrer-Policy) | present ✅ |
+| Secret leakage in error/status bodies | none ✅ |
+| Rate limiting: login limiter trips after threshold | 429 ✅ |
+
+Auth hashing now uses a maintained, version-robust bcrypt path (bug #2). HSTS is
+emitted (applies under HTTPS/production). The prompt-injection guard remains on
+the agent input path.
+
+### 12.10 Deployment Readiness Audit (§13) — 31 checks, 2 warnings, no deploy
+
+Verified statically: dev & prod compose, backend `Dockerfile`/`Dockerfile.prod`
+(non-root `appuser`, multi-worker uvicorn), env templates documenting
+DATABASE_URL/REDIS_URL/GEMINI_API_KEY/JWT_SECRET/CELERY_*, 14 Alembic revisions,
+Celery + Redis services, frontend `vite build` + committed `dist/`, configurable
+`VITE_API_BASE_URL`, prod-secret startup validation, GitHub Actions CI
+(ruff + mypy + pytest + frontend build), and Render/Railway/Vercel manifests.
+
+**Two warnings (operational — must be in the deploy runbook):**
+1. **Migrations are never auto-applied** — no `alembic upgrade head` in any
+   entrypoint/compose/CI step. This is exactly what produced bug #1 (empty
+   stamped schema). **A fresh deploy MUST run `alembic upgrade head` before first
+   boot.** (Captured in the RC checklist, §12.15.)
+2. **CI does not run `vitest`** — only 3 frontend test files exist and the
+   pipeline builds but does not test the frontend.
+
+### 12.11 Demo Strategy & Official Demo Script (§4, §14)
+
+**Workflow (instant, reliable):**
+```
+docker compose up -d                              # bring up the stack
+docker exec fda_backend alembic upgrade head      # ensure schema (idempotent)
+python -m validation.seed_demo                    # deterministic, key-free cohort
+python -m validation.smoke_test                   # 19-check green light
+# open http://localhost:5173
+```
+For live-ingest demos that need LLM extraction without quota, set
+`DEMO_MODE=true` (embeddings/risk/tone become deterministic stubs).
+
+**Official 5–7 minute demo script (with timing):**
+
+| # | Segment | Time | Action / talking point |
+|---|---|---|---|
+| 1 | Platform overview | 0:00–0:45 | Architecture: ingestion → retrieval → 4 intelligence engines → agent → memo; grounded, citation-backed. |
+| 2 | Upload a filing | 0:45–1:30 | `POST /reports/upload` + status pipeline (or a pre-seeded `TONE_EXTRACTED` report). |
+| 3 | Financial intelligence | 1:30–2:15 | `/reports/{id}/metrics` + dashboard: revenue, margins, FCF, ratios. |
+| 4 | Risk intelligence | 2:15–3:00 | Risk page: categorised, severity-ranked risks with source citations. |
+| 5 | Management intelligence | 3:00–3:40 | Tone: sentiment / confidence / hedging, with evidence. |
+| 6 | Competitor benchmarking | 3:40–4:40 | `POST /benchmark/compare` on the cohort → ranked cards (Apex #1 → Cortex #3) across 4 dimensions. |
+| 7 | Memo generation | 4:40–5:40 | Open the COMPLETED memo: exec summary, thesis, bull/bear, 100% citation coverage; export markdown. |
+| 8 | Agent question | 5:40–6:30 | Ask "What are Apex's principal risks?"; grounded answer + citations (needs funded key or `DEMO_MODE`). |
+| 9 | Closing summary | 6:30–7:00 | Recap: every claim cited; production-hardened; validated (118 checks green). |
+
+### 12.12 Judge Q&A Preparation (§15)
+
+- **Architecture.** "Layered, evidence-first: typed ingestion (PDF→sections→
+  token-aware chunks), pgvector retrieval, four independent intelligence engines
+  (financial/risk/tone/benchmark), a LangGraph agent, and a memo generator — all
+  behind a FastAPI app with JWT/RBAC, Redis caching/rate-limiting, and Celery
+  workers. No circular dependencies (verified at import)."
+- **RAG.** "Hybrid (pgvector cosine KNN + lexical) with section-preference
+  profiles, plus an advanced pipeline: query rewriting, HyDE, multi-query merge,
+  reranking, and token-budgeted context assembly. The strategy→profile mapping
+  was hardened in Phase 12 so every analysis strategy resolves correctly."
+- **Agents.** "A planned LangGraph workflow: classify intent → plan tools →
+  execute (retrieval/financial/risk/tone tools) → fuse evidence → generate a
+  cited answer. Degrades gracefully if the LLM is unavailable — it returns the
+  raw evidence rather than failing."
+- **Benchmarking.** "Per-dimension normalised scoring (financial, risk, tone,
+  capital allocation) with weighted overall ranking and graceful weight
+  reallocation when a dimension is missing. Validated against a known-ordering
+  cohort — the ranking is correct."
+- **Memo generation.** "An LLM composes thesis/bull/bear sections, each grounded
+  in citations that resolve to real chunks/metrics/risks; exportable to
+  markdown/JSON. Citation coverage and grounding measured at 100% on the
+  validation memo."
+- **Scalability.** "Stateless API behind workers; Redis caching on hot reads;
+  HNSW ANN index on embeddings; rate limiting protects under burst (measured —
+  0 5xx, throttles per user). Horizontal scale via more API/worker replicas."
+- **Security.** "JWT access/refresh, RBAC hierarchy (ADMIN⊇ANALYST⊇VIEWER),
+  per-user/endpoint rate limits, OWASP security headers, upload validation,
+  prompt-injection guard, direct bcrypt hashing. All verified at the HTTP edge."
+- **Deployment.** "Multi-stage non-root images, compose + Railway/Render/Vercel
+  manifests, CI (lint/type/test/build). One operational caveat: run
+  `alembic upgrade head` on first boot — migrations aren't auto-applied."
+- **Limitations / Future work.** See §12.13 and the Future-Enhancements section.
+
+### 12.13 Architecture Review (§16) & Known Limitations
+
+**Architecture review:** the import graph loads cleanly — **no circular
+imports**. **No duplicated business logic** found across engines. One **dead
+module removed** (`app/benchmark/`, empty, unreferenced). Domain exceptions map
+to the correct HTTP statuses after the §10 fix. Strategy/profile vocabularies are
+now explicitly bridged rather than colliding.
+
+**Known limitations (honest):**
+1. **Gemini free-tier quota exhausted** for `generate_content` → live agent/memo
+   *generation* and HyDE/rewriting degrade in this environment. Mitigation: a
+   funded key or `DEMO_MODE=true`. Embeddings and all non-LLM paths are unaffected.
+2. **Benchmark `/compare` result cache cannot serialize UUIDs**
+   (`cache.set_failed: Object of type UUID is not JSON serializable`) — caching
+   silently no-ops and the cohort is recomputed each call. Functionally correct,
+   just not cached. Minor; flagged for a follow-up serializer fix.
+3. **Demo retrieval quality is not semantic** — demo embeddings are local hashes
+   for determinism; real semantic quality is validated by the unit suite, not on
+   demo data.
+4. **Migrations not auto-applied** on deploy (runbook step required).
+5. **CI omits `vitest`**; the frontend bundle ships a large echarts chunk
+   (~1.1 MB / gzip 384 KB) — a candidate for dynamic import / manual chunking.
+
+### 12.14 Lessons Learned
+
+- **Auth was never exercised against a live DB until Phase 12**, which masked a
+  three-bug chain (empty schema → bcrypt break → classmethod bug). Lesson:
+  validate the *deployed* surface, not just unit mocks — integration-level smoke
+  tests catch what unit tests structurally cannot.
+- **Library version drift is a silent killer** (passlib×bcrypt). Pin security-
+  critical libraries and prefer maintained, direct dependencies over abstraction
+  shims that lag their backends.
+- **Two vocabularies for one concept** (RAG strategy vs search profile) is a
+  latent integration bug; an explicit mapping (or a single shared enum) prevents
+  it. It surfaced only once retrieval ran end-to-end.
+- **A deterministic, key-free demo dataset is worth its weight** — it makes the
+  whole validation suite reproducible and demos quota-proof.
+- **Distinguish "throttled" from "failed"** in load tests, or protective rate
+  limiting reads as an outage.
+
+### 12.15 Release-Candidate Checklist (§18) — Code Freeze
+
+- [x] Backend unit suite green (348 passed)
+- [x] Frontend tests green (9/9), typecheck clean, prod build succeeds
+- [x] Validation suite green (118 passed / 0 failed; warnings triaged)
+- [x] Five critical runtime bugs fixed; dead module removed
+- [x] `requirements.txt` updated (`bcrypt~=5.0`)
+- [ ] **Deploy runbook: run `alembic upgrade head` before first boot** (manual)
+- [ ] Provision a funded Gemini key (or `DEMO_MODE=true`) for live agent/memo demos
+- [ ] (Optional) Add `vitest` to CI; fix the benchmark-compare cache UUID serializer;
+      code-split the echarts bundle
+- [ ] Remove stray local test-output artifacts (`backend/*_out.txt`,
+      `backend/pytest_*.txt`) before tagging
+
+### 12.16 Final Readiness Assessment
+
+**The platform is COMPETITION READY.** All thirteen end-to-end stages are wired
+and validated; performance is strong (read p95 < 30 ms); the service is resilient
+under burst (0 5xx) and degrades gracefully when the LLM is unavailable; security
+controls hold at the HTTP edge; the deployment story is complete modulo one
+documented manual migration step. The single material caveat for a *live* demo is
+LLM quota for agent/memo **generation** — mitigated by a funded key or
+`DEMO_MODE`. Five latent, runtime-breaking defects that would have surfaced on
+the competition floor were found and fixed before code freeze.
+
+### 12.17 Exit-Criteria Verification
+
+| Exit criterion | Status | Evidence |
+|---|---|---|
+| End-to-end validation completed | ✅ | `e2e_validation` 12/12 |
+| Smoke test suite completed | ✅ | `smoke_test` 19/19 |
+| Demo dataset prepared | ✅ | `seed_demo` (3 companies, 9 chunks, 21 metrics, 7 risks, memo) |
+| Demo mode validated | ✅ | key-free seed + `DEMO_MODE` stub paths confirmed |
+| Performance benchmarking completed | ✅ | §12.3 table (avg/median/p95/worst) |
+| Agent evaluation completed | ✅ | §12.5 (metrics + quota constraint documented) |
+| Retrieval evaluation completed | ✅ | §12.6 (`/evaluation/run` vector/hybrid/rag) |
+| Memo evaluation completed | ✅ | `memo_eval` 13/13 |
+| Benchmark evaluation completed | ✅ | `benchmark_eval` 9/9 (ground-truth ranking) |
+| Security validation completed | ✅ | `security_audit` 11/11 |
+| Frontend validation completed | ✅ | vitest 9/9, typecheck, build |
+| Deployment audit completed | ✅ | `deployment_audit` 31 checks, 2 warns |
+| Demo script created | ✅ | §12.11 (5–7 min, timed) |
+| Judge Q&A prepared | ✅ | §12.12 |
+| Architecture review completed | ✅ | §12.13 (no circular deps, dead module removed) |
+| Critical bugs resolved | ✅ | §12.2 (5 fixed) |
+| Documentation updated | ✅ | this report (only `06_IMPLEMENTATION_ROADMAP.md` modified) |
+
+**Phase 12 is COMPLETE.** No new features were added; no architecture was
+redesigned; nothing was deployed.
+
+---

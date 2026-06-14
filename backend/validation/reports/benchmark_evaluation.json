@@ -1,0 +1,118 @@
+{
+  "name": "Benchmark Evaluation",
+  "ok": true,
+  "passed": 9,
+  "failed": 0,
+  "warned": 0,
+  "duration_s": 1.314,
+  "measurements": {
+    "actual_order": [
+      "DEMO-APX",
+      "DEMO-BLT",
+      "DEMO-CTX"
+    ],
+    "summaries": [
+      {
+        "company_id": "42f1ec8c-0a5f-577e-857b-243c43cfd66f",
+        "company_name": "Apex Robotics Inc.",
+        "ticker": "DEMO-APX",
+        "scores": {
+          "FINANCIAL": 100.0,
+          "RISK": 100.0,
+          "TONE": 100.0,
+          "CAPITAL_ALLOCATION": 100.0
+        },
+        "rank": 1
+      },
+      {
+        "company_id": "8a0ce784-7b30-5393-9b8b-34e4c4ec8766",
+        "company_name": "Bolt Dynamics Corp.",
+        "ticker": "DEMO-BLT",
+        "scores": {
+          "FINANCIAL": 36.898061288305186,
+          "RISK": 50.0,
+          "TONE": 72.30263157894737,
+          "CAPITAL_ALLOCATION": 37.5
+        },
+        "rank": 2
+      },
+      {
+        "company_id": "6c98d9b1-800b-5341-84df-97516e1502f9",
+        "company_name": "Cortex Systems plc",
+        "ticker": "DEMO-CTX",
+        "scores": {
+          "FINANCIAL": 0.0,
+          "RISK": 83.33333333333333,
+          "TONE": 50.0,
+          "CAPITAL_ALLOCATION": 0.0
+        },
+        "rank": 3
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "benchmark compare 200",
+      "passed": true,
+      "detail": "HTTP 200 in 126ms",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "all cohort members summarised",
+      "passed": true,
+      "detail": "3/3",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "every company has scores + rank",
+      "passed": true,
+      "detail": "3/3",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "ranks are a valid 1..N permutation",
+      "passed": true,
+      "detail": "ranks=[1, 2, 3]",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "ranking matches known ground truth",
+      "passed": true,
+      "detail": "expected=['DEMO-APX', 'DEMO-BLT', 'DEMO-CTX'] actual=['DEMO-APX', 'DEMO-BLT', 'DEMO-CTX']",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "strongest company scores above weakest",
+      "passed": true,
+      "detail": "APX_mean_dim=100.0 CTX_mean_dim=33.3",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "all four scoring dimensions populated",
+      "passed": true,
+      "detail": "populated=['FINANCIAL', 'RISK', 'TONE', 'CAPITAL_ALLOCATION']",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "duplicate-company input handled gracefully",
+      "passed": true,
+      "detail": "HTTP 422",
+      "warn": false,
+      "data": {}
+    },
+    {
+      "name": "unknown company id \u2192 404 (not 500)",
+      "passed": true,
+      "detail": "HTTP 404",
+      "warn": false,
+      "data": {}
+    }
+  ]
+}
