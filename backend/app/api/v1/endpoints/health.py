@@ -13,6 +13,7 @@ orchestrators (Docker/K8s) and humans verify the service and its dependencies.
 """
 
 import os
+import ssl
 import uuid
 import redis.asyncio as aioredis
 from fastapi import APIRouter, Response, status
@@ -42,7 +43,7 @@ async def perform_full_checks() -> dict[str, str]:
 
     # 2. Redis Connection Ping
     try:
-        client = aioredis.from_url(settings.redis_url)
+        client = aioredis.from_url(settings.redis_url, ssl_cert_reqs=ssl.CERT_NONE)
         await client.ping()
         await client.aclose()
         checks["redis"] = "ok"
