@@ -67,6 +67,7 @@ class ReportRepository:
         quarter: int | None,
         original_filename: str,
         storage_path: str,
+        file_data: bytes | None = None,
     ) -> Report:
         report = Report(
             company_id=company_id,
@@ -76,6 +77,7 @@ class ReportRepository:
             original_filename=original_filename,
             storage_path=storage_path,
             status=ReportStatus.UPLOADED,
+            file_data=file_data,
         )
         self.session.add(report)
         await self.session.flush()

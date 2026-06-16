@@ -78,14 +78,30 @@ def process_report(report_id: str) -> dict:
             log.warning("processing.report_missing", report_id=report_id)
             return {"report_id": report_id, "status": "MISSING"}
 
+        import tempfile
+        from pathlib import Path
+
+        tmp_path = None
         try:
             repo.mark_processing(report)
 
-            abs_path = get_storage().get_absolute_path(report.storage_path)
-            parsed = parse_pdf(abs_path)
+            if report.file_data is not None:
+                # Write database bytes to temporary file for parsing
+                with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+                    tmp.write(report.file_data)
+                    tmp_path = Path(tmp.name)
+                parsed = parse_pdf(tmp_path)
+            else:
+                # Fallback to local storage (e.g. for existing local files / development)
+                abs_path = get_storage().get_absolute_path(report.storage_path)
+                parsed = parse_pdf(abs_path)
 
             page_rows = [(p.page_number, p.text) for p in parsed.pages]
             repo.replace_pages(rid, page_rows)
+
+            # Reclaim Postgres database storage by clearing the raw PDF bytes
+            report.file_data = None
+
             repo.mark_processed(report, total_pages=parsed.total_pages)
 
             log.info("processing.success", report_id=report_id, total_pages=parsed.total_pages)
@@ -106,6 +122,12 @@ def process_report(report_id: str) -> dict:
             if failed is not None:
                 repo.mark_failed(failed, message=f"{type(exc).__name__}: {exc}")
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
+        finally:
+            if tmp_path and tmp_path.exists():
+                try:
+                    tmp_path.unlink()
+                except Exception as cleanup_exc:
+                    log.warning("processing.tmp_cleanup_failed", path=str(tmp_path), error=str(cleanup_exc))
 
 
 @celery_app.task(name="app.tasks.ingestion.detect_sections", acks_late=True)

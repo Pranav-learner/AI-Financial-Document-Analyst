@@ -88,6 +88,7 @@ class ReportIngestionService:
             quarter=quarter,
             original_filename=original_filename or f"upload{ext}",
             storage_path=storage_path,
+            file_data=data,
         )
         await self.session.commit()
 

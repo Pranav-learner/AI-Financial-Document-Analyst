@@ -108,6 +108,7 @@ async def test_successful_upload_creates_report_and_enqueues(stub_celery: list[s
     )
 
     assert report is repo.created_report
+    assert repo.created_report.file_data == PDF_BYTES  # file data was passed
     assert storage.saved == PDF_BYTES          # file was stored
     assert repo.company_calls == 1             # company resolved
     assert session.commits == 1                # record committed

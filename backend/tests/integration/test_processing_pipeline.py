@@ -19,7 +19,7 @@ from app.models.report_page import ReportPage
 from app.tasks.ingestion import process_report
 
 
-def _insert_report(session: Session, storage_path: str) -> uuid.UUID:
+def _insert_report(session: Session, storage_path: str, file_data: bytes | None = None) -> uuid.UUID:
     report = Report(
         report_type=ReportType.TEN_Q,
         year=2026,
@@ -27,6 +27,7 @@ def _insert_report(session: Session, storage_path: str) -> uuid.UUID:
         original_filename="acme.pdf",
         storage_path=storage_path,
         status=ReportStatus.UPLOADED,
+        file_data=file_data,
     )
     session.add(report)
     session.commit()
@@ -75,3 +76,35 @@ def test_process_report_missing_file_marks_failed(sync_session: Session) -> None
 def test_process_report_unknown_id_is_noop(sync_session: Session) -> None:
     result = process_report(str(uuid.uuid4()))
     assert result["status"] == "MISSING"
+
+
+@pytest.mark.integration
+def test_process_report_with_db_file_bytes(sync_session: Session, tiny_pdf_bytes: bytes) -> None:
+    # Use an invalid/non-existent local storage path to ensure it cannot load from disk
+    storage_path = "reports/2026/06/non_existent_local_file.pdf"
+
+    report_id = _insert_report(sync_session, storage_path, file_data=tiny_pdf_bytes)
+
+    # Verify report initially has file_data
+    initial_report = sync_session.get(Report, report_id)
+    assert initial_report.file_data == tiny_pdf_bytes
+
+    result = process_report(str(report_id))
+
+    assert result["status"] == "PROCESSED"
+    refreshed = sync_session.get(Report, report_id)
+    sync_session.refresh(refreshed)
+    assert refreshed.status == ReportStatus.PROCESSED
+    assert refreshed.total_pages == 2
+
+    # Confirm that the file_data column has been cleared to NULL (None)
+    assert refreshed.file_data is None
+
+    pages = (
+        sync_session.query(ReportPage)
+        .filter(ReportPage.report_id == report_id)
+        .order_by(ReportPage.page_number)
+        .all()
+    )
+    assert [p.page_number for p in pages] == [1, 2]
+    assert pages[0].page_text.strip() != ""
