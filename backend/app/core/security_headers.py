@@ -11,7 +11,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
         # Content Security Policy (restrict all origins, frames, object embed tags)
-        response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'; object-src 'none';"
+        # Relax for documentation paths to allow Swagger/ReDoc assets from CDN
+        path = request.url.path
+        if path.startswith(("/docs", "/redoc", "/openapi.json")):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                "img-src 'self' data: https://fastapi.tiangolo.com; "
+                "frame-ancestors 'none'; object-src 'none';"
+            )
+        else:
+            response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'; object-src 'none';"
         # Prevent clickjacking
         response.headers["X-Frame-Options"] = "DENY"
         # Prevent MIME type sniffing
