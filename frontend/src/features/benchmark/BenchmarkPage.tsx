@@ -3,24 +3,70 @@ import SectionPanel from "@/components/SectionPanel";
 import DataTable, { type Column } from "@/components/DataTable";
 import Skeleton from "@/design-system/components/Skeleton";
 import ErrorFallback from "@/design-system/patterns/ErrorFallback";
-import EmptyState from "@/components/EmptyState";
 import BenchmarkBadge from "@/components/BenchmarkBadge";
 import BenchmarkRadarChart from "@/components/charts/BenchmarkRadarChart";
 import BenchmarkBarChart from "@/components/charts/BenchmarkBarChart";
-import { useBenchmarkRun, useBenchmarkSummary } from "@/hooks/useBenchmark";
+import { useBenchmarkRun, useBenchmarkSummary, useCreateBenchmarkRun } from "@/hooks/useBenchmark";
+import { useReports } from "@/hooks/useReports";
 import type { BenchmarkSummary } from "@/types/api";
 import { useState } from "react";
-import { Target, Trophy, Award, Medal } from "lucide-react";
+import { Target, Trophy, Award, Medal, PlusCircle } from "lucide-react";
 import { clsx } from "clsx";
 
 export default function BenchmarkPage() {
   const [runId, setRunId] = useState("");
   const { data: run } = useBenchmarkRun(runId || undefined);
-  const { data: summaries, isLoading, isError, refetch } = useBenchmarkSummary(runId || undefined);
+  const { data: summaries, isLoading, isError, refetch } = useBenchmarkSummary(
+    runId || undefined,
+    run?.status === "COMPLETED"
+  );
+  const { data: reportsData } = useReports();
+  const reportsList = reportsData?.items ?? [];
+  const createMutation = useCreateBenchmarkRun();
+  const [newRunName, setNewRunName] = useState("Competitor Cohort Benchmark");
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState<string[]>([]);
+
+  const getCompanyTicker = (companyId: string) => {
+    const report = reportsList.find((r) => r.company_id === companyId);
+    if (!report || !report.original_filename) return companyId.slice(0, 8);
+    const parts = report.original_filename.split("_");
+    return parts[0] || companyId.slice(0, 8);
+  };
+
+  const uniqueCompanies = Array.from(
+    new Map<string, string>(
+      reportsList
+        .filter((r) => r.company_id)
+        .map((r) => [r.company_id as string, getCompanyTicker(r.company_id as string)])
+    ).entries()
+  ).map(([id, ticker]) => ({ id: id as string, ticker }));
+
+  const handleCreateRun = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedCompanyIds.length < 2) return;
+    try {
+      const res = await createMutation.mutateAsync({
+        run_name: newRunName,
+        company_ids: selectedCompanyIds,
+      });
+      setRunId(res.id);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleToggleCompany = (companyId: string) => {
+    setSelectedCompanyIds((prev) =>
+      prev.includes(companyId)
+        ? prev.filter((id) => id !== companyId)
+        : [...prev, companyId]
+    );
+  };
+
   const summaryList = summaries ?? [];
 
   const columns: Column<BenchmarkSummary>[] = [
-    { key: "company_id", header: "Company ID", render: (s) => <span className="font-mono text-xs">{s.company_id}</span> },
+    { key: "company_id", header: "Company", render: (s) => <span className="font-semibold text-surface-900">{getCompanyTicker(s.company_id)}</span> },
     { key: "financial_score", header: "Financial Score", align: "center", sortable: true, render: (s) => s.financial_score?.toFixed(1) ?? "—" },
     { key: "risk_score", header: "Risk Mitigation", align: "center", sortable: true, render: (s) => s.risk_score?.toFixed(1) ?? "—" },
     { key: "tone_score", header: "Sentiment Score", align: "center", sortable: true, render: (s) => s.tone_score?.toFixed(1) ?? "—" },
@@ -31,11 +77,11 @@ export default function BenchmarkPage() {
 
   const radarIndicators = ["Financial", "Risk", "Tone", "Capital Allocation"];
   const radarSeries = summaryList.map((s) => ({
-    name: s.company_id.slice(0, 8),
+    name: getCompanyTicker(s.company_id),
     values: [s.financial_score ?? 0, s.risk_score ?? 0, s.tone_score ?? 0, s.capital_allocation_score ?? 0],
   }));
 
-  const barCompanies = summaryList.map((s) => s.company_id.slice(0, 8));
+  const barCompanies = summaryList.map((s) => getCompanyTicker(s.company_id));
   const barScores = summaryList.map((s) => s.overall_score ?? 0);
 
   // Sorting for the podium presentation
@@ -95,12 +141,128 @@ export default function BenchmarkPage() {
       />
 
       {!runId && (
-        <div className="p-8">
-          <EmptyState
-            title="Enter a benchmark run ID"
-            description="Provide a benchmark run ID above (e.g., 'run-01') to load the comparative evaluation model."
-            icon={<Target className="w-7 h-7 text-brand-650" />}
-          />
+        <div className="grid gap-6 md:grid-cols-2 animate-slide-up">
+          {/* Left: Quick Load Demo */}
+          <div className="glass-panel p-6 bg-white border border-surface-200 flex flex-col justify-between">
+            <div>
+              <h3 className="text-base font-bold text-surface-900 flex items-center gap-2 mb-2">
+                <Trophy className="w-5 h-5 text-warning" />
+                Quick Load Demo Run
+              </h3>
+              <p className="text-sm text-surface-500 mb-6">
+                Directly load the pre-computed Demo Cohort Run to immediately view the leaderboard podium, radar charts, and comparative analytics.
+              </p>
+            </div>
+            <div>
+              <button
+                type="button"
+                onClick={() => setRunId("0bcd40bd-86b6-4fcc-957d-d511d7904b85")}
+                className="w-full py-2.5 px-4 bg-brand-50 border border-brand-200 text-brand-700 font-semibold rounded-lg hover:bg-brand-100 transition-colors flex items-center justify-center gap-2"
+              >
+                <Target className="w-4 h-4" />
+                Load Demo Cohort Run
+              </button>
+            </div>
+          </div>
+
+          {/* Right: Create Cohort Benchmark */}
+          <div className="glass-panel p-6 bg-white border border-surface-200">
+            <h3 className="text-base font-bold text-surface-900 flex items-center gap-2 mb-2">
+              <PlusCircle className="w-5 h-5 text-brand-600" />
+              Run Cohort Benchmark
+            </h3>
+            <p className="text-sm text-surface-500 mb-4">
+              Select 2 or more processed companies to run a comparative cohort benchmark analysis.
+            </p>
+
+            <form onSubmit={handleCreateRun} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-surface-450 block mb-1">
+                  Benchmark Run Name
+                </label>
+                <input
+                  type="text"
+                  value={newRunName}
+                  onChange={(e) => setNewRunName(e.target.value)}
+                  className="w-full text-sm border border-surface-200 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-brand-500 focus:outline-none"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-surface-450 block mb-2">
+                  Select Companies (Min 2)
+                </label>
+                <div className="border border-surface-150 rounded-lg p-3 max-h-40 overflow-y-auto space-y-2 bg-surface-50/50">
+                  {uniqueCompanies.length === 0 ? (
+                    <span className="text-xs text-surface-400 italic">No processed filings found.</span>
+                  ) : (
+                    uniqueCompanies.map((comp) => (
+                      <label key={comp.id} className="flex items-center gap-2 text-sm text-surface-700 hover:text-surface-900 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCompanyIds.includes(comp.id)}
+                          onChange={() => handleToggleCompany(comp.id)}
+                          className="rounded border-surface-300 text-brand-600 focus:ring-brand-500"
+                        />
+                        <span className="font-mono font-semibold">{comp.ticker}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={selectedCompanyIds.length < 2 || createMutation.isPending}
+                className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 disabled:bg-surface-250 text-white font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+              >
+                {createMutation.isPending ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Enqueuing...
+                  </>
+                ) : (
+                  "Enqueue Benchmark Run"
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {runId && run && run.status !== "COMPLETED" && (
+        <div className="space-y-6">
+          <div className="glass-panel p-4 text-sm text-surface-700 bg-brand-50/20 border-brand-200/50 flex items-center justify-between">
+            <div>
+              <span className="font-bold text-surface-900">{run.run_name}</span> · Status:{" "}
+              <span className="text-xs font-semibold px-2 py-0.5 rounded bg-brand-100 text-brand-700 font-mono">
+                {run.status}
+              </span>
+            </div>
+            <span className="text-xs text-surface-450 font-mono">
+              {run.company_ids.length} companies benchmarked
+            </span>
+          </div>
+
+          {(run.status === "PENDING" || run.status === "PROCESSING") && (
+            <div className="glass-panel p-8 flex flex-col items-center justify-center text-center bg-white border border-surface-200 animate-slide-up">
+              <div className="w-12 h-12 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin mb-4" />
+              <h3 className="text-base font-bold text-surface-900">AI Benchmarking in Progress</h3>
+              <p className="text-sm text-surface-500 mt-2 max-w-md">
+                Our competitor benchmarking engine is evaluating risk profiles, normalized financial metrics, and management sentiment weights across the company cohort. This usually takes 15–30 seconds.
+              </p>
+            </div>
+          )}
+
+          {run.status === "FAILED" && (
+            <div className="glass-panel p-8 flex flex-col items-center justify-center text-center bg-red-50 border border-red-200 animate-slide-up">
+              <div className="text-red-500 text-lg font-bold mb-2">⚠ Benchmark Run Failed</div>
+              <p className="text-sm text-red-700 max-w-md">
+                {run.error_message || "An error occurred during benchmarking calculations. Please verify your company data and try again."}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -182,7 +344,7 @@ export default function BenchmarkPage() {
                             Rank {comp.place}
                           </span>
                           <span className="text-xs font-semibold text-surface-800 block truncate max-w-[140px] mt-1 font-mono">
-                            {comp.company_id}
+                            {getCompanyTicker(comp.company_id)}
                           </span>
                         </div>
                         <div className="mt-2">

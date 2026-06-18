@@ -9,12 +9,14 @@ import {
   FileText,
   MessageSquare,
   ChevronLeft,
+  UploadCloud,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useObservability } from "@/hooks/useObservability";
 
 const links = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/upload", label: "Upload", icon: UploadCloud },
   { to: "/financial", label: "Financial", icon: BarChart3 },
   { to: "/risks", label: "Risks", icon: ShieldAlert },
   { to: "/management", label: "Management", icon: Users },

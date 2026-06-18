@@ -30,10 +30,13 @@ export default function FinancialPage() {
   const analytics = analyticsData?.items ?? [];
 
   // Derive key metrics
-  const revenue = metrics.find((m) => m.normalized_metric_name === "total_revenue");
-  const grossMargin = metrics.find((m) => m.normalized_metric_name === "gross_margin");
-  const netIncome = metrics.find((m) => m.normalized_metric_name === "net_income");
-  const ebitda = metrics.find((m) => m.normalized_metric_name === "ebitda");
+  const revenue = metrics.find((m) => {
+    const name = m.normalized_metric_name.toUpperCase();
+    return name === "REVENUE" || name === "TOTAL_REVENUE";
+  });
+  const grossMargin = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "GROSS_MARGIN");
+  const netIncome = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "NET_INCOME");
+  const ebitda = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "EBITDA");
 
   // Build chart data from comparisons
   const revenueComps = comparisons.filter((c) => c.metric_name.toLowerCase().includes("revenue"));
@@ -139,12 +142,27 @@ export default function FinancialPage() {
         </div>
       ) : (
         <>
-          {/* Key Metrics Cards */}
           <div className="card-grid">
-            <MetricCard label="Revenue" value={revenue ? `$${revenue.value.toLocaleString()}M` : "—"} icon={<DollarSign className="w-5 h-5 text-brand-600" />} />
-            <MetricCard label="Gross Margin" value={grossMargin ? `${grossMargin.value}%` : "—"} icon={<Percent className="w-5 h-5 text-success" />} />
-            <MetricCard label="Net Income" value={netIncome ? `$${netIncome.value.toLocaleString()}M` : "—"} icon={<TrendingUp className="w-5 h-5 text-indigo-600" />} />
-            <MetricCard label="EBITDA" value={ebitda ? `$${ebitda.value.toLocaleString()}M` : "—"} icon={<DollarSign className="w-5 h-5 text-warning" />} />
+            <MetricCard
+              label="Revenue"
+              value={revenue ? `$${revenue.value.toLocaleString()}${revenue.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              icon={<DollarSign className="w-5 h-5 text-brand-600" />}
+            />
+            <MetricCard
+              label="Gross Margin"
+              value={grossMargin ? `${grossMargin.value}%` : "—"}
+              icon={<Percent className="w-5 h-5 text-success" />}
+            />
+            <MetricCard
+              label="Net Income"
+              value={netIncome ? `$${netIncome.value.toLocaleString()}${netIncome.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
+            />
+            <MetricCard
+              label="EBITDA"
+              value={ebitda ? `$${ebitda.value.toLocaleString()}${ebitda.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              icon={<DollarSign className="w-5 h-5 text-warning" />}
+            />
           </div>
 
           {/* Charts */}

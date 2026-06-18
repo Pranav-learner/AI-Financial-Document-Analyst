@@ -43,7 +43,7 @@ export default function MemoPage() {
       const res = await generateMutation.mutateAsync({
         company_id: activeReport.company_id,
         report_id: reportId,
-        memo_type: "single_company",
+        memo_type: "SINGLE_COMPANY",
         title: `Investment Memo: ${activeReport.original_filename || "Company Analysis"}`,
       });
       setMemoId(res.memo_id);
@@ -156,6 +156,7 @@ export default function MemoPage() {
                 onClick={() => handleExport("markdown")}
                 variant="outline"
                 className="flex items-center gap-1.5 text-xs"
+                disabled={memo.status !== "COMPLETED"}
               >
                 <FileDown className="w-4 h-4" />
                 Export Markdown
@@ -164,12 +165,32 @@ export default function MemoPage() {
                 onClick={() => handleExport("json")}
                 variant="outline"
                 className="flex items-center gap-1.5 text-xs"
+                disabled={memo.status !== "COMPLETED"}
               >
                 <FileDown className="w-4 h-4" />
                 Export JSON
               </Button>
             </div>
           </div>
+
+          {(memo.status === "PENDING" || memo.status === "GENERATING") && (
+            <div className="glass-panel p-8 flex flex-col items-center justify-center text-center bg-white border border-surface-200">
+              <div className="w-12 h-12 rounded-full border-4 border-brand-200 border-t-brand-600 animate-spin mb-4" />
+              <h3 className="text-base font-bold text-surface-900">AI Synthesis in Progress</h3>
+              <p className="text-sm text-surface-500 mt-2 max-w-md">
+                Our multi-agent reasoning system is parsing the report metrics, risk factors, management sentiment, and cross-company benchmark data to build a comprehensive investment memo. This usually takes 15–30 seconds.
+              </p>
+            </div>
+          )}
+
+          {memo.status === "FAILED" && (
+            <div className="glass-panel p-8 flex flex-col items-center justify-center text-center bg-red-50 border border-red-200">
+              <div className="text-red-500 text-lg font-bold mb-2">⚠ Generation Failed</div>
+              <p className="text-sm text-red-700 max-w-md">
+                An error occurred during memo generation. Please verify that the report has finished processing completely and try again.
+              </p>
+            </div>
+          )}
 
           {/* Export Panel with loading spinner */}
           {exportFormat && (

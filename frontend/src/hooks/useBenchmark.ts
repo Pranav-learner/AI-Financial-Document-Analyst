@@ -17,7 +17,14 @@ export function useBenchmarkRun(runId: string | undefined) {
     queryKey: ["benchmark-run", runId],
     queryFn: ({ signal }) => getBenchmarkRun(runId!, signal),
     enabled: !!runId,
-    staleTime: 30 * 1000, // 30s — runs may still be processing
+    staleTime: 1000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (status === "PENDING" || status === "PROCESSING") {
+        return 3000;
+      }
+      return false;
+    },
   });
 }
 
@@ -30,11 +37,11 @@ export function useBenchmarkResults(runId: string | undefined) {
   });
 }
 
-export function useBenchmarkSummary(runId: string | undefined) {
+export function useBenchmarkSummary(runId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ["benchmark-summary", runId],
     queryFn: ({ signal }) => getBenchmarkSummary(runId!, signal),
-    enabled: !!runId,
+    enabled: enabled && !!runId,
     staleTime: 5 * 60 * 1000,
   });
 }

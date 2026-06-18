@@ -8,11 +8,16 @@ import redis.asyncio as aioredis
 from app.core.config import settings
 
 # Initialize global Redis client with decoding enabled
+redis_kwargs = {
+    "encoding": "utf-8",
+    "decode_responses": True,
+}
+if settings.redis_url.startswith("rediss://"):
+    redis_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
+
 redis_client: aioredis.Redis = aioredis.from_url(
     settings.redis_url,
-    encoding="utf-8",
-    decode_responses=True,
-    ssl_cert_reqs=ssl.CERT_NONE,
+    **redis_kwargs
 )
 
 

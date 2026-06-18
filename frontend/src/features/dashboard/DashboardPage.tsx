@@ -17,7 +17,6 @@ import {
   PlusCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import Button from "@/design-system/components/Button";
 
 // Pinned examples for hacker/presentation demo speed
 const PINNED_EXAMPLES = [
@@ -72,7 +71,7 @@ export default function DashboardPage() {
 
   const reports = data?.items ?? [];
   const latestReport = reports[0];
-  const processed = reports.filter((r) => ["EMBEDDED", "COMPLETED", "READY"].includes(r.status));
+  const processed = reports.filter((r) => ["EMBEDDED", "EXTRACTED", "COMPARED", "ANALYZED", "RISK_EXTRACTED", "TONE_EXTRACTED", "COMPLETED", "READY"].includes(r.status));
   const failed = reports.filter((r) => r.status === "FAILED");
 
   const handlePinnedClick = (companyName: string) => {
@@ -165,14 +164,14 @@ export default function DashboardPage() {
             </p>
           </div>
           <div className="mt-6">
-            <Button
-              variant="secondary"
-              className="w-full justify-center flex items-center gap-2"
+            <Link
+              to="/upload"
               onClick={() => trackInteraction("Upload Report Clicked", "Quick Upload")}
+              className="w-full justify-center flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold text-sm py-2.5 px-4 rounded-lg transition-colors border border-white/30"
             >
               <PlusCircle className="w-4 h-4" />
               Upload Filing PDF
-            </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -250,7 +249,7 @@ export default function DashboardPage() {
                     className={`w-2.5 h-2.5 rounded-full shrink-0 ${
                       r.status === "FAILED"
                         ? "bg-danger"
-                        : ["EMBEDDED", "COMPLETED", "READY"].includes(r.status)
+                        : ["EMBEDDED", "EXTRACTED", "COMPARED", "ANALYZED", "RISK_EXTRACTED", "TONE_EXTRACTED", "COMPLETED", "READY"].includes(r.status)
                           ? "bg-success animate-pulse"
                           : "bg-warning"
                     }`}
@@ -270,7 +269,7 @@ export default function DashboardPage() {
                     className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       r.status === "FAILED"
                         ? "bg-danger-light text-danger-dark"
-                        : ["EMBEDDED", "COMPLETED", "READY"].includes(r.status)
+                        : ["EMBEDDED", "EXTRACTED", "COMPARED", "ANALYZED", "RISK_EXTRACTED", "TONE_EXTRACTED", "COMPLETED", "READY"].includes(r.status)
                           ? "bg-success-light text-success-dark"
                           : "bg-warning-light text-warning-dark"
                     }`}

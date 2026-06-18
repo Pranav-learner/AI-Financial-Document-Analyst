@@ -43,7 +43,10 @@ async def perform_full_checks() -> dict[str, str]:
 
     # 2. Redis Connection Ping
     try:
-        client = aioredis.from_url(settings.redis_url, ssl_cert_reqs=ssl.CERT_NONE)
+        redis_kwargs = {}
+        if settings.redis_url.startswith("rediss://"):
+            redis_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
+        client = aioredis.from_url(settings.redis_url, **redis_kwargs)
         await client.ping()
         await client.aclose()
         checks["redis"] = "ok"

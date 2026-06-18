@@ -16,7 +16,14 @@ export function useMemoDetails(memoId: string | undefined) {
     queryKey: ["memo", memoId],
     queryFn: ({ signal }) => getMemoDetails(memoId!, signal),
     enabled: !!memoId,
-    staleTime: 30 * 1000,
+    staleTime: 1000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      if (status === "PENDING" || status === "GENERATING") {
+        return 3000;
+      }
+      return false;
+    },
   });
 }
 

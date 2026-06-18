@@ -3,10 +3,14 @@ import EmptyState from "@/components/EmptyState";
 import CitationBadge from "@/components/CitationBadge";
 import { useThreads, useMessages, useSendMessage, useCreateThread } from "@/hooks/useAgent";
 import type { Message } from "@/types/api";
-import { Send, Plus, MessageSquare, Terminal, HelpCircle, X, Info, Sparkles } from "lucide-react";
+import { Send, Plus, MessageSquare, Terminal, HelpCircle, X, Info, Sparkles, AlertTriangle } from "lucide-react";
 import { clsx } from "clsx";
 import Button from "@/design-system/components/Button";
 import Skeleton from "@/design-system/components/Skeleton";
+
+/** Detect LLM-level generation errors returned as apology strings in content */
+const isLLMError = (content: string) =>
+  content.startsWith("I apologize, but I encountered an error generating the final response");
 
 export default function AgentPage() {
   const { data: threads, isLoading: threadsLoading, isError: threadsError } = useThreads();
@@ -224,6 +228,7 @@ export default function AgentPage() {
               {messages?.map((msg: Message) => {
                 const isUser = msg.role === "user";
                 const citations = (msg.metadata?.citations as any[]) || [];
+                const hasLLMError = !isUser && isLLMError(msg.content);
 
                 return (
                   <div
@@ -232,13 +237,30 @@ export default function AgentPage() {
                       "flex flex-col max-w-[80%] rounded-2xl px-5 py-3.5 text-sm animate-fade-in shadow-sm border",
                       isUser
                         ? "self-end bg-brand-600 border-brand-700 text-white ml-auto rounded-tr-none"
-                        : "self-start bg-white border-surface-200 text-surface-850 rounded-tl-none"
+                        : hasLLMError
+                          ? "self-start bg-amber-50 border-amber-200 text-amber-800 rounded-tl-none"
+                          : "self-start bg-white border-surface-200 text-surface-850 rounded-tl-none"
                     )}
                   >
-                    <div className="whitespace-pre-wrap leading-relaxed font-sans">{msg.content}</div>
+                    {hasLLMError ? (
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-bold text-amber-800 text-xs">LLM Quota Limit Reached</p>
+                          <p className="text-xs text-amber-700 mt-1 leading-relaxed">
+                            The Gemini AI model has reached its free-tier request quota. Evidence was retrieved successfully but the final answer could not be generated. Please wait a moment and try again.
+                          </p>
+                          <p className="text-[10px] text-amber-600/70 mt-2 font-mono">
+                            Error: RESOURCE_EXHAUSTED (429) — gemini-2.5-pro
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="whitespace-pre-wrap leading-relaxed font-sans">{msg.content}</div>
+                    )}
 
                     {/* Citations block if any */}
-                    {!isUser && citations.length > 0 && (
+                    {!isUser && !hasLLMError && citations.length > 0 && (
                       <div className="mt-4 pt-3.5 border-t border-surface-150 space-y-2">
                         <span className="text-[9px] font-bold text-surface-450 uppercase tracking-wider block">
                           Verified References ({citations.length})

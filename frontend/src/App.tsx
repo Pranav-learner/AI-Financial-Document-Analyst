@@ -11,6 +11,7 @@ const ManagementPage = lazy(() => import("@/features/management/ManagementPage")
 const BenchmarkPage = lazy(() => import("@/features/benchmark/BenchmarkPage"));
 const MemoPage = lazy(() => import("@/features/memo/MemoPage"));
 const AgentPage = lazy(() => import("@/features/agent/AgentPage"));
+const UploadPage = lazy(() => import("@/features/upload/UploadPage"));
 
 const PageLoader = () => (
   <div className="space-y-6">
@@ -84,6 +85,14 @@ export default function App() {
           element={
             <Suspense fallback={<PageLoader />}>
               <AgentPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/upload"
+          element={
+            <Suspense fallback={<PageLoader />}>
+              <UploadPage />
             </Suspense>
           }
         />
