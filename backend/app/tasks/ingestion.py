@@ -125,18 +125,22 @@ def handle_task_failure_or_retry(task, report_id: str | uuid.UUID, stage_name: s
 )
 def process_report(self, report_id: str) -> dict:
     """Parse a report's PDF and persist its pages."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("processing.start", report_id=report_id)
+    task_id = self.request.id
+    log.info("processing.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("processing.report_missing", report_id=report_id)
+            log.warning("processing.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "PROCESSED"):
-            log.info("processing.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("processing.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("processing.enqueue_sections", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(detect_sections.delay):
                 detect_sections.delay(report_id)
             return {"report_id": report_id, "status": "SKIPPED_PROCESSED", "total_pages": report.total_pages}
@@ -163,7 +167,9 @@ def process_report(self, report_id: str) -> dict:
             report.file_data = None
             repo.mark_processed(report, total_pages=parsed.total_pages)
 
-            log.info("processing.success", report_id=report_id, total_pages=parsed.total_pages)
+            duration = round(time.monotonic() - started, 3)
+            log.info("processing.completed", report_id=report_id, task_id=task_id, total_pages=parsed.total_pages, duration_seconds=duration)
+            log.info("processing.enqueue_sections", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(detect_sections.delay):
                 detect_sections.delay(report_id)
 
@@ -175,6 +181,7 @@ def process_report(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("processing.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "PROCESSED", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
         finally:
@@ -182,7 +189,7 @@ def process_report(self, report_id: str) -> dict:
                 try:
                     tmp_path.unlink()
                 except Exception as cleanup_exc:
-                    log.warning("processing.tmp_cleanup_failed", path=str(tmp_path), error=str(cleanup_exc))
+                    log.warning("processing.tmp_cleanup_failed", path=str(tmp_path), error=str(cleanup_exc), task_id=task_id)
 
 
 @celery_app.task(
@@ -196,18 +203,22 @@ def process_report(self, report_id: str) -> dict:
 )
 def detect_sections(self, report_id: str) -> dict:
     """Detect logical sections for a processed report (Phase 1B)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("sectioning.start", report_id=report_id)
+    task_id = self.request.id
+    log.info("sectioning.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("sectioning.report_missing", report_id=report_id)
+            log.warning("sectioning.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "SECTIONED"):
-            log.info("sectioning.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("sectioning.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("sectioning.enqueue_chunks", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_chunks.delay):
                 generate_chunks.delay(report_id)
             from app.models.report_section import ReportSection
@@ -237,7 +248,9 @@ def detect_sections(self, report_id: str) -> dict:
             count = repo.replace_sections(rid, rows)
             repo.mark_sectioned(report)
 
-            log.info("sectioning.success", report_id=report_id, sections=count)
+            duration = round(time.monotonic() - started, 3)
+            log.info("sectioning.completed", report_id=report_id, task_id=task_id, sections=count, duration_seconds=duration)
+            log.info("sectioning.enqueue_chunks", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_chunks.delay):
                 generate_chunks.delay(report_id)
 
@@ -245,6 +258,7 @@ def detect_sections(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("sectioning.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "SECTIONED", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -260,18 +274,22 @@ def detect_sections(self, report_id: str) -> dict:
 )
 def generate_chunks(self, report_id: str) -> dict:
     """Generate retrieval-ready chunks from a report's sections (Phase 1C)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("chunking.start", report_id=report_id)
+    task_id = self.request.id
+    log.info("chunking.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("chunking.report_missing", report_id=report_id)
+            log.warning("chunking.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "CHUNKED"):
-            log.info("chunking.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("chunking.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("chunking.enqueue_embeddings", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_embeddings_task.delay):
                 generate_embeddings_task.delay(report_id)
             from app.models.document_chunk import DocumentChunk
@@ -321,7 +339,9 @@ def generate_chunks(self, report_id: str) -> dict:
             count = repo.replace_chunks(rid, rows)
             repo.mark_chunked(report)
 
-            log.info("chunking.success", report_id=report_id, chunks=count)
+            duration = round(time.monotonic() - started, 3)
+            log.info("chunking.completed", report_id=report_id, task_id=task_id, chunks=count, duration_seconds=duration)
+            log.info("chunking.enqueue_embeddings", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_embeddings_task.delay):
                 generate_embeddings_task.delay(report_id)
 
@@ -329,6 +349,7 @@ def generate_chunks(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("chunking.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "CHUNKED", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -344,18 +365,22 @@ def generate_chunks(self, report_id: str) -> dict:
 )
 def generate_embeddings_task(self, report_id: str, *, force: bool = False) -> dict:
     """Generate + store Gemini embeddings for a report's chunks (Phase 2A)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("embedding.task_start", report_id=report_id, force=force)
+    task_id = self.request.id
+    log.info("embedding.task_received", report_id=report_id, task_id=task_id, force=force)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("embedding.report_missing", report_id=report_id)
+            log.warning("embedding.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if not force and report.completed_stage and is_stage_completed(report.completed_stage, "EMBEDDED"):
-            log.info("embedding.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("embedding.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("embedding.enqueue_metrics", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_financial_metrics_task.delay):
                 extract_financial_metrics_task.delay(report_id)
             from app.models.document_chunk import DocumentChunk
@@ -379,13 +404,19 @@ def generate_embeddings_task(self, report_id: str, *, force: bool = False) -> di
             service = EmbeddingService(repo, provider)
             metrics = service.generate_for_report(rid, force=force)
 
+            metrics_dict = metrics.as_dict()
+            metrics_dict.pop("report_id", None)
+
             if metrics.failed > 0:
                 msg = f"{metrics.failed}/{metrics.total_chunks} chunks failed embedding"
-                log.error("embedding.partial_failure", report_id=report_id, **metrics.as_dict())
+                log.error("embedding.partial_failure", report_id=report_id, task_id=task_id, **metrics_dict)
                 raise EmbeddingProviderError(msg, retryable=True)
 
             repo.mark_embedded(report)
-            log.info("embedding.task_success", report_id=report_id, **metrics.as_dict())
+            
+            duration = round(time.monotonic() - started, 3)
+            log.info("embedding.completed", report_id=report_id, task_id=task_id, duration_seconds=duration, **metrics_dict)
+            log.info("embedding.enqueue_metrics", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_financial_metrics_task.delay):
                 extract_financial_metrics_task.delay(report_id)
 
@@ -393,6 +424,7 @@ def generate_embeddings_task(self, report_id: str, *, force: bool = False) -> di
 
         except Exception as exc:
             session.rollback()
+            log.error("embedding.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "EMBEDDED", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -408,18 +440,22 @@ def generate_embeddings_task(self, report_id: str, *, force: bool = False) -> di
 )
 def extract_financial_metrics_task(self, report_id: str) -> dict:
     """Extract structured financial metrics from a report's chunks (Phase 3A)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("extraction.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("metrics.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("extraction.report_missing", report_id=report_id)
+            log.warning("metrics.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "METRICS_READY"):
-            log.info("extraction.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("metrics.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("metrics.enqueue_comparisons", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_metric_comparisons_task.delay):
                 generate_metric_comparisons_task.delay(report_id)
             metrics_count = len(repo.get_report_metrics(rid))
@@ -467,9 +503,11 @@ def extract_financial_metrics_task(self, report_id: str) -> dict:
             count = repo.replace_metrics(rid, rows)
             repo.mark_extracted(report)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "extraction.task_success", report_id=report_id, metrics=count, **result.stats.as_dict()
+                "metrics.completed", report_id=report_id, task_id=task_id, metrics=count, duration_seconds=duration, **result.stats.as_dict()
             )
+            log.info("metrics.enqueue_comparisons", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_metric_comparisons_task.delay):
                 generate_metric_comparisons_task.delay(report_id)
 
@@ -477,6 +515,7 @@ def extract_financial_metrics_task(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("metrics.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "METRICS_READY", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -503,18 +542,22 @@ def _to_point(m: FinancialMetric) -> MetricPoint:
 )
 def generate_metric_comparisons_task(self, report_id: str) -> dict:
     """Generate deterministic period comparisons for a report's metrics (Phase 3B)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("comparison.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("comparisons.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("comparison.report_missing", report_id=report_id)
+            log.warning("comparisons.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "COMPARISON_READY"):
-            log.info("comparison.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("comparisons.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("comparisons.enqueue_analytics", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_financial_analytics_task.delay):
                 generate_financial_analytics_task.delay(report_id)
             from app.models.financial_metric import FinancialMetric
@@ -529,7 +572,8 @@ def generate_metric_comparisons_task(self, report_id: str) -> dict:
             if report.company_id is None:
                 repo.replace_report_comparisons(rid, [])
                 repo.mark_compared(report)
-                log.info("comparison.no_company", report_id=report_id)
+                log.info("comparisons.no_company", report_id=report_id, task_id=task_id)
+                log.info("comparisons.enqueue_analytics", report_id=report_id, task_id=task_id)
                 if not is_testing() or is_mocked(generate_financial_analytics_task.delay):
                     generate_financial_analytics_task.delay(report_id)
                 return {"report_id": report_id, "status": "COMPARISON_READY", "comparisons": 0}
@@ -558,10 +602,12 @@ def generate_metric_comparisons_task(self, report_id: str) -> dict:
             count = repo.replace_report_comparisons(rid, rows)
             repo.mark_compared(report)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "comparison.task_success", report_id=report_id, comparisons=count,
+                "comparisons.completed", report_id=report_id, task_id=task_id, comparisons=count, duration_seconds=duration,
                 **result.stats.as_dict(),
             )
+            log.info("comparisons.enqueue_analytics", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_financial_analytics_task.delay):
                 generate_financial_analytics_task.delay(report_id)
 
@@ -569,6 +615,7 @@ def generate_metric_comparisons_task(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("comparisons.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "COMPARISON_READY", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -584,18 +631,22 @@ def generate_metric_comparisons_task(self, report_id: str) -> dict:
 )
 def generate_financial_analytics_task(self, report_id: str) -> dict:
     """Generate ratios, signals, and trend classifications for a report (Phase 3C)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("analytics.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("analytics.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("analytics.report_missing", report_id=report_id)
+            log.warning("analytics.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "ANALYTICS_READY"):
-            log.info("analytics.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("analytics.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("analytics.enqueue_risks", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_risks_task.delay):
                 extract_risks_task.delay(report_id)
             from app.models.financial_analytics import FinancialAnalytics
@@ -608,7 +659,8 @@ def generate_financial_analytics_task(self, report_id: str) -> dict:
             if report.company_id is None:
                 repo.replace_report_analytics(rid, [])
                 repo.mark_analyzed(report)
-                log.info("analytics.no_company", report_id=report_id)
+                log.info("analytics.no_company", report_id=report_id, task_id=task_id)
+                log.info("analytics.enqueue_risks", report_id=report_id, task_id=task_id)
                 if not is_testing() or is_mocked(extract_risks_task.delay):
                     extract_risks_task.delay(report_id)
                 return {"report_id": report_id, "status": "ANALYTICS_READY", "analytics": 0}
@@ -634,10 +686,12 @@ def generate_financial_analytics_task(self, report_id: str) -> dict:
             count = repo.replace_report_analytics(rid, db_rows)
             repo.mark_analyzed(report)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "analytics.task_success", report_id=report_id, analytics=count,
-                warnings=len(warnings),
+                "analytics.completed", report_id=report_id, task_id=task_id, analytics=count,
+                warnings=len(warnings), duration_seconds=duration,
             )
+            log.info("analytics.enqueue_risks", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_risks_task.delay):
                 extract_risks_task.delay(report_id)
 
@@ -645,6 +699,7 @@ def generate_financial_analytics_task(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("analytics.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "ANALYTICS_READY", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -660,18 +715,22 @@ def generate_financial_analytics_task(self, report_id: str) -> dict:
 )
 def extract_risks_task(self, report_id: str) -> dict:
     """Extract structured risk factors from a report's chunks (Phase 4)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("risk_extraction.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("risks.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("risk_extraction.report_missing", report_id=report_id)
+            log.warning("risks.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "RISKS_READY"):
-            log.info("risk_extraction.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("risks.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("risks.enqueue_risk_evolution", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_risk_evolution_task.delay):
                 generate_risk_evolution_task.delay(report_id)
             risks_count = len(repo.get_report_risks(rid))
@@ -716,11 +775,13 @@ def extract_risks_task(self, report_id: str) -> dict:
             ]
             count = repo.replace_risks(rid, rows)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "risk_extraction.task_success", report_id=report_id, risks=count, **result.stats.as_dict()
+                "risks.completed", report_id=report_id, task_id=task_id, risks=count, duration_seconds=duration, **result.stats.as_dict()
             )
 
             # Chain into Phase 4 risk evolution
+            log.info("risks.enqueue_risk_evolution", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(generate_risk_evolution_task.delay):
                 generate_risk_evolution_task.delay(report_id)
 
@@ -728,6 +789,7 @@ def extract_risks_task(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("risks.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "RISKS_READY", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -743,18 +805,22 @@ def extract_risks_task(self, report_id: str) -> dict:
 )
 def generate_risk_evolution_task(self, report_id: str) -> dict:
     """Generate risk evolution records comparing current risks to prior period (Phase 4)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("risk_evolution.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("risk_evolution.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("risk_evolution.report_missing", report_id=report_id)
+            log.warning("risk_evolution.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "RISKS_READY"):
-            log.info("risk_evolution.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("risk_evolution.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
+            log.info("risk_evolution.enqueue_tone", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_management_tone_task.delay):
                 extract_management_tone_task.delay(report_id)
             from app.models.risk_factor import RiskFactor
@@ -792,7 +858,8 @@ def generate_risk_evolution_task(self, report_id: str) -> dict:
             if report.company_id is None:
                 repo.replace_risk_evolution(uuid.UUID("00000000-0000-0000-0000-000000000000"), rid, None, [])
                 repo.mark_risk_extracted(report)
-                log.info("risk_evolution.no_company", report_id=report_id)
+                log.info("risk_evolution.no_company", report_id=report_id, task_id=task_id)
+                log.info("risk_evolution.enqueue_tone", report_id=report_id, task_id=task_id)
                 if not is_testing() or is_mocked(extract_management_tone_task.delay):
                     extract_management_tone_task.delay(report_id)
                 return {"report_id": report_id, "status": "RISKS_READY", "evolutions": 0}
@@ -828,12 +895,16 @@ def generate_risk_evolution_task(self, report_id: str) -> dict:
             )
             repo.mark_risk_extracted(report)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "risk_evolution.task_success",
+                "risk_evolution.completed",
                 report_id=report_id,
+                task_id=task_id,
                 evolutions=count,
+                duration_seconds=duration,
                 **result.stats.as_dict(),
             )
+            log.info("risk_evolution.enqueue_tone", report_id=report_id, task_id=task_id)
             if not is_testing() or is_mocked(extract_management_tone_task.delay):
                 extract_management_tone_task.delay(report_id)
 
@@ -841,6 +912,7 @@ def generate_risk_evolution_task(self, report_id: str) -> dict:
 
         except Exception as exc:
             session.rollback()
+            log.error("risk_evolution.failed", report_id=report_id, task_id=task_id, error=str(exc))
             handle_task_failure_or_retry(self, rid, "RISKS_READY", exc)
             return {"report_id": report_id, "status": "FAILED", "error": str(exc)}
 
@@ -856,18 +928,21 @@ def generate_risk_evolution_task(self, report_id: str) -> dict:
 )
 def extract_management_tone_task(self, report_id: str) -> dict:
     """Extract management tone and generate PoP evolution records (Phase 5)."""
+    import time
+    started = time.monotonic()
     rid = uuid.UUID(report_id)
-    log.info("tone_extraction.task_start", report_id=report_id)
+    task_id = self.request.id
+    log.info("tone.task_received", report_id=report_id, task_id=task_id)
 
     with SyncSessionLocal() as session:
         repo = SyncReportRepository(session)
         report = repo.get_report(rid)
         if report is None:
-            log.warning("tone_extraction.report_missing", report_id=report_id)
+            log.warning("tone.report_missing", report_id=report_id, task_id=task_id)
             return {"report_id": report_id, "status": "MISSING"}
 
         if report.completed_stage and is_stage_completed(report.completed_stage, "READY"):
-            log.info("tone_extraction.skip", report_id=report_id, completed_stage=report.completed_stage)
+            log.info("tone.skip", report_id=report_id, task_id=task_id, completed_stage=report.completed_stage)
             tones_count = len(repo.get_report_tone(rid))
             from app.models.management_tone import ManagementTone
             from app.models.tone_evolution import ToneEvolution
@@ -907,7 +982,7 @@ def extract_management_tone_task(self, report_id: str) -> dict:
                 repo.replace_tone_records(rid, [])
                 repo.replace_tone_evolution(uuid.UUID("00000000-0000-0000-0000-000000000000"), rid, None, [])
                 repo.mark_tone_extracted(report)
-                log.info("tone_extraction.no_company", report_id=report_id)
+                log.info("tone.no_company", report_id=report_id, task_id=task_id)
                 return {"report_id": report_id, "status": "READY", "tones": 0, "evolutions": 0}
 
             # 1. Load candidate chunks for tone extraction
@@ -985,11 +1060,14 @@ def extract_management_tone_task(self, report_id: str) -> dict:
 
             repo.mark_tone_extracted(report)
 
+            duration = round(time.monotonic() - started, 3)
             log.info(
-                "tone_extraction.task_success",
+                "tone.completed",
                 report_id=report_id,
+                task_id=task_id,
                 tones=tones_count,
                 evolutions=ev_count,
+                duration_seconds=duration,
                 **result.stats.as_dict(),
             )
             return {
@@ -1001,7 +1079,7 @@ def extract_management_tone_task(self, report_id: str) -> dict:
             }
 
         except Exception as exc:  # noqa: BLE001
-            log.error("tone_extraction.task_failure", report_id=report_id, error=str(exc))
+            log.error("tone.failed", report_id=report_id, task_id=task_id, error=str(exc))
             session.rollback()
             failed = repo.get_report(rid)
             if failed is not None:

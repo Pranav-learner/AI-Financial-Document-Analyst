@@ -346,16 +346,16 @@ export default function UploadPage() {
             </h3>
             <ol className="space-y-2 text-xs text-surface-600 leading-relaxed">
               {[
-                ["CHUNKED", "Document is parsed and text segments extracted from PDF structure"],
-                ["EXTRACTED", "Financial metrics (revenue, margins, EBITDA) are identified by AI"],
-                ["COMPARED", "Period-over-period comparisons (YoY/QoQ) are generated"],
-                ["ANALYZED", "Financial signals and anomalies flagged by the analytics engine"],
-                ["RISK_EXTRACTED", "Risk factors are classified by category and severity"],
-                ["TONE_EXTRACTED", "Management discussion is scored for sentiment and hedging"],
+                ["CHUNKED", "PDF pages parsed and text chunks generated"],
                 ["EMBEDDED", "Semantic embeddings indexed for Agent RAG queries"],
+                ["METRICS_READY", "Structured financial metrics extracted from table sections"],
+                ["COMPARISON_READY", "Period-over-period comparisons (YoY/QoQ) generated"],
+                ["ANALYTICS_READY", "Ratios, signals, and trends calculated"],
+                ["RISKS_READY", "Risk factors extracted and classified by severity"],
+                ["READY", "Management tone analyzed and pipeline completed"],
               ].map(([status, desc]) => (
                 <li key={status} className="flex items-start gap-2">
-                  <span className="font-mono font-bold text-brand-700 shrink-0 w-28">{status}</span>
+                  <span className="font-mono font-bold text-brand-700 shrink-0 w-36">{status}</span>
                   <span>{desc}</span>
                 </li>
               ))}

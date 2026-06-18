@@ -75,37 +75,37 @@ class Report(UUIDMixin, Base):
     def progress(self) -> int:
         """Calculate the completion percentage of the ingestion & extraction pipeline."""
         progress_map = {
-            ReportStatus.UPLOADED: 0,
-            ReportStatus.PROCESSING: 10,
+            ReportStatus.UPLOADED: 10,
+            ReportStatus.PROCESSING: 20,
             ReportStatus.PROCESSED: 20,
             ReportStatus.SECTIONING: 30,
-            ReportStatus.SECTIONED: 40,
-            ReportStatus.CHUNKING: 50,
-            ReportStatus.CHUNKED: 60,
-            ReportStatus.EMBEDDING: 70,
-            ReportStatus.EMBEDDED: 75,
-            "METRICS_EXTRACTING": 80,
-            "METRICS_READY": 85,
-            "COMPARING": 88,
-            "COMPARISON_READY": 90,
-            "ANALYTICS": 92,
-            "ANALYTICS_READY": 95,
-            "RISKS": 97,
-            "RISKS_READY": 98,
-            "TONE": 99,
+            ReportStatus.SECTIONED: 30,
+            ReportStatus.CHUNKING: 40,
+            ReportStatus.CHUNKED: 40,
+            ReportStatus.EMBEDDING: 55,
+            ReportStatus.EMBEDDED: 55,
+            "METRICS_EXTRACTING": 65,
+            "METRICS_READY": 65,
+            "COMPARING": 70,
+            "COMPARISON_READY": 70,
+            "ANALYTICS": 75,
+            "ANALYTICS_READY": 75,
+            "RISKS": 85,
+            "RISKS_READY": 85,
+            "TONE": 92,
             "READY": 100,
         }
         
         # Map the Enum members (which may resolve to original/new values)
-        progress_map[ReportStatus.EXTRACTING] = 80
-        progress_map[ReportStatus.EXTRACTED] = 85
-        progress_map[ReportStatus.COMPARING] = 88
-        progress_map[ReportStatus.COMPARED] = 90
-        progress_map[ReportStatus.ANALYZING] = 92
-        progress_map[ReportStatus.ANALYZED] = 95
-        progress_map[ReportStatus.RISK_EXTRACTING] = 97
-        progress_map[ReportStatus.RISK_EXTRACTED] = 98
-        progress_map[ReportStatus.TONE_EXTRACTING] = 99
+        progress_map[ReportStatus.EXTRACTING] = 65
+        progress_map[ReportStatus.EXTRACTED] = 65
+        progress_map[ReportStatus.COMPARING] = 70
+        progress_map[ReportStatus.COMPARED] = 70
+        progress_map[ReportStatus.ANALYZING] = 75
+        progress_map[ReportStatus.ANALYZED] = 75
+        progress_map[ReportStatus.RISK_EXTRACTING] = 85
+        progress_map[ReportStatus.RISK_EXTRACTED] = 85
+        progress_map[ReportStatus.TONE_EXTRACTING] = 92
         progress_map[ReportStatus.TONE_EXTRACTED] = 100
 
         current_status = self.status
