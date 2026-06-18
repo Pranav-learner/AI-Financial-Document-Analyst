@@ -18,6 +18,7 @@ from app.agents.financial_analyst.state import AgentState
 from app.agents.financial_analyst.exceptions import IntentClassificationException, PlannerException
 from app.agents.financial_analyst.validators import validate_intent_classification, validate_planning
 from app.agents.financial_analyst.models import _INTENT_SCHEMA, _PLAN_SCHEMA
+from app.agents.financial_analyst.utils import retry_gemini
 
 log = get_logger(__name__)
 
@@ -62,14 +63,16 @@ class QueryClassifier:
 
         try:
             client = self._get_client()
-            resp = client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=_INTENT_SCHEMA,
-                    temperature=0.0,
-                ),
+            resp = await retry_gemini(
+                lambda: client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=_INTENT_SCHEMA,
+                        temperature=0.0,
+                    ),
+                )
             )
             raw_text = resp.text or "{}"
             data = json.loads(raw_text)
@@ -130,14 +133,16 @@ class Planner:
 
         try:
             client = self._get_client()
-            resp = client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=_PLAN_SCHEMA,
-                    temperature=0.0,
-                ),
+            resp = await retry_gemini(
+                lambda: client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=_PLAN_SCHEMA,
+                        temperature=0.0,
+                    ),
+                )
             )
             raw_text = resp.text or "{}"
             data = json.loads(raw_text)

@@ -69,7 +69,7 @@ class Settings(BaseSettings):
 
     # ---- LLM / Embeddings ----
     gemini_api_key: str = ""
-    gemini_llm_model: str = "gemini-2.5-pro"
+    gemini_llm_model: str = "gemini-2.5-flash"
     # Phase 2A: finalized. `gemini-embedding-001` (GA) returns 3072-dim vectors
     # natively; we request a Matryoshka-truncated 768-dim output (then re-normalize)
     # so the column stays within pgvector's 2000-dim HNSW/IVFFlat index limit for

@@ -16,6 +16,7 @@ from app.core.logging import get_logger
 from app.agents.financial_analyst.state import AgentState
 from app.agents.financial_analyst.validators import validate_response_generation
 from app.agents.financial_analyst.models import _RESPONSE_SCHEMA
+from app.agents.financial_analyst.utils import retry_gemini
 
 log = get_logger(__name__)
 
@@ -59,14 +60,16 @@ class ResponseGenerator:
 
         try:
             client = self._get_client()
-            resp = client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=_RESPONSE_SCHEMA,
-                    temperature=0.1,
-                ),
+            resp = await retry_gemini(
+                lambda: client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=_RESPONSE_SCHEMA,
+                        temperature=0.1,
+                    ),
+                )
             )
             raw_text = resp.text or "{}"
             data = json.loads(raw_text)

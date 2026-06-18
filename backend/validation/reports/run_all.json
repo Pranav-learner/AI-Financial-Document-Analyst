@@ -1,133 +1,133 @@
 {
   "phase": "12",
   "overall_ok": false,
-  "duration_s": 13.7,
+  "duration_s": 436.6,
   "totals": {
-    "passed": 70,
-    "failed": 28,
-    "warned": 7
+    "passed": 103,
+    "failed": 2,
+    "warned": 2
   },
   "suites": [
     {
       "name": "Deployment Audit",
-      "ok": false,
-      "passed": 0,
-      "failed": 22,
-      "warned": 7,
-      "duration_s": 13.733,
+      "ok": true,
+      "passed": 31,
+      "failed": 0,
+      "warned": 2,
+      "duration_s": 436.6,
       "measurements": {
-        "migration_count": 0
+        "migration_count": 16
       },
       "checks": [
         {
           "name": "docker-compose (dev)",
-          "passed": false,
-          "detail": "missing: docker-compose.yml",
+          "passed": true,
+          "detail": "docker-compose.yml",
           "warn": false,
           "data": {}
         },
         {
           "name": "docker-compose (prod)",
-          "passed": false,
-          "detail": "missing: docker-compose.prod.yml",
+          "passed": true,
+          "detail": "docker-compose.prod.yml",
           "warn": false,
           "data": {}
         },
         {
           "name": "backend Dockerfile",
-          "passed": false,
-          "detail": "missing: backend/Dockerfile",
+          "passed": true,
+          "detail": "backend/Dockerfile",
           "warn": false,
           "data": {}
         },
         {
           "name": "backend Dockerfile.prod",
-          "passed": false,
-          "detail": "missing: backend/Dockerfile.prod",
+          "passed": true,
+          "detail": "backend/Dockerfile.prod",
           "warn": false,
           "data": {}
         },
         {
           "name": "frontend Dockerfile.prod",
-          "passed": false,
-          "detail": "missing: frontend/Dockerfile.prod",
-          "warn": true,
+          "passed": true,
+          "detail": "frontend/Dockerfile.prod",
+          "warn": false,
           "data": {}
         },
         {
           "name": "prod image runs as non-root",
-          "passed": false,
-          "detail": "missing file: backend/Dockerfile.prod",
+          "passed": true,
+          "detail": "found in backend/Dockerfile.prod",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod image multi-worker uvicorn",
-          "passed": false,
-          "detail": "missing file: backend/Dockerfile.prod",
+          "passed": true,
+          "detail": "found in backend/Dockerfile.prod",
           "warn": false,
           "data": {}
         },
         {
           "name": "env example (root)",
-          "passed": false,
-          "detail": "missing: .env.example",
+          "passed": true,
+          "detail": ".env.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "env example (production)",
-          "passed": false,
-          "detail": "missing: .env.production.example",
+          "passed": true,
+          "detail": ".env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod env documents DATABASE_URL",
-          "passed": false,
-          "detail": "missing file: .env.production.example",
+          "passed": true,
+          "detail": "found in .env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod env documents REDIS_URL",
-          "passed": false,
-          "detail": "missing file: .env.production.example",
+          "passed": true,
+          "detail": "found in .env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod env documents GEMINI_API_KEY",
-          "passed": false,
-          "detail": "missing file: .env.production.example",
+          "passed": true,
+          "detail": "found in .env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod env documents JWT_SECRET",
-          "passed": false,
-          "detail": "missing file: .env.production.example",
+          "passed": true,
+          "detail": "found in .env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod env documents CELERY_BROKER_URL",
-          "passed": false,
-          "detail": "missing file: .env.production.example",
+          "passed": true,
+          "detail": "found in .env.production.example",
           "warn": false,
           "data": {}
         },
         {
           "name": "alembic config",
-          "passed": false,
-          "detail": "missing: backend/alembic.ini",
+          "passed": true,
+          "detail": "backend/alembic.ini",
           "warn": false,
           "data": {}
         },
         {
           "name": "alembic migrations present",
-          "passed": false,
-          "detail": "0 revisions",
+          "passed": true,
+          "detail": "16 revisions",
           "warn": false,
           "data": {}
         },
@@ -140,97 +140,125 @@
         },
         {
           "name": "celery worker service defined",
-          "passed": false,
-          "detail": "missing file: docker-compose.yml",
+          "passed": true,
+          "detail": "found in docker-compose.yml",
           "warn": false,
           "data": {}
         },
         {
           "name": "redis service defined",
-          "passed": false,
-          "detail": "missing file: docker-compose.yml",
+          "passed": true,
+          "detail": "found in docker-compose.yml",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod redis password-protected",
-          "passed": false,
-          "detail": "missing file: docker-compose.prod.yml",
-          "warn": true,
+          "passed": true,
+          "detail": "found in docker-compose.prod.yml",
+          "warn": false,
           "data": {}
         },
         {
           "name": "frontend build script",
-          "passed": false,
-          "detail": "missing file: frontend/package.json",
+          "passed": true,
+          "detail": "found in frontend/package.json",
           "warn": false,
           "data": {}
         },
         {
           "name": "frontend build output committed",
-          "passed": false,
-          "detail": "missing: frontend/dist/index.html",
-          "warn": true,
+          "passed": true,
+          "detail": "frontend/dist/index.html",
+          "warn": false,
           "data": {}
         },
         {
           "name": "frontend API base configurable",
-          "passed": false,
-          "detail": "missing file: frontend/src/services/api.ts",
+          "passed": true,
+          "detail": "found in frontend/src/services/api.ts",
           "warn": false,
           "data": {}
         },
         {
           "name": "startup validates prod secrets",
-          "passed": false,
-          "detail": "missing file: backend/app/main.py",
+          "passed": true,
+          "detail": "found in backend/app/main.py",
           "warn": false,
           "data": {}
         },
         {
           "name": "prod config rejects default JWT secret",
-          "passed": false,
-          "detail": "missing file: backend/app/main.py",
+          "passed": true,
+          "detail": "found in backend/app/main.py",
           "warn": false,
           "data": {}
         },
         {
           "name": "GitHub Actions CI",
-          "passed": false,
-          "detail": "missing: .github/workflows/ci.yml",
+          "passed": true,
+          "detail": ".github/workflows/ci.yml",
           "warn": false,
           "data": {}
         },
         {
-          "name": "render manifest",
+          "name": "CI runs pytest",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI runs ruff lint",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI builds frontend",
+          "passed": true,
+          "detail": "found in .github/workflows/ci.yml",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "CI runs frontend tests (vitest)",
           "passed": false,
-          "detail": "missing: infrastructure/deployment/render.yaml",
+          "detail": "not found in .github/workflows/ci.yml",
           "warn": true,
+          "data": {}
+        },
+        {
+          "name": "render manifest",
+          "passed": true,
+          "detail": "infrastructure/deployment/render.yaml",
+          "warn": false,
           "data": {}
         },
         {
           "name": "railway manifest",
-          "passed": false,
-          "detail": "missing: infrastructure/deployment/railway.json",
-          "warn": true,
+          "passed": true,
+          "detail": "infrastructure/deployment/railway.json",
+          "warn": false,
           "data": {}
         },
         {
           "name": "vercel manifest",
-          "passed": false,
-          "detail": "missing: infrastructure/deployment/vercel.json",
-          "warn": true,
+          "passed": true,
+          "detail": "infrastructure/deployment/vercel.json",
+          "warn": false,
           "data": {}
         }
       ]
     },
     {
       "name": "Smoke Test",
-      "ok": false,
-      "passed": 13,
-      "failed": 2,
+      "ok": true,
+      "passed": 19,
+      "failed": 0,
       "warned": 0,
-      "duration_s": 13.731,
+      "duration_s": 436.591,
       "measurements": {
         "data_seeded": true
       },
@@ -238,14 +266,42 @@
         {
           "name": "health endpoint 200",
           "passed": true,
-          "detail": "HTTP 200 in 4ms",
+          "detail": "HTTP 200 in 11ms",
           "warn": false,
           "data": {}
         },
         {
           "name": "readiness probe 200",
-          "passed": false,
-          "detail": "HTTP 503",
+          "passed": true,
+          "detail": "database=ok, redis=ok, celery=ok, gemini=ok, storage=ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency database ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency redis ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency celery ok",
+          "passed": true,
+          "detail": "ok",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "dependency storage ok",
+          "passed": true,
+          "detail": "ok",
           "warn": false,
           "data": {}
         },
@@ -272,8 +328,8 @@
         },
         {
           "name": "auth gating: 401 without token",
-          "passed": false,
-          "detail": "HTTP 200",
+          "passed": true,
+          "detail": "HTTP 401",
           "warn": false,
           "data": {}
         },
@@ -308,28 +364,28 @@
         {
           "name": "read report metrics",
           "passed": true,
-          "detail": "HTTP 200 in 18ms",
+          "detail": "HTTP 200 in 30ms",
           "warn": false,
           "data": {}
         },
         {
           "name": "read report sections",
           "passed": true,
-          "detail": "HTTP 200 in 15ms",
+          "detail": "HTTP 200 in 27ms",
           "warn": false,
           "data": {}
         },
         {
           "name": "read report chunks",
           "passed": true,
-          "detail": "HTTP 200 in 35ms",
+          "detail": "HTTP 200 in 56ms",
           "warn": false,
           "data": {}
         },
         {
           "name": "hybrid search 200",
           "passed": true,
-          "detail": "HTTP 200 in 26ms",
+          "detail": "HTTP 200 in 51ms",
           "warn": false,
           "data": {}
         },
@@ -344,98 +400,18 @@
     },
     {
       "name": "E2E Validation",
-      "ok": true,
-      "passed": 12,
-      "failed": 0,
+      "ok": false,
+      "passed": 0,
+      "failed": 1,
       "warned": 0,
-      "duration_s": 10.746,
-      "measurements": {
-        "stages_validated": 12,
-        "stages_passed": 12
-      },
+      "duration_s": 253.404,
+      "measurements": {},
       "checks": [
         {
-          "name": "Upload\u2192Process: report in terminal status",
-          "passed": true,
-          "detail": "status=TONE_EXTRACTED",
+          "name": "suite executed",
+          "passed": false,
+          "detail": "crashed: timed out",
           "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Section extraction produced sections",
-          "passed": true,
-          "detail": "3 sections",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Chunking produced chunks",
-          "passed": true,
-          "detail": "3 chunks",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Embeddings present for chunks",
-          "passed": true,
-          "detail": "{'report_id': '64f29cfa-2a13-5931-9788-911094e2ac15', 'total_chunks': 3, 'embedded_chunks': 3, 'missing_chunks': 0, 'dimension': 768, 'model': 'gemini-embedding-001', 'fully_embedded': True}",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Retrieval: hybrid search returns hits",
-          "passed": true,
-          "detail": "HTTP 200, 5 hits",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Retrieval: RAG assembles grounded context",
-          "passed": true,
-          "detail": "HTTP 200, 5 citations",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Financial extraction produced metrics",
-          "passed": true,
-          "detail": "7 metrics",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Risk extraction produced risks",
-          "passed": true,
-          "detail": "2 risks",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Tone extraction produced tone",
-          "passed": true,
-          "detail": "HTTP 200",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Benchmarking ranks the cohort",
-          "passed": true,
-          "detail": "3/3 ranked",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Memo available & completed",
-          "passed": true,
-          "detail": "HTTP 200, status=COMPLETED",
-          "warn": false,
-          "data": {}
-        },
-        {
-          "name": "Agent endpoint responds",
-          "passed": true,
-          "detail": "HTTP 200 (LLM degraded \u2014 see agent_eval)",
-          "warn": true,
           "data": {}
         }
       ]
@@ -446,73 +422,73 @@
       "passed": 8,
       "failed": 0,
       "warned": 0,
-      "duration_s": 8.918,
+      "duration_s": 253.404,
       "measurements": {
         "iterations": 20,
         "latency_ms": {
           "health": {
             "count": 20,
-            "avg_ms": 4.6,
-            "median_ms": 4.5,
-            "p95_ms": 6.2,
-            "min_ms": 3.4,
-            "max_ms": 8.1
+            "avg_ms": 7.2,
+            "median_ms": 7.0,
+            "p95_ms": 9.3,
+            "min_ms": 5.2,
+            "max_ms": 10.3
           },
           "reports_list": {
             "count": 20,
-            "avg_ms": 15.1,
-            "median_ms": 15.5,
-            "p95_ms": 18.5,
-            "min_ms": 11.1,
-            "max_ms": 20.6
+            "avg_ms": 21.1,
+            "median_ms": 20.4,
+            "p95_ms": 24.2,
+            "min_ms": 18.1,
+            "max_ms": 25.3
           },
           "report_risks": {
             "count": 20,
-            "avg_ms": 15.9,
-            "median_ms": 15.9,
-            "p95_ms": 18.9,
-            "min_ms": 13.2,
-            "max_ms": 19.3
+            "avg_ms": 22.4,
+            "median_ms": 21.6,
+            "p95_ms": 27.3,
+            "min_ms": 19.0,
+            "max_ms": 27.9
           },
           "report_tone": {
             "count": 20,
-            "avg_ms": 14.9,
-            "median_ms": 14.9,
-            "p95_ms": 17.0,
-            "min_ms": 11.6,
-            "max_ms": 17.4
+            "avg_ms": 19.4,
+            "median_ms": 19.1,
+            "p95_ms": 21.4,
+            "min_ms": 16.7,
+            "max_ms": 22.3
           },
           "report_metrics": {
             "count": 20,
-            "avg_ms": 15.6,
-            "median_ms": 15.4,
-            "p95_ms": 17.7,
-            "min_ms": 13.2,
-            "max_ms": 20.0
+            "avg_ms": 20.7,
+            "median_ms": 20.2,
+            "p95_ms": 23.6,
+            "min_ms": 17.5,
+            "max_ms": 26.3
           },
           "hybrid_search": {
             "count": 20,
-            "avg_ms": 26.1,
-            "median_ms": 25.8,
-            "p95_ms": 28.4,
-            "min_ms": 23.1,
-            "max_ms": 30.5
+            "avg_ms": 21.5,
+            "median_ms": 19.1,
+            "p95_ms": 20.8,
+            "min_ms": 17.7,
+            "max_ms": 66.9
           },
           "vector_search": {
             "count": 20,
-            "avg_ms": 24.3,
-            "median_ms": 23.7,
-            "p95_ms": 26.5,
-            "min_ms": 21.6,
-            "max_ms": 28.1
+            "avg_ms": 20.3,
+            "median_ms": 19.3,
+            "p95_ms": 25.9,
+            "min_ms": 17.1,
+            "max_ms": 31.7
           },
           "company_risk_summary": {
             "count": 20,
-            "avg_ms": 17.5,
-            "median_ms": 17.4,
-            "p95_ms": 19.5,
-            "min_ms": 14.8,
-            "max_ms": 22.0
+            "avg_ms": 23.6,
+            "median_ms": 23.3,
+            "p95_ms": 25.1,
+            "min_ms": 20.4,
+            "max_ms": 34.3
           }
         }
       },
@@ -520,56 +496,56 @@
         {
           "name": "health",
           "passed": true,
-          "detail": "avg=4.6ms median=4.5ms p95=6.2ms worst=8.1ms (n=20)",
+          "detail": "avg=7.2ms median=7.0ms p95=9.3ms worst=10.3ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "reports_list",
           "passed": true,
-          "detail": "avg=15.1ms median=15.5ms p95=18.5ms worst=20.6ms (n=20)",
+          "detail": "avg=21.1ms median=20.4ms p95=24.2ms worst=25.3ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "report_risks",
           "passed": true,
-          "detail": "avg=15.9ms median=15.9ms p95=18.9ms worst=19.3ms (n=20)",
+          "detail": "avg=22.4ms median=21.6ms p95=27.3ms worst=27.9ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "report_tone",
           "passed": true,
-          "detail": "avg=14.9ms median=14.9ms p95=17.0ms worst=17.4ms (n=20)",
+          "detail": "avg=19.4ms median=19.1ms p95=21.4ms worst=22.3ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "report_metrics",
           "passed": true,
-          "detail": "avg=15.6ms median=15.4ms p95=17.7ms worst=20.0ms (n=20)",
+          "detail": "avg=20.7ms median=20.2ms p95=23.6ms worst=26.3ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "hybrid_search",
           "passed": true,
-          "detail": "avg=26.1ms median=25.8ms p95=28.4ms worst=30.5ms (n=20)",
+          "detail": "avg=21.5ms median=19.1ms p95=20.8ms worst=66.9ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "vector_search",
           "passed": true,
-          "detail": "avg=24.3ms median=23.7ms p95=26.5ms worst=28.1ms (n=20)",
+          "detail": "avg=20.3ms median=19.3ms p95=25.9ms worst=31.7ms (n=20)",
           "warn": false,
           "data": {}
         },
         {
           "name": "company_risk_summary",
           "passed": true,
-          "detail": "avg=17.5ms median=17.4ms p95=19.5ms worst=22.0ms (n=20)",
+          "detail": "avg=23.6ms median=23.3ms p95=25.1ms worst=34.3ms (n=20)",
           "warn": false,
           "data": {}
         }
@@ -581,11 +557,11 @@
       "passed": 8,
       "failed": 0,
       "warned": 0,
-      "duration_s": 6.221,
+      "duration_s": 250.155,
       "measurements": {
         "runs": {
           "vector": {
-            "run_id": "22bdbdea-a399-4f3f-8ec7-45129ed857f8",
+            "run_id": "e9ccef60-f155-4ddf-af67-57bc21f7cca6",
             "retrieval_type": "vector",
             "top_k": 10,
             "num_queries": 9,
@@ -593,11 +569,11 @@
             "mean_precision_at_k": 0.0,
             "mean_mrr": 0.0,
             "hit_rate": 0.0,
-            "mean_latency_ms": 10.991111,
+            "mean_latency_ms": 13.044444,
             "mean_candidate_reduction_pct": 0.0,
             "corpus_size": 9,
             "failures": 0,
-            "timestamp": "2026-06-16T16:58:42.327049+00:00",
+            "timestamp": "2026-06-18T16:50:36.487011+00:00",
             "per_category": {
               "FINANCIAL_STATEMENTS": {
                 "num_queries": 3,
@@ -648,6 +624,40 @@
               {
                 "query": "supply chain risk",
                 "category": "RISK",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 15.58,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-18T16:50:36.337546+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "cybersecurity and data breach risk",
+                "category": "RISK",
+                "retrieval_type": "vector",
+                "top_k": 10,
+                "recall_at_k": 0.0,
+                "precision_at_k": 0.0,
+                "mrr": 0.0,
+                "hit_rate": 0.0,
+                "latency_ms": 13.49,
+                "candidate_count": 9,
+                "candidate_reduction_pct": 0.0,
+                "returned": 9,
+                "total_relevant": 0,
+                "timestamp": "2026-06-18T16:50:36.356566+00:00",
+                "ndcg": 0.0
+              },
+              {
+                "query": "operating margin",
+                "category": "FINANCIAL_STATEMENTS",
                 "retrieval_type": "vector",
                 "top_k": 10,
                 "recall_at_k": 0.0,
@@ -659,41 +669,7 @@
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.196013+00:00",
-                "ndcg": 0.0
-              },
-              {
-                "query": "cybersecurity and data breach risk",
-                "category": "RISK",
-                "retrieval_type": "vector",
-                "top_k": 10,
-                "recall_at_k": 0.0,
-                "precision_at_k": 0.0,
-                "mrr": 0.0,
-                "hit_rate": 0.0,
-                "latency_ms": 12.49,
-                "candidate_count": 9,
-                "candidate_reduction_pct": 0.0,
-                "returned": 9,
-                "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.213857+00:00",
-                "ndcg": 0.0
-              },
-              {
-                "query": "operating margin",
-                "category": "FINANCIAL_STATEMENTS",
-                "retrieval_type": "vector",
-                "top_k": 10,
-                "recall_at_k": 0.0,
-                "precision_at_k": 0.0,
-                "mrr": 0.0,
-                "hit_rate": 0.0,
-                "latency_ms": 11.4,
-                "candidate_count": 9,
-                "candidate_reduction_pct": 0.0,
-                "returned": 9,
-                "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.231629+00:00",
+                "timestamp": "2026-06-18T16:50:36.374857+00:00",
                 "ndcg": 0.0
               },
               {
@@ -705,12 +681,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.92,
+                "latency_ms": 12.69,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.247189+00:00",
+                "timestamp": "2026-06-18T16:50:36.392643+00:00",
                 "ndcg": 0.0
               },
               {
@@ -722,12 +698,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.65,
+                "latency_ms": 11.37,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.262874+00:00",
+                "timestamp": "2026-06-18T16:50:36.408996+00:00",
                 "ndcg": 0.0
               },
               {
@@ -739,12 +715,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 9.91,
+                "latency_ms": 13.58,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.277642+00:00",
+                "timestamp": "2026-06-18T16:50:36.427477+00:00",
                 "ndcg": 0.0
               },
               {
@@ -756,12 +732,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.03,
+                "latency_ms": 13.22,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.294095+00:00",
+                "timestamp": "2026-06-18T16:50:36.448571+00:00",
                 "ndcg": 0.0
               },
               {
@@ -773,12 +749,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.78,
+                "latency_ms": 13.91,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.310329+00:00",
+                "timestamp": "2026-06-18T16:50:36.468513+00:00",
                 "ndcg": 0.0
               },
               {
@@ -790,18 +766,18 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 11.98,
+                "latency_ms": 12.8,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.326794+00:00",
+                "timestamp": "2026-06-18T16:50:36.486789+00:00",
                 "ndcg": 0.0
               }
             ]
           },
           "hybrid": {
-            "run_id": "2090ac6b-8baa-456b-a835-48bdbe98a73b",
+            "run_id": "4b399027-a226-463e-a923-bf9dd42d9895",
             "retrieval_type": "hybrid",
             "top_k": 10,
             "num_queries": 9,
@@ -809,11 +785,11 @@
             "mean_precision_at_k": 0.0,
             "mean_mrr": 0.0,
             "hit_rate": 0.0,
-            "mean_latency_ms": 11.983333,
+            "mean_latency_ms": 11.913333,
             "mean_candidate_reduction_pct": 88.888889,
             "corpus_size": 9,
             "failures": 0,
-            "timestamp": "2026-06-16T16:58:42.483827+00:00",
+            "timestamp": "2026-06-18T16:50:36.647596+00:00",
             "per_category": {
               "FINANCIAL_STATEMENTS": {
                 "num_queries": 3,
@@ -870,12 +846,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 13.88,
+                "latency_ms": 13.84,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.359649+00:00",
+                "timestamp": "2026-06-18T16:50:36.524580+00:00",
                 "ndcg": 0.0
               },
               {
@@ -887,12 +863,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.33,
+                "latency_ms": 12.01,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.373913+00:00",
+                "timestamp": "2026-06-18T16:50:36.540970+00:00",
                 "ndcg": 0.0
               },
               {
@@ -904,12 +880,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 16.19,
+                "latency_ms": 17.26,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.393957+00:00",
+                "timestamp": "2026-06-18T16:50:36.562917+00:00",
                 "ndcg": 0.0
               },
               {
@@ -921,12 +897,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 10.06,
+                "latency_ms": 10.61,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.407696+00:00",
+                "timestamp": "2026-06-18T16:50:36.577528+00:00",
                 "ndcg": 0.0
               },
               {
@@ -938,12 +914,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 9.91,
+                "latency_ms": 11.91,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.421728+00:00",
+                "timestamp": "2026-06-18T16:50:36.594444+00:00",
                 "ndcg": 0.0
               },
               {
@@ -955,12 +931,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 11.9,
+                "latency_ms": 12.01,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.436952+00:00",
+                "timestamp": "2026-06-18T16:50:36.609781+00:00",
                 "ndcg": 0.0
               },
               {
@@ -972,12 +948,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 8.64,
+                "latency_ms": 8.86,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.449138+00:00",
+                "timestamp": "2026-06-18T16:50:36.621320+00:00",
                 "ndcg": 0.0
               },
               {
@@ -989,12 +965,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 11.87,
+                "latency_ms": 8.9,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.464835+00:00",
+                "timestamp": "2026-06-18T16:50:36.633082+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1006,18 +982,18 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 15.07,
+                "latency_ms": 11.82,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:42.483561+00:00",
+                "timestamp": "2026-06-18T16:50:36.647408+00:00",
                 "ndcg": 0.0
               }
             ]
           },
           "rag": {
-            "run_id": "c65be8de-d102-4108-8c1b-8a8a6b00049b",
+            "run_id": "56c44829-9130-40f1-9a4b-85b12c351be5",
             "retrieval_type": "rag",
             "top_k": 10,
             "num_queries": 9,
@@ -1025,11 +1001,11 @@
             "mean_precision_at_k": 0.0,
             "mean_mrr": 0.0,
             "hit_rate": 0.0,
-            "mean_latency_ms": 256.197778,
+            "mean_latency_ms": 309.228889,
             "mean_candidate_reduction_pct": 22.222222,
             "corpus_size": 9,
             "failures": 0,
-            "timestamp": "2026-06-16T16:58:44.949171+00:00",
+            "timestamp": "2026-06-18T16:50:39.587291+00:00",
             "per_category": {
               "FINANCIAL_STATEMENTS": {
                 "num_queries": 3,
@@ -1086,12 +1062,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 1162.73,
+                "latency_ms": 1478.73,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:43.678529+00:00",
+                "timestamp": "2026-06-18T16:50:38.166244+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1103,12 +1079,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 1025.57,
+                "latency_ms": 1198.94,
                 "candidate_count": 0,
                 "candidate_reduction_pct": 100.0,
                 "returned": 0,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.718993+00:00",
+                "timestamp": "2026-06-18T16:50:39.379311+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1120,12 +1096,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 15.65,
+                "latency_ms": 14.39,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.750419+00:00",
+                "timestamp": "2026-06-18T16:50:39.407458+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1137,12 +1113,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 18.35,
+                "latency_ms": 14.76,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.784688+00:00",
+                "timestamp": "2026-06-18T16:50:39.436684+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1154,12 +1130,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 16.81,
+                "latency_ms": 15.1,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.816565+00:00",
+                "timestamp": "2026-06-18T16:50:39.464941+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1171,12 +1147,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 18.17,
+                "latency_ms": 14.25,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.850564+00:00",
+                "timestamp": "2026-06-18T16:50:39.493598+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1188,12 +1164,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 16.44,
+                "latency_ms": 15.4,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.880715+00:00",
+                "timestamp": "2026-06-18T16:50:39.522285+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1205,12 +1181,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 15.31,
+                "latency_ms": 15.57,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.911177+00:00",
+                "timestamp": "2026-06-18T16:50:39.551798+00:00",
                 "ndcg": 0.0
               },
               {
@@ -1222,12 +1198,12 @@
                 "precision_at_k": 0.0,
                 "mrr": 0.0,
                 "hit_rate": 0.0,
-                "latency_ms": 16.75,
+                "latency_ms": 15.92,
                 "candidate_count": 9,
                 "candidate_reduction_pct": 0.0,
                 "returned": 9,
                 "total_relevant": 0,
-                "timestamp": "2026-06-16T16:58:44.948976+00:00",
+                "timestamp": "2026-06-18T16:50:39.587083+00:00",
                 "ndcg": 0.0
               }
             ]
@@ -1245,7 +1221,7 @@
         {
           "name": "vector: queries evaluated",
           "passed": true,
-          "detail": "num_queries=9, corpus_size=9, latency=10.991111ms",
+          "detail": "num_queries=9, corpus_size=9, latency=13.044444ms",
           "warn": false,
           "data": {}
         },
@@ -1259,7 +1235,7 @@
         {
           "name": "hybrid: queries evaluated",
           "passed": true,
-          "detail": "num_queries=9, corpus_size=9, latency=11.983333ms",
+          "detail": "num_queries=9, corpus_size=9, latency=11.913333ms",
           "warn": false,
           "data": {}
         },
@@ -1273,7 +1249,7 @@
         {
           "name": "rag: queries evaluated",
           "passed": true,
-          "detail": "num_queries=9, corpus_size=9, latency=256.197778ms",
+          "detail": "num_queries=9, corpus_size=9, latency=309.228889ms",
           "warn": false,
           "data": {}
         },
@@ -1299,7 +1275,7 @@
       "passed": 13,
       "failed": 0,
       "warned": 0,
-      "duration_s": 3.43,
+      "duration_s": 246.857,
       "measurements": {
         "section_count": 3,
         "citation_count": 4,
@@ -1406,7 +1382,7 @@
       "passed": 9,
       "failed": 0,
       "warned": 0,
-      "duration_s": 3.339,
+      "duration_s": 246.759,
       "measurements": {
         "actual_order": [
           "DEMO-APX",
@@ -1456,7 +1432,7 @@
         {
           "name": "benchmark compare 200",
           "passed": true,
-          "detail": "HTTP 200 in 76ms",
+          "detail": "HTTP 200 in 96ms",
           "warn": false,
           "data": {}
         },
@@ -1520,42 +1496,42 @@
     },
     {
       "name": "Security Audit",
-      "ok": false,
-      "passed": 7,
-      "failed": 4,
+      "ok": true,
+      "passed": 11,
+      "failed": 0,
       "warned": 0,
-      "duration_s": 3.231,
+      "duration_s": 246.623,
       "measurements": {
         "login_status_sequence": [
           401,
           401,
           401,
           401,
-          401,
-          401,
-          401,
-          401
+          429,
+          429,
+          429,
+          429
         ]
       },
       "checks": [
         {
           "name": "authn: anonymous \u2192 401",
-          "passed": false,
-          "detail": "HTTP 200",
+          "passed": true,
+          "detail": "HTTP 401",
           "warn": false,
           "data": {}
         },
         {
           "name": "authn: malformed token \u2192 401",
-          "passed": false,
-          "detail": "HTTP 200",
+          "passed": true,
+          "detail": "HTTP 401",
           "warn": false,
           "data": {}
         },
         {
           "name": "rbac: viewer blocked from analyst action (403)",
-          "passed": false,
-          "detail": "HTTP 200",
+          "passed": true,
+          "detail": "HTTP 403",
           "warn": false,
           "data": {}
         },
@@ -1610,8 +1586,135 @@
         },
         {
           "name": "rate limiting: login limiter trips (429)",
+          "passed": true,
+          "detail": "statuses=[401, 401, 401, 401, 429, 429, 429, 429]",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Load Test",
+      "ok": true,
+      "passed": 4,
+      "failed": 0,
+      "warned": 0,
+      "duration_s": 243.548,
+      "measurements": {
+        "concurrency": 10,
+        "total_requests": 60,
+        "scenarios": {
+          "concurrent reports list": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 60,
+            "throttled_429": 0,
+            "failed": 0,
+            "success_rate": 1.0,
+            "wall_s": 1.466,
+            "throughput_rps": 40.9,
+            "latency": {
+              "count": 60,
+              "avg_ms": 212.4,
+              "median_ms": 121.6,
+              "p95_ms": 714.4,
+              "min_ms": 55.3,
+              "max_ms": 721.8
+            },
+            "status_breakdown": {
+              "200": 60
+            }
+          },
+          "concurrent hybrid queries": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 40,
+            "throttled_429": 20,
+            "failed": 0,
+            "success_rate": 0.667,
+            "wall_s": 0.988,
+            "throughput_rps": 60.7,
+            "latency": {
+              "count": 60,
+              "avg_ms": 133.0,
+              "median_ms": 119.5,
+              "p95_ms": 299.8,
+              "min_ms": 55.3,
+              "max_ms": 322.1
+            },
+            "status_breakdown": {
+              "200": 40,
+              "429": 20
+            }
+          },
+          "concurrent vector queries": {
+            "total": 60,
+            "concurrency": 10,
+            "succeeded": 40,
+            "throttled_429": 20,
+            "failed": 0,
+            "success_rate": 0.667,
+            "wall_s": 0.988,
+            "throughput_rps": 60.7,
+            "latency": {
+              "count": 60,
+              "avg_ms": 130.6,
+              "median_ms": 124.5,
+              "p95_ms": 213.3,
+              "min_ms": 55.8,
+              "max_ms": 217.5
+            },
+            "status_breakdown": {
+              "200": 40,
+              "429": 20
+            }
+          }
+        }
+      },
+      "checks": [
+        {
+          "name": "concurrent reports list",
+          "passed": true,
+          "detail": "60/60 2xx @ c=10, 40.9 rps, p95=714.4ms, worst=721.8ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "concurrent hybrid queries",
+          "passed": true,
+          "detail": "40/60 2xx @ c=10, 20 throttled(429), 60.7 rps, p95=299.8ms, worst=322.1ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "concurrent vector queries",
+          "passed": true,
+          "detail": "40/60 2xx @ c=10, 20 throttled(429), 60.7 rps, p95=213.3ms, worst=217.5ms, 5xx/net-fail=0",
+          "warn": false,
+          "data": {}
+        },
+        {
+          "name": "rate limiter protects under burst (no 5xx)",
+          "passed": true,
+          "detail": "per-user 429 throttling observed \u2014 documented concurrency ceiling",
+          "warn": false,
+          "data": {}
+        }
+      ]
+    },
+    {
+      "name": "Agent Evaluation",
+      "ok": false,
+      "passed": 0,
+      "failed": 1,
+      "warned": 0,
+      "duration_s": 0.001,
+      "measurements": {},
+      "checks": [
+        {
+          "name": "suite executed",
           "passed": false,
-          "detail": "statuses=[401, 401, 401, 401, 401, 401, 401, 401]",
+          "detail": "crashed: timed out",
           "warn": false,
           "data": {}
         }

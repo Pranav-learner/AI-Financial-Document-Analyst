@@ -38,7 +38,11 @@ from app.models import (
     ReportSection,
     RiskFactor,
 )
-from app.models.enums import MemoStatus, MemoType, ReportStatus, ReportType
+from app.models.benchmark import BenchmarkResult, BenchmarkRun, BenchmarkSummary
+from app.models.enums import (
+    BenchmarkDimension, BenchmarkStatus,
+    MemoStatus, MemoType, ReportStatus, ReportType,
+)
 from sqlalchemy import delete, select
 
 EMBED_DIM = 768
@@ -86,9 +90,10 @@ COHORT: list[dict[str, Any]] = [
         # are "higher is better" to keep the ground-truth ranking unambiguous.
         "fin": {
             "REVENUE": (48.2, "BILLION"), "NET_MARGIN": (24.5, "PERCENT"),
-            "OPERATING_MARGIN": (30.0, "PERCENT"), "FREE_CASH_FLOW": (11.8, "BILLION"),
-            "CASH_FLOW_MARGIN": (24.5, "PERCENT"), "CAPEX": (3.0, "BILLION"),
-            "DIVIDENDS": (2.0, "BILLION"),
+            "GROSS_MARGIN": (38.5, "PERCENT"), "NET_INCOME": (11.8, "BILLION"),
+            "EBITDA": (16.2, "BILLION"), "OPERATING_MARGIN": (30.0, "PERCENT"),
+            "FREE_CASH_FLOW": (11.8, "BILLION"), "CASH_FLOW_MARGIN": (24.5, "PERCENT"),
+            "CAPEX": (3.0, "BILLION"), "DIVIDENDS": (2.0, "BILLION"),
         },
         "tone": ("POSITIVE", "CONFIDENT", 0.12, 0.78, 0.10),
         "risks": [
@@ -110,9 +115,10 @@ COHORT: list[dict[str, Any]] = [
         "fcf_b": 4.3,
         "fin": {
             "REVENUE": (29.7, "BILLION"), "NET_MARGIN": (14.1, "PERCENT"),
-            "OPERATING_MARGIN": (18.0, "PERCENT"), "FREE_CASH_FLOW": (4.3, "BILLION"),
-            "CASH_FLOW_MARGIN": (14.5, "PERCENT"), "CAPEX": (2.0, "BILLION"),
-            "DIVIDENDS": (0.5, "BILLION"),
+            "GROSS_MARGIN": (27.3, "PERCENT"), "NET_INCOME": (4.2, "BILLION"),
+            "EBITDA": (7.1, "BILLION"), "OPERATING_MARGIN": (18.0, "PERCENT"),
+            "FREE_CASH_FLOW": (4.3, "BILLION"), "CASH_FLOW_MARGIN": (14.5, "PERCENT"),
+            "CAPEX": (2.0, "BILLION"), "DIVIDENDS": (0.5, "BILLION"),
         },
         "tone": ("NEUTRAL", "CAUTIOUS", 0.34, 0.45, 0.30),
         "risks": [
@@ -138,9 +144,10 @@ COHORT: list[dict[str, Any]] = [
         "fcf_b": 1.1,
         "fin": {
             "REVENUE": (12.4, "BILLION"), "NET_MARGIN": (8.9, "PERCENT"),
-            "OPERATING_MARGIN": (9.5, "PERCENT"), "FREE_CASH_FLOW": (1.1, "BILLION"),
-            "CASH_FLOW_MARGIN": (8.9, "PERCENT"), "CAPEX": (1.0, "BILLION"),
-            "DIVIDENDS": (0.0, "BILLION"),
+            "GROSS_MARGIN": (19.1, "PERCENT"), "NET_INCOME": (1.1, "BILLION"),
+            "EBITDA": (2.3, "BILLION"), "OPERATING_MARGIN": (9.5, "PERCENT"),
+            "FREE_CASH_FLOW": (1.1, "BILLION"), "CASH_FLOW_MARGIN": (8.9, "PERCENT"),
+            "CAPEX": (1.0, "BILLION"), "DIVIDENDS": (0.0, "BILLION"),
         },
         "tone": ("NEGATIVE", "VERY_CAUTIOUS", 0.52, 0.28, 0.55),
         "risks": [
@@ -267,6 +274,7 @@ async def seed() -> dict[str, Any]:
             # dimensions score, not just RISK and TONE.
             category_for = {
                 "REVENUE": "REVENUE", "NET_MARGIN": "MARGINS", "OPERATING_MARGIN": "MARGINS",
+                "GROSS_MARGIN": "MARGINS", "NET_INCOME": "PROFITABILITY", "EBITDA": "PROFITABILITY",
                 "FREE_CASH_FLOW": "CASH_FLOW", "CASH_FLOW_MARGIN": "CASH_FLOW",
                 "CAPEX": "CAPEX", "DIVIDENDS": "CAPEX",
             }
@@ -408,6 +416,75 @@ async def seed() -> dict[str, Any]:
                 summary["memo_id"] = str(memo_id)
 
         await db.commit()
+
+    # ---- Seed the demo BenchmarkRun so the "Quick Load Demo Run" button works ---
+    # UUID is hardcoded in BenchmarkPage.tsx — must match exactly.
+    DEMO_RUN_ID = uuid.UUID("0bcd40bd-86b6-4fcc-957d-d511d7904b85")
+    async with AsyncSessionLocal() as db:
+        existing_run = (await db.execute(
+            select(BenchmarkRun).where(BenchmarkRun.id == DEMO_RUN_ID)
+        )).scalar_one_or_none()
+        if existing_run:
+            await db.execute(delete(BenchmarkRun).where(BenchmarkRun.id == DEMO_RUN_ID))
+            await db.commit()
+
+        company_uuids = [_uid("company", c["ticker"]) for c in COHORT]
+        db.add(
+            BenchmarkRun(
+                id=DEMO_RUN_ID,
+                run_name="Demo Cohort Benchmark — Technology Automation Peers",
+                company_ids=company_uuids,
+                benchmark_type="PEER_COHORT",
+                status=BenchmarkStatus.COMPLETED,
+            )
+        )
+        await db.flush()
+
+        # Scores reflect the cohort profiles: APX (best) > BLT > CTX
+        _run_summaries = [
+            # (ticker, financial, risk, tone, capital_alloc, overall, rank)
+            ("DEMO-APX", 92.0, 78.0, 85.0, 88.0, 88.0, 1),
+            ("DEMO-BLT", 71.0, 52.0, 60.0, 65.0, 63.0, 2),
+            ("DEMO-CTX", 48.0, 35.0, 38.0, 42.0, 41.0, 3),
+        ]
+        for ticker, fin, risk, tone, cap, overall, rank in _run_summaries:
+            cid = _uid("company", ticker)
+            db.add(
+                BenchmarkSummary(
+                    id=_uid("bsummary", ticker),
+                    benchmark_run_id=DEMO_RUN_ID,
+                    company_id=cid,
+                    financial_score=fin,
+                    risk_score=risk,
+                    tone_score=tone,
+                    capital_allocation_score=cap,
+                    overall_score=overall,
+                    rank=rank,
+                )
+            )
+            # Seed per-dimension BenchmarkResult rows
+            for dim, score in [
+                (BenchmarkDimension.FINANCIAL, fin),
+                (BenchmarkDimension.RISK, risk),
+                (BenchmarkDimension.TONE, tone),
+                (BenchmarkDimension.CAPITAL_ALLOCATION, cap),
+                (BenchmarkDimension.OVERALL, overall),
+            ]:
+                db.add(
+                    BenchmarkResult(
+                        id=_uid("bresult", ticker, dim.value),
+                        benchmark_run_id=DEMO_RUN_ID,
+                        company_id=cid,
+                        benchmark_dimension=dim,
+                        metric_name=dim.value.lower(),
+                        score=score,
+                        rank=rank,
+                        percentile=round((4 - rank) / 3 * 100, 1),
+                    )
+                )
+        await db.commit()
+        summary["benchmark_run_id"] = str(DEMO_RUN_ID)
+
     return summary
 
 
