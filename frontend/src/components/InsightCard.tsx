@@ -56,8 +56,8 @@ export default function InsightCard({
           {icons[severity]}
         </span>
         <div>
-          <h4 className="text-sm font-semibold text-surface-800">{title}</h4>
-          <p className="text-sm text-surface-600 mt-1 leading-relaxed">
+          <h4 className="text-sm font-semibold text-surface-800 dark:text-surface-200">{title}</h4>
+          <p className="text-sm text-surface-600 dark:text-surface-400 mt-1 leading-relaxed">
             {description}
           </p>
         </div>

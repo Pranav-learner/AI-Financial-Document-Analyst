@@ -4,23 +4,25 @@ import Sidebar from "@/components/Sidebar";
 import Breadcrumbs from "@/design-system/components/Breadcrumbs";
 import DemoGuide from "@/design-system/patterns/DemoGuide";
 import { useObservability, usePerformanceTimer } from "@/hooks/useObservability";
-import { Activity, X } from "lucide-react";
+import { Activity, X, Sun, Moon } from "lucide-react";
 import Button from "@/design-system/components/Button";
+import { useThemeContext } from "@/lib/ThemeContext";
 
 /** Main application layout with sidebar navigation, header, and diagnostics dashboard. */
 export default function AppLayout() {
   usePerformanceTimer("AppLayout");
   const { logs } = useObservability();
   const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const { theme, toggleTheme } = useThemeContext();
 
   return (
-    <div className="flex min-h-screen bg-surface-50">
+    <div className="flex min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-200">
       <Sidebar />
       
       <div className="flex-1 flex flex-col min-w-0">
         {/* Sticky Top Header */}
         <header
-          className="sticky top-0 z-30 h-16 bg-white border-b border-surface-200 px-6 flex items-center justify-between"
+          className="sticky top-0 z-30 h-16 bg-white dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 px-6 flex items-center justify-between transition-colors duration-200"
           role="banner"
         >
           <div className="flex items-center gap-4">
@@ -28,6 +30,21 @@ export default function AppLayout() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center justify-center w-9 h-9 rounded-lg border border-surface-200 dark:border-surface-700 text-surface-500 dark:text-surface-400 hover:bg-surface-100 dark:hover:bg-surface-800 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+              id="theme-toggle-btn"
+              title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {theme === "dark" ? (
+                <Sun className="w-4 h-4" aria-hidden="true" />
+              ) : (
+                <Moon className="w-4 h-4" aria-hidden="true" />
+              )}
+            </button>
+
             {/* Guided Tour Widget */}
             <DemoGuide />
 
@@ -51,7 +68,7 @@ export default function AppLayout() {
         {/* Floating Diagnostics Drawer */}
         {showDiagnostics && (
           <section
-            className="border-b border-surface-200 bg-surface-900 text-white p-5 animate-slide-down"
+            className="border-b border-surface-200 dark:border-surface-700 bg-surface-900 text-white p-5 animate-slide-down"
             aria-label="Frontend Telemetry Logs"
           >
             <div className="flex justify-between items-center mb-3">
@@ -122,3 +139,4 @@ export default function AppLayout() {
     </div>
   );
 }
+

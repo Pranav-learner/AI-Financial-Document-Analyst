@@ -23,7 +23,7 @@ export default function Breadcrumbs() {
         <li className="inline-flex items-center">
           <Link
             to="/"
-            className="inline-flex items-center text-xs font-medium text-surface-500 hover:text-brand-600 transition-colors"
+            className="inline-flex items-center text-xs font-medium text-surface-500 dark:text-surface-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
           >
             <Home className="w-3.5 h-3.5 mr-1" aria-hidden="true" />
             Home
@@ -39,7 +39,7 @@ export default function Breadcrumbs() {
               <ChevronRight className="w-3 h-3 text-surface-400 mx-1 shrink-0" aria-hidden="true" />
               {isLast ? (
                 <span
-                  className="text-xs font-semibold text-surface-800"
+                  className="text-xs font-semibold text-surface-800 dark:text-surface-200"
                   aria-current="page"
                 >
                   {name}
@@ -47,7 +47,7 @@ export default function Breadcrumbs() {
               ) : (
                 <Link
                   to={to}
-                  className="text-xs font-medium text-surface-500 hover:text-brand-600 transition-colors"
+                  className="text-xs font-medium text-surface-500 dark:text-surface-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
                 >
                   {name}
                 </Link>

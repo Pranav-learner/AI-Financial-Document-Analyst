@@ -17,7 +17,11 @@
   }
 
   body {
-    @apply bg-surface-50 text-surface-800;
+    @apply bg-surface-50 text-surface-800 transition-colors duration-200;
+  }
+
+  .dark body {
+    @apply bg-surface-950 text-surface-100;
   }
 
   /* Scrollbar styling */
@@ -34,14 +38,23 @@
     @apply bg-surface-300 rounded-full;
   }
 
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-surface-600;
+  }
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-surface-400;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-500;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-white/80 backdrop-blur-sm border border-surface-200 rounded-xl shadow-card;
+    @apply bg-white/80 backdrop-blur-sm border border-surface-200 rounded-xl shadow-card
+           dark:bg-surface-900/80 dark:border-surface-700;
   }
 
   .glass-panel-hover {
@@ -49,11 +62,11 @@
   }
 
   .metric-value {
-    @apply text-2xl font-semibold tracking-tight text-surface-900;
+    @apply text-2xl font-semibold tracking-tight text-surface-900 dark:text-surface-50;
   }
 
   .metric-label {
-    @apply text-xs font-medium uppercase tracking-wider text-surface-500;
+    @apply text-xs font-medium uppercase tracking-wider text-surface-500 dark:text-surface-400;
   }
 
   .badge {
@@ -61,40 +74,42 @@
   }
 
   .badge-success {
-    @apply badge bg-success-light text-success-dark;
+    @apply badge bg-success-light text-success-dark dark:bg-success/20 dark:text-green-400;
   }
 
   .badge-warning {
-    @apply badge bg-warning-light text-warning-dark;
+    @apply badge bg-warning-light text-warning-dark dark:bg-warning/20 dark:text-amber-400;
   }
 
   .badge-danger {
-    @apply badge bg-danger-light text-danger-dark;
+    @apply badge bg-danger-light text-danger-dark dark:bg-danger/20 dark:text-red-400;
   }
 
   .badge-info {
-    @apply badge bg-info-light text-info-dark;
+    @apply badge bg-info-light text-info-dark dark:bg-info/20 dark:text-blue-400;
   }
 
   .badge-neutral {
-    @apply badge bg-surface-100 text-surface-600;
+    @apply badge bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-300;
   }
 
   .nav-link {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-surface-600
-           transition-all duration-150 hover:bg-surface-100 hover:text-surface-900;
+           transition-all duration-150 hover:bg-surface-100 hover:text-surface-900
+           dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-100;
   }
 
   .nav-link-active {
-    @apply nav-link bg-brand-50 text-brand-700 hover:bg-brand-100;
+    @apply nav-link bg-brand-50 text-brand-700 hover:bg-brand-100
+           dark:bg-brand-950 dark:text-brand-400 dark:hover:bg-brand-900;
   }
 
   .section-title {
-    @apply text-lg font-semibold text-surface-900;
+    @apply text-lg font-semibold text-surface-900 dark:text-surface-100;
   }
 
   .page-title {
-    @apply text-2xl font-bold text-surface-900 tracking-tight;
+    @apply text-2xl font-bold text-surface-900 dark:text-surface-50 tracking-tight;
   }
 
   .card-grid {

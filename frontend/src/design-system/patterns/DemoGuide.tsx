@@ -87,7 +87,7 @@ export default function DemoGuide() {
         variant="outline"
         size="sm"
         onClick={startDemo}
-        className="flex items-center gap-1.5 border-brand-300 text-brand-700 bg-brand-50/50 hover:bg-brand-50"
+        className="flex items-center gap-1.5 border-brand-300 dark:border-brand-700 text-brand-700 dark:text-brand-400 bg-brand-50/50 dark:bg-brand-950/50 hover:bg-brand-50 dark:hover:bg-brand-900/50"
         aria-label="Start guided demo tour"
       >
         <Play className="w-3.5 h-3.5 text-brand-600 fill-brand-600" />
@@ -100,18 +100,18 @@ export default function DemoGuide() {
 
   return (
     <div
-      className="glass-panel border-brand-300 shadow-xl bg-gradient-to-r from-brand-50/90 to-white/90 p-4 max-w-2xl flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-up"
+      className="glass-panel border-brand-300 dark:border-brand-800 shadow-xl bg-gradient-to-r from-brand-50/90 to-white/90 dark:from-brand-950/90 dark:to-surface-900/90 p-4 max-w-2xl flex flex-col md:flex-row items-center justify-between gap-4 animate-slide-up"
       role="region"
       aria-label="Guided Demo Assistant"
     >
       <div className="flex items-start gap-3 flex-1">
         <HelpCircle className="w-5 h-5 text-brand-600 shrink-0 mt-0.5" aria-hidden="true" />
         <div>
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-brand-800">
+          <h4 className="text-xs font-semibold uppercase tracking-wider text-brand-800 dark:text-brand-300">
             Guided Tour: Step {currentStep + 1} of {STEPS.length}
           </h4>
-          <span className="text-sm font-bold text-surface-900 block mt-0.5">{step.title}</span>
-          <p className="text-xs text-surface-600 mt-1 leading-relaxed">{step.tip}</p>
+          <span className="text-sm font-bold text-surface-900 dark:text-surface-100 block mt-0.5">{step.title}</span>
+          <p className="text-xs text-surface-600 dark:text-surface-400 mt-1 leading-relaxed">{step.tip}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 shrink-0">

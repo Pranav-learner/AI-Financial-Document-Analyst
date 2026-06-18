@@ -66,12 +66,12 @@ export default function DataTable<T>({
       <div className="overflow-x-auto">
         <table className="w-full text-sm" role="table">
           <thead>
-            <tr className="border-b border-surface-200 bg-surface-50/60">
+            <tr className="border-b border-surface-200 dark:border-surface-700 bg-surface-50/60 dark:bg-surface-800/60">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   className={clsx(
-                    "px-4 py-3 font-medium text-xs uppercase tracking-wider text-surface-500",
+                    "px-4 py-3 font-medium text-xs uppercase tracking-wider text-surface-500 dark:text-surface-400",
                     aligns[col.align ?? "left"],
                     col.width,
                   )}
@@ -80,7 +80,7 @@ export default function DataTable<T>({
                   {col.sortable ? (
                     <button
                       onClick={() => toggleSort(col.key)}
-                      className="inline-flex items-center gap-1 hover:text-surface-800 transition-colors"
+                      className="inline-flex items-center gap-1 hover:text-surface-800 dark:hover:text-surface-200 transition-colors"
                       type="button"
                       aria-sort={
                         sortKey === col.key
@@ -100,17 +100,17 @@ export default function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-surface-100">
+          <tbody className="divide-y divide-surface-100 dark:divide-surface-700">
             {sorted.map((item) => (
               <tr
                 key={keyExtractor(item)}
-                className="hover:bg-surface-50/80 transition-colors"
+                className="hover:bg-surface-50/80 dark:hover:bg-surface-800/60 transition-colors"
               >
                 {columns.map((col) => (
                   <td
                     key={col.key}
                     className={clsx(
-                      "px-4 py-3 text-surface-700",
+                      "px-4 py-3 text-surface-700 dark:text-surface-300",
                       aligns[col.align ?? "left"],
                     )}
                   >
