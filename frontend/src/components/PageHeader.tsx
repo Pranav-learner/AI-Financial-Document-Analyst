@@ -15,7 +15,7 @@ export default function PageHeader({
       <div>
         <h1 className="page-title">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-surface-500 mt-1">{subtitle}</p>
+          <p className="text-sm text-surface-500 dark:text-surface-400 mt-1">{subtitle}</p>
         )}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

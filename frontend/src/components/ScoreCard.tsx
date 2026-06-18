@@ -46,7 +46,7 @@ export default function ScoreCard({
           dims[size],
           score != null
             ? [scoreColor(score, maxScore), scoreBg(score, maxScore)]
-            : "bg-surface-100 text-surface-400",
+            : "bg-surface-100 dark:bg-surface-800 text-surface-400",
           textSizes[size],
         )}
       >

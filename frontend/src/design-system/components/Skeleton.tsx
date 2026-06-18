@@ -9,7 +9,7 @@ interface SkeletonProps {
  * High-fidelity Skeleton/Shimmer loader component to replace standard spinners.
  */
 export default function Skeleton({ className, variant = "rectangular" }: SkeletonProps) {
-  const baseClass = "bg-surface-200/80 animate-shimmer relative overflow-hidden rounded";
+  const baseClass = "bg-surface-200/80 dark:bg-surface-700/80 animate-shimmer relative overflow-hidden rounded";
 
   if (variant === "text") {
     return <div className={clsx(baseClass, "h-4 w-3/4", className)} />;
@@ -23,11 +23,11 @@ export default function Skeleton({ className, variant = "rectangular" }: Skeleto
     return (
       <div className={clsx("glass-panel p-5 space-y-4 animate-pulse", className)}>
         <div className="flex justify-between items-center">
-          <div className="h-4 w-1/3 bg-surface-200 rounded" />
-          <div className="h-5 w-5 bg-surface-200 rounded-full" />
+          <div className="h-4 w-1/3 bg-surface-200 dark:bg-surface-700 rounded" />
+          <div className="h-5 w-5 bg-surface-200 dark:bg-surface-700 rounded-full" />
         </div>
-        <div className="h-8 w-2/3 bg-surface-200 rounded" />
-        <div className="h-3 w-1/2 bg-surface-200 rounded" />
+        <div className="h-8 w-2/3 bg-surface-200 dark:bg-surface-700 rounded" />
+        <div className="h-3 w-1/2 bg-surface-200 dark:bg-surface-700 rounded" />
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function Skeleton({ className, variant = "rectangular" }: Skeleto
       <div className={clsx("space-y-4 animate-pulse", className)}>
         <div className="flex items-start gap-3">
           <div className="h-8 w-8 rounded-full bg-surface-200 shrink-0" />
-          <div className="space-y-2 bg-surface-50 border border-surface-200 rounded-xl px-4 py-3 max-w-[70%] flex-1">
+          <div className="space-y-2 bg-surface-50 dark:bg-surface-800 border border-surface-200 dark:border-surface-700 rounded-xl px-4 py-3 max-w-[70%] flex-1">
             <div className="h-3 bg-surface-200 rounded w-5/6" />
             <div className="h-3 bg-surface-200 rounded w-full" />
             <div className="h-3 bg-surface-200 rounded w-4/5" />

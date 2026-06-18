@@ -19,7 +19,7 @@ export default function LoadingPanel({
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="space-y-2">
           <div
-            className="h-4 rounded-lg bg-gradient-to-r from-surface-100 via-surface-200 to-surface-100 animate-shimmer"
+            className="h-4 rounded-lg bg-gradient-to-r from-surface-100 via-surface-200 to-surface-100 dark:from-surface-800 dark:via-surface-700 dark:to-surface-800 animate-shimmer"
             style={{
               backgroundSize: "200% 100%",
               width: `${70 + Math.random() * 30}%`,
@@ -27,7 +27,7 @@ export default function LoadingPanel({
           />
           {i === 0 && (
             <div
-              className="h-3 rounded-lg bg-gradient-to-r from-surface-100 via-surface-200 to-surface-100 animate-shimmer"
+              className="h-3 rounded-lg bg-gradient-to-r from-surface-100 via-surface-200 to-surface-100 dark:from-surface-800 dark:via-surface-700 dark:to-surface-800 animate-shimmer"
               style={{ backgroundSize: "200% 100%", width: "40%" }}
             />
           )}

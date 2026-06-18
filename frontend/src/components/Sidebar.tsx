@@ -53,23 +53,23 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        "h-screen sticky top-0 flex flex-col border-r border-surface-200 bg-white transition-all duration-200 shadow-sm shrink-0",
+        "h-screen sticky top-0 flex flex-col border-r border-surface-200 dark:border-surface-700 bg-white dark:bg-surface-900 transition-all duration-200 shadow-sm dark:shadow-surface-900 shrink-0",
         collapsed ? "w-[68px]" : "w-[240px]",
       )}
       role="navigation"
       aria-label="Main navigation"
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-surface-100">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-surface-100 dark:border-surface-700">
         <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-600 to-brand-700 flex items-center justify-center shrink-0">
           <BarChart3 className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
           <div className="overflow-hidden">
-            <span className="text-sm font-bold text-surface-900 whitespace-nowrap">
+            <span className="text-sm font-bold text-surface-900 dark:text-surface-50 whitespace-nowrap">
               FinAnalyst
             </span>
-            <span className="block text-[10px] text-surface-400 font-medium">
+            <span className="block text-[10px] text-surface-400 dark:text-surface-500 font-medium">
               AI Document Analyst
             </span>
           </div>
@@ -87,8 +87,8 @@ export default function Sidebar() {
               clsx(
                 "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-150 outline-none focus:ring-2 focus:ring-brand-500 focus:ring-inset",
                 isActive
-                  ? "bg-brand-50 text-brand-700 font-semibold"
-                  : "text-surface-600 hover:bg-surface-50 hover:text-surface-900",
+                  ? "bg-brand-50 text-brand-700 font-semibold dark:bg-brand-950 dark:text-brand-400"
+                  : "text-surface-600 hover:bg-surface-50 hover:text-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-100",
                 collapsed && "justify-center px-2"
               )
             }
@@ -104,7 +104,7 @@ export default function Sidebar() {
       {/* Collapse Toggle */}
       <button
         onClick={toggleCollapse}
-        className="flex items-center justify-center py-3 border-t border-surface-100 text-surface-400 hover:text-surface-600 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-inset"
+        className="flex items-center justify-center py-3 border-t border-surface-100 dark:border-surface-700 text-surface-400 dark:text-surface-500 hover:text-surface-600 dark:hover:text-surface-300 hover:bg-surface-50 dark:hover:bg-surface-800 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-inset"
         aria-label={collapsed ? "Expand sidebar (Ctrl+B)" : "Collapse sidebar (Ctrl+B)"}
         type="button"
       >
@@ -118,3 +118,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+
