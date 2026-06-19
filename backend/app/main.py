@@ -71,16 +71,14 @@ app = FastAPI(
 )
 
 # ---- CORS --------------------------------------------------------------------
-# In demo mode (auth is bypassed) allow any origin so the hosted frontend can
-# reach the API regardless of its deploy URL — this avoids a CORS-blocked
-# "Dashboard Failure" when CORS_ORIGINS hasn't been set to the frontend's URL.
-# Credentials must be disabled when origins is "*" (browser requirement); demo
-# mode doesn't use cookies/auth, so that's fine. Outside demo mode we restrict
-# to the explicitly configured origins.
+# Auth is JWT-based (Authorization header), not cookie-based, so
+# allow_credentials=False and allow_origins=["*"] is safe in all environments.
+# This ensures the hosted frontend can always reach the API regardless of deploy
+# URL without requiring any CORS_ORIGINS configuration on the platform.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.demo_mode else settings.cors_origins_list,
-    allow_credentials=not settings.demo_mode,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
