@@ -31,7 +31,10 @@ def verify_production_config() -> None:
         errors = []
         if settings.jwt_secret == "changeme":
             errors.append("JWT_SECRET is set to default 'changeme'")
-        if not settings.gemini_api_key:
+        # In demo mode Gemini is never called (extractors return canned data), so
+        # a missing/exhausted key must NOT block startup — the app still serves the
+        # dashboard and processes uploads offline.
+        if not settings.demo_mode and not settings.gemini_api_key:
             errors.append("GEMINI_API_KEY is empty")
         if "localhost" in settings.database_url or "127.0.0.1" in settings.database_url:
             errors.append("DATABASE_URL points to localhost")
@@ -68,10 +71,16 @@ app = FastAPI(
 )
 
 # ---- CORS --------------------------------------------------------------------
+# In demo mode (auth is bypassed) allow any origin so the hosted frontend can
+# reach the API regardless of its deploy URL — this avoids a CORS-blocked
+# "Dashboard Failure" when CORS_ORIGINS hasn't been set to the frontend's URL.
+# Credentials must be disabled when origins is "*" (browser requirement); demo
+# mode doesn't use cookies/auth, so that's fine. Outside demo mode we restrict
+# to the explicitly configured origins.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"] if settings.demo_mode else settings.cors_origins_list,
+    allow_credentials=not settings.demo_mode,
     allow_methods=["*"],
     allow_headers=["*"],
 )
