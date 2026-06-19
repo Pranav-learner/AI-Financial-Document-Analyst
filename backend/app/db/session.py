@@ -25,23 +25,48 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.core.logging import get_logger
 
-def _get_async_connect_args() -> dict:
-    connect_args = {"prepared_statement_cache_size": 0}
-    db_url = settings.database_url
-    if "sslmode=require" in db_url or "ssl=require" in db_url or ".neon.tech" in db_url:
+def _build_async_url_and_args() -> tuple[str, dict]:
+    """asyncpg rejects sslmode/channel_binding as URL query params — strip them
+    and pass ssl=True via connect_args instead (which asyncpg handles correctly).
+    """
+    raw_url = settings.database_url
+    parsed = urlparse(raw_url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+
+    connect_args: dict = {"prepared_statement_cache_size": 0}
+    needs_ssl = (
+        "sslmode=require" in raw_url
+        or "ssl=require" in raw_url
+        or ".neon.tech" in raw_url
+        or ".upstash.io" in raw_url
+    )
+
+    # Strip SSL/channel_binding params that asyncpg can't handle as URL query args
+    for key in ("sslmode", "channel_binding", "ssl"):
+        if key in params:
+            params.pop(key)
+            needs_ssl = True  # if it was explicitly in URL, we definitely need SSL
+
+    if needs_ssl:
         connect_args["ssl"] = True
-    return connect_args
+
+    clean_query = urlencode(params, doseq=True)
+    clean_url = urlunparse(parsed._replace(query=clean_query))
+    return clean_url, connect_args
+
+
+_async_url, _async_connect_args = _build_async_url_and_args()
 
 # Single application-wide async engine (connection pool).
 engine = create_async_engine(
-    settings.database_url,
+    _async_url,
     echo=settings.db_echo,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
     pool_recycle=1800,
     pool_timeout=30,
     pool_pre_ping=True,
-    connect_args=_get_async_connect_args(),
+    connect_args=_async_connect_args,
 )
 
 # Session factory — `expire_on_commit=False` so objects stay usable after commit.

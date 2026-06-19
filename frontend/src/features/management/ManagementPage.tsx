@@ -28,6 +28,22 @@ export default function ManagementPage() {
   const confData = toneList.map((t) => t.confidence_score);
   const hedgeData = toneList.map((t) => t.hedging_score);
 
+  // Compute dominant sentiment distribution
+  const sentimentCounts = toneList.reduce(
+    (acc, t) => {
+      const s = t.sentiment as string;
+      acc[s] = (acc[s] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+  const dominantSentiment =
+    Object.entries(sentimentCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? "N/A";
+  const neutralPct = toneList.length
+    ? Math.round(((sentimentCounts["NEUTRAL"] ?? 0) / toneList.length) * 100)
+    : 0;
+  const isNeutralDominant = avgPos === 0 && avgNeg === 0 && toneList.length > 0;
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -74,7 +90,7 @@ export default function ManagementPage() {
             {reports.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.report_type} {r.year}
-                {r.quarter ? ` Q${r.quarter}` : ""} — {r.original_filename?.slice(0, 30)}
+                {r.quarter ? ` Q${r.quarter}` : ""} &mdash; {r.original_filename?.slice(0, 30)}
               </option>
             ))}
           </select>
@@ -91,30 +107,75 @@ export default function ManagementPage() {
       ) : (
         <>
           <div className="card-grid">
-            <MetricCard label="Average Positive Sentiment" value={`${(avgPos * 100).toFixed(1)}%`} icon={<ThumbsUp className="w-5 h-5 text-success" />} />
-            <MetricCard label="Average Negative Sentiment" value={`${(avgNeg * 100).toFixed(1)}%`} icon={<ThumbsDown className="w-5 h-5 text-danger" />} />
-            <MetricCard label="Average Hedging Level" value={`${(avgHedge * 100).toFixed(1)}%`} icon={<AlertTriangle className="w-5 h-5 text-warning" />} />
-            <MetricCard label="Linguistic Confidence" value={`${(avgConf * 100).toFixed(1)}%`} icon={<Users className="w-5 h-5 text-brand-600" />} />
+            <MetricCard
+              label="Dominant Sentiment"
+              value={dominantSentiment}
+              icon={<ThumbsUp className="w-5 h-5 text-success" />}
+            />
+            <MetricCard
+              label="Neutral Segments"
+              value={`${neutralPct}%`}
+              icon={<ThumbsDown className="w-5 h-5 text-danger" />}
+            />
+            <MetricCard
+              label="Average Hedging Level"
+              value={`${(avgHedge * 100).toFixed(1)}%`}
+              icon={<AlertTriangle className="w-5 h-5 text-warning" />}
+            />
+            <MetricCard
+              label="Linguistic Confidence"
+              value={`${(avgConf * 100).toFixed(1)}%`}
+              icon={<Users className="w-5 h-5 text-brand-600" />}
+            />
           </div>
 
-          <SectionPanel title="Confidence & Hedging Trends">
+          {isNeutralDominant && (
+            <div className="px-4 py-3 rounded-lg bg-blue-50 border border-blue-200 text-sm text-blue-800">
+              <strong>Info &mdash; Neutral-dominant document:</strong> Positive and negative
+              sentiment scores are near 0%, which is expected for financial statements (balance
+              sheets, cash flow statements). Tone quality is measured via confidence and hedging
+              levels.
+            </div>
+          )}
+
+          <SectionPanel title="Confidence &amp; Hedging Trends">
             <ConfidenceTrendChart labels={labels} confidence={confData} hedging={hedgeData} />
           </SectionPanel>
 
-          <SectionPanel title="Management Discussion Sentiment Breakdown" badge={<span className="badge-neutral">{toneList.length} segments</span>}>
+          <SectionPanel
+            title="Management Discussion Sentiment Breakdown"
+            badge={<span className="badge-neutral">{toneList.length} segments</span>}
+          >
             <div className="space-y-4">
               {toneList.map((t) => (
-                <div key={t.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-white border border-surface-200 hover:border-brand-300 transition-colors shadow-sm">
+                <div
+                  key={t.id}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-white border border-surface-200 hover:border-brand-300 transition-colors shadow-sm"
+                >
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className={clsx("w-2.5 h-2.5 rounded-full shrink-0 mt-1.5", t.sentiment === "POSITIVE" ? "bg-success" : t.sentiment === "NEGATIVE" ? "bg-danger" : "bg-surface-400")} />
+                    <div
+                      className={clsx(
+                        "w-2.5 h-2.5 rounded-full shrink-0 mt-1.5",
+                        t.sentiment === "POSITIVE"
+                          ? "bg-success"
+                          : t.sentiment === "NEGATIVE"
+                            ? "bg-danger"
+                            : "bg-surface-400",
+                      )}
+                    />
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-bold text-surface-900">{t.source_type}</span>
-                        <span className={clsx("text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                          t.sentiment === "POSITIVE" ? "bg-success-light text-success-dark" :
-                          t.sentiment === "NEGATIVE" ? "bg-danger-light text-danger-dark" :
-                          "bg-surface-100 text-surface-600"
-                        )}>
+                        <span
+                          className={clsx(
+                            "text-[10px] font-semibold px-2 py-0.5 rounded-full",
+                            t.sentiment === "POSITIVE"
+                              ? "bg-success-light text-success-dark"
+                              : t.sentiment === "NEGATIVE"
+                                ? "bg-danger-light text-danger-dark"
+                                : "bg-surface-100 text-surface-600",
+                          )}
+                        >
                           {t.sentiment}
                         </span>
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-100 text-surface-650 font-mono">
@@ -123,16 +184,31 @@ export default function ManagementPage() {
                       </div>
                       {t.source_text && (
                         <p className="text-xs text-surface-600 mt-2 italic bg-surface-50 p-2.5 rounded border-l-2 border-surface-300 leading-relaxed">
-                          "{t.source_text}"
+                          &ldquo;{t.source_text}&rdquo;
                         </p>
                       )}
                     </div>
                   </div>
                   <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-4 sm:gap-1 border-t sm:border-t-0 pt-3 sm:pt-0 border-surface-100 font-mono text-xs">
                     <div className="flex gap-3">
-                      <span className="text-success-dark">Pos: {(t.positive_score * 100).toFixed(0)}%</span>
-                      <span className="text-danger-dark">Neg: {(t.negative_score * 100).toFixed(0)}%</span>
-                      <span className="text-warning-dark">Hedge: {(t.hedging_score * 100).toFixed(0)}%</span>
+                      {t.positive_score > 0 || t.negative_score > 0 ? (
+                        <>
+                          <span className="text-success-dark">
+                            Pos: {(t.positive_score * 100).toFixed(0)}%
+                          </span>
+                          <span className="text-danger-dark">
+                            Neg: {(t.negative_score * 100).toFixed(0)}%
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-surface-500 italic">Neutral</span>
+                      )}
+                      <span className="text-warning-dark">
+                        Hedge: {(t.hedging_score * 100).toFixed(0)}%
+                      </span>
+                      <span className="text-brand-600">
+                        Conf: {(t.confidence_score * 100).toFixed(0)}%
+                      </span>
                     </div>
                   </div>
                 </div>
