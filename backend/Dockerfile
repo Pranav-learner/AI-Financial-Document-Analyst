@@ -27,5 +27,5 @@ RUN mkdir -p /app/data/uploads
 
 EXPOSE 8000
 
-# Default command is overridden by docker-compose (uvicorn vs celery).
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Shell form reads $PORT injected by Render (defaults to 8000 for local Docker use).
+CMD uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
