@@ -204,6 +204,7 @@ async def agent_chat(
         query=payload.query,
         thread_id=thread.thread_id,
         company_id=thread.company_id,
+        report_id=payload.report_id,
         history=history,
     )
 

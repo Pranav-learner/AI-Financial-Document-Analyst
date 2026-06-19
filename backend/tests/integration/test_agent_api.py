@@ -174,3 +174,84 @@ async def test_agent_chat_and_history(
     assert hist[0]["role"] == "user"
     assert hist[1]["role"] == "assistant"
     assert hist[1]["metadata"]["key_findings"] == ["Key finding 1"]
+
+
+@pytest.mark.integration
+@patch("app.agents.financial_analyst.planner.QueryClassifier._get_client")
+@patch("app.agents.financial_analyst.planner.Planner._get_client")
+@patch("app.agents.financial_analyst.response_generator.ResponseGenerator._get_client")
+@patch("app.agents.tools.retrieval_tools.AdvancedRAGService")
+async def test_agent_chat_with_report_id(
+    mock_rag_class: MagicMock,
+    mock_generator_client_getter: MagicMock,
+    mock_planner_client_getter: MagicMock,
+    mock_classifier_client_getter: MagicMock,
+    api_client: AsyncClient,
+    sync_session: Session,
+) -> None:
+    """Verify chat endpoint successfully propagates report_id to the agent workflow."""
+    company_id = _seed_company(sync_session)
+    report_id = uuid.uuid4()
+
+    mock_rag_instance = MagicMock()
+    mock_rag_instance.retrieve.return_value = {
+        "context_text": "Sample source evidence text.",
+        "citations": []
+    }
+    mock_rag_class.return_value = mock_rag_instance
+
+    # Mock Gemini Clients
+    mock_client = MagicMock()
+    
+    intent_resp = MagicMock()
+    intent_resp.text = '{"intent": "RAG_RETRIEVAL", "confidence": 0.95, "reasoning": "Wants document details."}'
+
+    plan_resp = MagicMock()
+    plan_resp.text = json.dumps({
+        "steps": [
+            {
+                "tool_name": "retrieve_evidence",
+                "arguments": {
+                    "query": "What are the latest risk factors?",
+                    "company_id": str(company_id),
+                    "report_id": str(report_id),
+                    "top_k": 3
+                }
+            }
+        ]
+    })
+
+    res_resp = MagicMock()
+    res_resp.text = json.dumps({
+        "answer": "Grounded answer with report_id.",
+        "key_findings": ["Key finding"],
+        "citations": []
+    })
+
+    mock_client.models.generate_content.side_effect = [intent_resp, plan_resp, res_resp]
+    
+    mock_classifier_client_getter.return_value = mock_client
+    mock_planner_client_getter.return_value = mock_client
+    mock_generator_client_getter.return_value = mock_client
+
+    thread_id = f"thread_{uuid.uuid4().hex[:12]}"
+    
+    resp = await api_client.post(
+        f"{PREFIX}/agent/chat",
+        json={
+            "query": "What are the latest risk factors?",
+            "thread_id": thread_id,
+            "company_id": str(company_id),
+            "report_id": str(report_id),
+        }
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["answer"] == "Grounded answer with report_id."
+
+    # Verify that the planner was indeed called with the prompt referencing active report
+    called_args, called_kwargs = mock_client.models.generate_content.call_args_list[1]
+    prompt_used = called_kwargs.get("contents") or called_args[0]
+    assert str(report_id) in prompt_used
+    assert "Active Report ID" in prompt_used
+

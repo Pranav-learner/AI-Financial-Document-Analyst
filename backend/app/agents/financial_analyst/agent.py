@@ -57,6 +57,7 @@ async def run_financial_agent(
     query: str,
     thread_id: str,
     company_id: uuid.UUID | None = None,
+    report_id: uuid.UUID | None = None,
     history: list[dict[str, str]] | None = None,
     client: genai.Client | None = None,
 ) -> dict[str, Any]:
@@ -67,12 +68,15 @@ async def run_financial_agent(
         query: User input query.
         thread_id: Business unique thread identifier.
         company_id: Optional UUID of active company context.
+        report_id: Optional UUID of the active report — scopes RAG retrieval to
+            that specific document so the agent answers from the uploaded PDF.
         history: List of conversation messages.
         client: Optional Gemini client to override default.
     """
     state_input: AgentState = {
         "query": query,
         "company_id": company_id,
+        "report_id": report_id,
         "thread_id": thread_id,
         "history": history or [],
         "intent": None,
