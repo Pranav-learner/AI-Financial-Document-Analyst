@@ -52,10 +52,17 @@ async def lifespan(app: FastAPI):
     log = get_logger(__name__)
     try:
         verify_production_config()
+    except Exception as e:
+        log.critical("app.startup_config_failed", error=str(e))
+        raise
+    # Database health check is best-effort — a missing table (pre-migration)
+    # or transient connection error must NOT prevent the app from starting.
+    # The /ready endpoint exposes the real DB status for alerting.
+    try:
         await verify_database_health()
     except Exception as e:
-        log.critical("app.startup_failed", error=str(e))
-        raise
+        log.error("app.startup_db_warning", error=str(e),
+                  message="DB health check failed — app starting anyway. Run migrations.")
     log.info("app.startup", env=settings.app_env.value, name=settings.app_name)
     if settings.demo_mode:
         log.warning("app.startup.demo_mode_active", message="DEMO_MODE is enabled. Authentication is bypassed.")
