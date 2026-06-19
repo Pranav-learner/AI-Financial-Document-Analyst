@@ -23,6 +23,13 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.core.logging import get_logger
 
+def _get_async_connect_args() -> dict:
+    connect_args = {"prepared_statement_cache_size": 0}
+    db_url = settings.database_url
+    if "sslmode=require" in db_url or "ssl=require" in db_url or ".neon.tech" in db_url:
+        connect_args["ssl"] = True
+    return connect_args
+
 # Single application-wide async engine (connection pool).
 engine = create_async_engine(
     settings.database_url,
@@ -32,6 +39,7 @@ engine = create_async_engine(
     pool_recycle=1800,
     pool_timeout=30,
     pool_pre_ping=True,
+    connect_args=_get_async_connect_args(),
 )
 
 # Session factory — `expire_on_commit=False` so objects stay usable after commit.
@@ -109,6 +117,9 @@ async def verify_database_health() -> None:
 # engine across ad-hoc event loops, the worker uses a plain sync session
 # (psycopg driver, same as Alembic). The API layer remains fully async.
 # ---------------------------------------------------------------------------
+def _get_sync_connect_args() -> dict:
+    return {"prepare_threshold": None}
+
 sync_engine = create_engine(
     settings.database_url_sync,
     echo=settings.db_echo,
@@ -117,6 +128,7 @@ sync_engine = create_engine(
     pool_recycle=1800,
     pool_timeout=30,
     pool_pre_ping=True,
+    connect_args=_get_sync_connect_args(),
 )
 
 SyncSessionLocal = sessionmaker(
