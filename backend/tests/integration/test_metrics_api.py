@@ -9,6 +9,7 @@ from __future__ import annotations
 import uuid
 
 import pytest
+from unittest.mock import patch
 from app.core.config import settings
 from app.models.document_chunk import DocumentChunk
 from app.models.enums import ReportStatus
@@ -52,7 +53,8 @@ def _seed(session: Session) -> uuid.UUID:
 
 
 @pytest.mark.integration
-def test_extraction_task_stores_metrics(sync_session: Session) -> None:
+@patch("app.financial.extraction.llm_extractor.LLMExtractor.extract", return_value=[])
+def test_extraction_task_stores_metrics(mock_llm_extract, sync_session: Session) -> None:
     report_id = _seed(sync_session)
     result = extract_financial_metrics_task(str(report_id))
     assert result["status"] == "METRICS_READY"
@@ -82,7 +84,8 @@ def test_extraction_task_stores_metrics(sync_session: Session) -> None:
 
 
 @pytest.mark.integration
-async def test_metrics_apis(api_client: AsyncClient, sync_session: Session) -> None:
+@patch("app.financial.extraction.llm_extractor.LLMExtractor.extract", return_value=[])
+async def test_metrics_apis(mock_llm_extract, api_client: AsyncClient, sync_session: Session) -> None:
     report_id = _seed(sync_session)
     extract_financial_metrics_task(str(report_id))
 
@@ -128,7 +131,8 @@ async def test_metrics_404_for_unknown_report(api_client: AsyncClient) -> None:
 
 
 @pytest.mark.integration
-async def test_extraction_is_idempotent(sync_session: Session) -> None:
+@patch("app.financial.extraction.llm_extractor.LLMExtractor.extract", return_value=[])
+async def test_extraction_is_idempotent(mock_llm_extract, sync_session: Session) -> None:
     report_id = _seed(sync_session)
     first = extract_financial_metrics_task(str(report_id))["metrics"]
     second = extract_financial_metrics_task(str(report_id))["metrics"]

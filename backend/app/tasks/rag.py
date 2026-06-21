@@ -22,6 +22,7 @@ def run_async_evaluation(retrieval_type: str = "both", top_k: int | None = None)
             runs = await service.run(retrieval_type=retrieval_type, top_k=top_k)
             return [r.summary() for r in runs]
 
+    loop = None
     try:
         try:
             loop = asyncio.get_event_loop()
@@ -35,3 +36,11 @@ def run_async_evaluation(retrieval_type: str = "both", top_k: int | None = None)
     except Exception as exc:
         log.exception("tasks.rag.run_async_evaluation.failed", error=str(exc))
         return {"status": "FAILED", "error": str(exc)}
+    finally:
+        if loop is not None:
+            try:
+                from app.db.session import engine
+                loop.run_until_complete(engine.dispose())
+            except Exception as dispose_exc:
+                log.warning("tasks.rag.dispose_engine_failed", error=str(dispose_exc))
+

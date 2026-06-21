@@ -190,3 +190,12 @@ async def test_generate_memo_endpoint_and_task_execution(
     exported_obj = json.loads(export_json_data["exported_content"])
     assert exported_obj["status"] == "COMPLETED"
     assert len(exported_obj["sections"]) == 8
+
+    # 8. Export via API GET (PDF)
+    export_pdf_resp = await api_client.get(f"{PREFIX}/memos/{memo_id}/pdf")
+    assert export_pdf_resp.status_code == 200, export_pdf_resp.text
+    assert export_pdf_resp.headers["content-type"] == "application/pdf"
+    assert "content-disposition" in export_pdf_resp.headers
+    assert "attachment" in export_pdf_resp.headers["content-disposition"]
+    assert len(export_pdf_resp.content) > 1000  # Verify it's non-empty PDF content
+

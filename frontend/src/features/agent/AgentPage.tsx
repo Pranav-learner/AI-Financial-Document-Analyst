@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import EmptyState from "@/components/EmptyState";
 import CitationBadge from "@/components/CitationBadge";
 import { useThreads, useMessages, useSendMessage, useCreateThread } from "@/hooks/useAgent";
+import { useReports } from "@/hooks/useReports";
 import type { Message } from "@/types/api";
 import { Send, Plus, MessageSquare, Terminal, HelpCircle, X, Info, Sparkles, AlertTriangle } from "lucide-react";
 import { clsx } from "clsx";
@@ -22,6 +23,11 @@ export default function AgentPage() {
   const sendMessageMutation = useSendMessage();
   const createThreadMutation = useCreateThread();
 
+  // Load filings reports context
+  const { data: reportsData } = useReports(20, 0);
+  const reports = reportsData?.items ?? [];
+  const [selectedReportId, setSelectedReportId] = useState("");
+
   const [query, setQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,9 +44,14 @@ export default function AgentPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Determine active report and company
+  const activeReport = reports.find((r) => r.id === selectedReportId) || reports[0];
+  const activeCompanyId = activeReport?.company_id || undefined;
+  const activeReportId = activeReport?.id || undefined;
+
   const handleCreateThread = async () => {
     try {
-      const res = await createThreadMutation.mutateAsync(undefined);
+      const res = await createThreadMutation.mutateAsync(activeCompanyId);
       setActiveThreadId(res.thread_id);
     } catch (err) {
       console.error(err);
@@ -60,11 +71,14 @@ export default function AgentPage() {
       await sendMessageMutation.mutateAsync({
         query: queryToSend,
         thread_id: activeThreadId,
+        company_id: activeCompanyId,
+        report_id: activeReportId,
       });
     } catch (err) {
       console.error(err);
     }
   };
+
 
   // Agent quick query presets
   const presets = [
@@ -171,6 +185,23 @@ export default function AgentPage() {
                   </p>
                 </div>
               </div>
+              {reports.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-surface-500">Query Focus:</span>
+                  <select
+                    value={selectedReportId}
+                    onChange={(e) => setSelectedReportId(e.target.value)}
+                    className="text-xs border border-surface-200 rounded-lg px-2.5 py-1.5 bg-white text-surface-700 focus:ring-2 focus:ring-brand-500 focus:outline-none font-medium max-w-[280px] truncate"
+                    aria-label="Select report"
+                  >
+                    {reports.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.report_type} {r.year}{r.quarter ? ` Q${r.quarter}` : ""} &mdash; {r.original_filename?.slice(0, 25)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             {/* Message History */}

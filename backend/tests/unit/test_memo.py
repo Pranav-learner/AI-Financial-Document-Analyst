@@ -145,17 +145,18 @@ def test_memo_validator_grounding_verification(sample_package: MemoPackage) -> N
     # Should not raise exception
     validator.validate(sample_package, "Summary", sections_valid)
 
-    # Contains an ungrounded number (999,999)
+    # Contains multiple ungrounded numbers (999,999, 888,888, 777,777, 666,666, 555,555)
     sections_invalid = [
         MemoSectionSchema(
             section_name="Overview",
             section_order=1,
-            content="The company has 999,999 active users in Europe.",
+            content="The company has 999,999 active users in Europe, 888,888 in Asia, 777,777 in America, 666,666 in Africa, and 555,555 in Australia.",
             citations=[]
         )
     ]
-    with pytest.raises(MemoValidationError, match="ungrounded figure '999,999'"):
+    with pytest.raises(MemoValidationError, match="contains 5 ungrounded figures"):
         validator.validate(sample_package, "Summary", sections_invalid)
+
 
 
 @pytest.mark.unit

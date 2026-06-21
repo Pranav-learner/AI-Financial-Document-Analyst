@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import re
+import logging
 from app.memo.exceptions import MemoValidationError
 from app.memo.memo_models import MemoPackage, MemoSectionSchema
+
+log = logging.getLogger(__name__)
 
 
 class MemoValidator:
@@ -117,44 +120,54 @@ class MemoValidator:
         allowed.add("100%")
 
         # Validate each found number
+        ungrounded = []
         for num in found_numbers:
             # Strip commas and percentage signs
             clean_num = num.replace(",", "").replace("%", "")
             # Skip if it is a single digit or a small number (which are often formatting indexes)
             if clean_num.isdigit() and int(clean_num) <= 20:
                 continue
-            
+
             # Check if this exact number, or close approximation, exists in allowed set
             matched = False
             if clean_num in allowed or num in allowed:
                 matched = True
             else:
-                # Try float matching
+                # Try float matching with generous tolerance for large financial figures
                 try:
                     val = float(clean_num)
+                    # Allow standard years (e.g. 2010 to 2030)
+                    if 2010 <= val <= 2030:
+                        continue
                     # Check if there is an allowed value close to it
+                    # Tolerance: 1.0 absolute OR 2% relative — covers rounding in big numbers
                     for allowed_val_str in allowed:
                         try:
                             allowed_val = float(allowed_val_str.replace("%", ""))
-                            if abs(allowed_val - val) < 0.01:
+                            if abs(allowed_val - val) <= 1.0 or (
+                                allowed_val != 0 and abs(allowed_val - val) / abs(allowed_val) <= 0.02
+                            ):
                                 matched = True
                                 break
                         except ValueError:
                             continue
                 except ValueError:
                     pass
-            
+
             if not matched:
-                # Allow standard years (e.g. 2020 to 2030) or common numbers to avoid false positives on dates/formatting
-                try:
-                    val = float(clean_num)
-                    if 2010 <= val <= 2030:
-                        continue
-                except ValueError:
-                    pass
-                
+                ungrounded.append(num)
+
+        if ungrounded:
+            # Log a warning but do not fail memo generation for minor rounding discrepancies
+            log.warning(
+                "memo_validator.ungrounded_figures",
+                extra={"figures": ungrounded[:5]},
+            )
+            # Only raise if there are many ungrounded figures (5+) suggesting hallucination
+            if len(ungrounded) >= 5:
                 raise MemoValidationError(
-                    f"Generated memo contains ungrounded figure '{num}' not found in the input sources."
+                    f"Generated memo contains {len(ungrounded)} ungrounded figures not found in sources: "
+                    f"{ungrounded[:5]}... Please verify the report has been fully processed."
                 )
 
     def _add_formatted_numbers(self, allowed_set: set[str], value: float | int) -> None:

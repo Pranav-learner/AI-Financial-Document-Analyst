@@ -9,6 +9,7 @@ export interface ChatPayload {
   query: string;
   thread_id: string;
   company_id?: string;
+  report_id?: string;
 }
 
 export function createThread(

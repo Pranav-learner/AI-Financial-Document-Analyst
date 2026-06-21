@@ -133,6 +133,20 @@ class LLMExtractor:
         return self._client
 
     def _generate(self, text: str) -> str:
+        if app_settings.demo_mode:
+            # Offline demo data so the financial surface populates without
+            # Gemini. Canonical metric names resolve through the taxonomy; the
+            # hybrid extractor dedupes the per-chunk repeats by normalized name.
+            return json.dumps([
+                {"metric_name": "REVENUE", "value": 94.9, "currency": "USD", "unit": "billion", "period": "FY2024", "confidence": 0.92},
+                {"metric_name": "NET_INCOME", "value": 21.4, "currency": "USD", "unit": "billion", "period": "FY2024", "confidence": 0.9},
+                {"metric_name": "EBITDA", "value": 28.6, "currency": "USD", "unit": "billion", "period": "FY2024", "confidence": 0.87},
+                {"metric_name": "GROSS_MARGIN", "value": 43.3, "unit": "percent", "period": "FY2024", "confidence": 0.88},
+                {"metric_name": "OPERATING_MARGIN", "value": 29.6, "unit": "percent", "period": "FY2024", "confidence": 0.86},
+                {"metric_name": "NET_MARGIN", "value": 22.6, "unit": "percent", "period": "FY2024", "confidence": 0.85},
+                {"metric_name": "FREE_CASH_FLOW", "value": 19.2, "currency": "USD", "unit": "billion", "period": "FY2024", "confidence": 0.84},
+            ])
+
         from google.genai import types  # lazy import
 
         client = self._get_client()

@@ -31,7 +31,10 @@ def verify_production_config() -> None:
         errors = []
         if settings.jwt_secret == "changeme":
             errors.append("JWT_SECRET is set to default 'changeme'")
-        if not settings.gemini_api_key:
+        # In demo mode Gemini is never called (extractors return canned data), so
+        # a missing/exhausted key must NOT block startup — the app still serves the
+        # dashboard and processes uploads offline.
+        if not settings.demo_mode and not settings.gemini_api_key:
             errors.append("GEMINI_API_KEY is empty")
         if "localhost" in settings.database_url or "127.0.0.1" in settings.database_url:
             errors.append("DATABASE_URL points to localhost")
@@ -49,10 +52,17 @@ async def lifespan(app: FastAPI):
     log = get_logger(__name__)
     try:
         verify_production_config()
+    except Exception as e:
+        log.critical("app.startup_config_failed", error=str(e))
+        raise
+    # Database health check is best-effort — a missing table (pre-migration)
+    # or transient connection error must NOT prevent the app from starting.
+    # The /ready endpoint exposes the real DB status for alerting.
+    try:
         await verify_database_health()
     except Exception as e:
-        log.critical("app.startup_failed", error=str(e))
-        raise
+        log.error("app.startup_db_warning", error=str(e),
+                  message="DB health check failed — app starting anyway. Run migrations.")
     log.info("app.startup", env=settings.app_env.value, name=settings.app_name)
     if settings.demo_mode:
         log.warning("app.startup.demo_mode_active", message="DEMO_MODE is enabled. Authentication is bypassed.")
@@ -68,10 +78,14 @@ app = FastAPI(
 )
 
 # ---- CORS --------------------------------------------------------------------
+# Auth is JWT-based (Authorization header), not cookie-based, so
+# allow_credentials=False and allow_origins=["*"] is safe in all environments.
+# This ensures the hosted frontend can always reach the API regardless of deploy
+# URL without requiring any CORS_ORIGINS configuration on the platform.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

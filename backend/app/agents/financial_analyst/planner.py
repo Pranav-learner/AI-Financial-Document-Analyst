@@ -18,6 +18,7 @@ from app.agents.financial_analyst.state import AgentState
 from app.agents.financial_analyst.exceptions import IntentClassificationException, PlannerException
 from app.agents.financial_analyst.validators import validate_intent_classification, validate_planning
 from app.agents.financial_analyst.models import _INTENT_SCHEMA, _PLAN_SCHEMA
+from app.agents.financial_analyst.utils import retry_gemini
 
 log = get_logger(__name__)
 
@@ -62,14 +63,16 @@ class QueryClassifier:
 
         try:
             client = self._get_client()
-            resp = client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=_INTENT_SCHEMA,
-                    temperature=0.0,
-                ),
+            resp = await retry_gemini(
+                lambda: client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=_INTENT_SCHEMA,
+                        temperature=0.0,
+                    ),
+                )
             )
             raw_text = resp.text or "{}"
             data = json.loads(raw_text)
@@ -101,17 +104,26 @@ class Planner:
         query = state["query"]
         intent = state["intent"]
         company_id = state.get("company_id")
+        report_id = state.get("report_id")
         history = state.get("history") or []
 
         history_str = "\n".join(
             [f"{msg['role'].upper()}: {msg['content']}" for msg in history]
         )
 
+        # Build context section — tell the LLM exactly which IDs to use
+        context_lines = []
+        if report_id:
+            context_lines.append(f"Active Report ID (MUST pass as report_id in retrieve_evidence): {report_id}")
+        if company_id:
+            context_lines.append(f"Active Company ID: {company_id}")
+        context_block = "\n".join(context_lines) if context_lines else "No specific report or company context provided."
+
         prompt = (
             "You are a financial analyst planner. Create a list of tool steps needed to answer the user query.\n"
             f"Query: \"{query}\"\n"
-            f"Classified Intent: {intent}\n"
-            f"Company ID context: {company_id}\n\n"
+            f"Classified Intent: {intent}\n\n"
+            f"Context:\n{context_block}\n\n"
             "Available tools:\n"
             "- get_financial_metrics: args { company_id: str, report_id: str }\n"
             "- get_metric_comparisons: args { company_id: str, report_id: str }\n"
@@ -120,39 +132,43 @@ class Planner:
             "- get_risk_evolution: args { company_id: str }\n"
             "- get_management_tone: args { company_id: str, report_id: str }\n"
             "- get_tone_evolution: args { company_id: str }\n"
-            "- retrieve_evidence: args { query: str, company_id: str, top_k: int }\n\n"
+            "- retrieve_evidence: args { query: str, company_id: str, report_id: str, top_k: int }\n\n"
             "Rules:\n"
             "1. ONLY output tools listed above.\n"
-            "2. Map query intent to the correct tools. For example, if intent is RISK_ANALYSIS, you might call get_risk_factors and get_risk_evolution.\n"
-            "3. If company_id context is provided, pass it in arguments where applicable.\n"
+            "2. For ANY query about a specific report's content (net sales, assets, financials, risks, text), you MUST call retrieve_evidence.\n"
+            "3. ALWAYS pass report_id and company_id from the Context section into the arguments of retrieve_evidence and other tools — do not omit them if provided.\n"
             "4. For general QA or health check, you can return an empty list of steps.\n"
+            "5. retrieve_evidence retrieves raw text from the uploaded PDF — always use it for factual document questions.\n"
         )
 
         try:
             client = self._get_client()
-            resp = client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=_PLAN_SCHEMA,
-                    temperature=0.0,
-                ),
+            resp = await retry_gemini(
+                lambda: client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=_PLAN_SCHEMA,
+                        temperature=0.0,
+                    ),
+                )
             )
             raw_text = resp.text or "{}"
             data = json.loads(raw_text)
             steps = data.get("steps", [])
-            log.info("planner.success", steps_count=len(steps))
+            log.info("planner.success", steps_count=len(steps), report_id=str(report_id), company_id=str(company_id))
             return {"plan": steps}
         except Exception as exc:
             log.error("planner.error", error=str(exc))
-            # Fallback plan: run retrieve_evidence tool if classification failed
+            # Fallback plan: run retrieve_evidence with all available context
             fallback_step = {
                 "tool_name": "retrieve_evidence",
                 "arguments": {
                     "query": query,
                     "company_id": str(company_id) if company_id else None,
-                    "top_k": 5
+                    "report_id": str(report_id) if report_id else None,
+                    "top_k": 10
                 }
             }
             return {"plan": [fallback_step], "errors": state.get("errors", []) + [f"Planning error: {exc}"]}

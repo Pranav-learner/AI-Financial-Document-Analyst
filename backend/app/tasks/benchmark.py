@@ -25,6 +25,7 @@ def run_benchmark_task(run_id_str: str) -> dict:
             await service.run_benchmark(run_id)
             return {"run_id": str(run_id), "status": "COMPLETED"}
 
+    loop = None
     try:
         try:
             loop = asyncio.get_event_loop()
@@ -38,3 +39,11 @@ def run_benchmark_task(run_id_str: str) -> dict:
     except Exception as exc:
         log.exception("tasks.benchmark.run_benchmark_task.failed", run_id=run_id, error=str(exc))
         return {"run_id": str(run_id), "status": "FAILED", "error": str(exc)}
+    finally:
+        if loop is not None:
+            try:
+                from app.db.session import engine
+                loop.run_until_complete(engine.dispose())
+            except Exception as dispose_exc:
+                log.warning("tasks.benchmark.dispose_engine_failed", error=str(dispose_exc))
+

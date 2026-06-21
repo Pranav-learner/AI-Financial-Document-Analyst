@@ -29,14 +29,65 @@ export default function FinancialPage() {
   const comparisons = comparisonsData?.items ?? [];
   const analytics = analyticsData?.items ?? [];
 
+  // Format helpers for currency and percentages
+  const formatCurrency = (val: number | null | undefined, unit: string | null | undefined, currency: string | null | undefined) => {
+    if (val == null) return "—";
+    const prefix = !currency || currency.toUpperCase() === "USD" ? "$" : `${currency} `;
+    let displayValue = val;
+    let displayUnit = "";
+    
+    const upperUnit = unit?.toUpperCase() || "";
+    if (upperUnit === "BILLION" || upperUnit === "B") {
+      displayUnit = "B";
+    } else if (upperUnit === "MILLION" || upperUnit === "M") {
+      displayUnit = "M";
+    } else if (Math.abs(val) >= 1_000_000_000) {
+      displayValue = val / 1_000_000_000;
+      displayUnit = "B";
+    } else if (Math.abs(val) >= 1_000_000) {
+      displayValue = val / 1_000_000;
+      displayUnit = "M";
+    } else if (Math.abs(val) >= 1_000) {
+      displayValue = val / 1_000;
+      displayUnit = "K";
+    }
+    
+    const formattedNumber = displayUnit
+      ? displayValue.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+      : displayValue.toLocaleString();
+      
+    return `${prefix}${formattedNumber}${displayUnit}`;
+  };
+
+  const formatPercentage = (val: number | null | undefined, sourceKind: "metric" | "analytic") => {
+    if (val == null) return "—";
+    let percentValue = val;
+    if (sourceKind === "analytic") {
+      percentValue = val * 100;
+    } else if (Math.abs(val) < 1.0) {
+      percentValue = val * 100;
+    }
+    return `${percentValue.toFixed(1)}%`;
+  };
+
   // Derive key metrics
   const revenue = metrics.find((m) => {
     const name = m.normalized_metric_name.toUpperCase();
     return name === "REVENUE" || name === "TOTAL_REVENUE";
   });
-  const grossMargin = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "GROSS_MARGIN");
+
+  const grossMarginMetric = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "GROSS_MARGIN");
+  const grossMarginAnalytic = analytics.find((a) => a.metric_name?.toUpperCase() === "GROSS_MARGIN" || a.signal_code?.toUpperCase() === "GROSS_MARGIN");
+  const grossMarginValue = grossMarginMetric ? grossMarginMetric.value : grossMarginAnalytic ? grossMarginAnalytic.value : null;
+  const grossMarginSource = grossMarginMetric ? "metric" : "analytic";
+
   const netIncome = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "NET_INCOME");
-  const ebitda = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "EBITDA");
+
+  const ebitdaMetric = metrics.find((m) => m.normalized_metric_name.toUpperCase() === "EBITDA");
+  const ebitdaAnalytic = analytics.find((a) => a.metric_name?.toUpperCase() === "EBITDA" || a.signal_code?.toUpperCase() === "EBITDA");
+  const ebitdaValue = ebitdaMetric ? ebitdaMetric.value : ebitdaAnalytic ? ebitdaAnalytic.value : null;
+  const ebitdaUnit = ebitdaMetric ? ebitdaMetric.unit : null;
+  const ebitdaCurrency = ebitdaMetric ? ebitdaMetric.currency : null;
 
   // Build chart data from comparisons
   const revenueComps = comparisons.filter((c) => c.metric_name.toLowerCase().includes("revenue"));
@@ -145,22 +196,22 @@ export default function FinancialPage() {
           <div className="card-grid">
             <MetricCard
               label="Revenue"
-              value={revenue ? `$${revenue.value.toLocaleString()}${revenue.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              value={formatCurrency(revenue?.value, revenue?.unit, revenue?.currency)}
               icon={<DollarSign className="w-5 h-5 text-brand-600" />}
             />
             <MetricCard
               label="Gross Margin"
-              value={grossMargin ? `${grossMargin.value}%` : "—"}
+              value={formatPercentage(grossMarginValue, grossMarginSource)}
               icon={<Percent className="w-5 h-5 text-success" />}
             />
             <MetricCard
               label="Net Income"
-              value={netIncome ? `$${netIncome.value.toLocaleString()}${netIncome.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              value={formatCurrency(netIncome?.value, netIncome?.unit, netIncome?.currency)}
               icon={<TrendingUp className="w-5 h-5 text-indigo-600" />}
             />
             <MetricCard
               label="EBITDA"
-              value={ebitda ? `$${ebitda.value.toLocaleString()}${ebitda.unit === 'BILLION' ? 'B' : 'M'}` : "—"}
+              value={formatCurrency(ebitdaValue, ebitdaUnit, ebitdaCurrency)}
               icon={<DollarSign className="w-5 h-5 text-warning" />}
             />
           </div>

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,66 +22,72 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 async def get_current_user(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     token: str | None = Depends(oauth2_scheme),
 ) -> User:
     """Extract and authenticate the current user from JWT token."""
-    if settings.demo_mode:
-        stmt = select(User).where(User.email == "demo@example.com")
+    # If token is present, we must validate it (even in local / demo modes)
+    if token:
+        try:
+            payload = decode_token(token)
+            if payload.get("type") != "access":
+                raise AuthenticationError("Invalid token type")
+            user_id = payload.get("sub")
+            if not user_id:
+                raise AuthenticationError("Could not validate credentials")
+        except Exception as e:
+            raise AuthenticationError("Could not validate credentials") from e
+
+        stmt = select(User).where(User.id == user_id)
         result = await db.execute(stmt)
         user = result.scalar_one_or_none()
+
         if user is None:
-            from app.core.security import hash_password
-            user = User(
-                email="demo@example.com",
-                password_hash=hash_password("demopassword"),
-                role=UserRole.ADMIN,
-                is_active=True,
-            )
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
+            raise AuthenticationError("User not found")
+
         return user
 
-    if settings.app_env.value == "local" and not token:
-        # For local development, automatically fall back to or create a dev admin user
-        stmt = select(User).where(User.email == "dev@example.com")
-        result = await db.execute(stmt)
-        user = result.scalar_one_or_none()
-        if user is None:
-            from app.core.security import hash_password
-            user = User(
-                email="dev@example.com",
-                password_hash=hash_password("devpassword"),
-                role=UserRole.ADMIN,
-                is_active=True,
-            )
-            db.add(user)
-            await db.commit()
-            await db.refresh(user)
-        return user
+    # No token is present
+    is_validation = request.headers.get("x-validation-client") == "true"
 
-    if not token:
-        raise AuthenticationError("Not authenticated")
+    if not is_validation:
+        if settings.demo_mode:
+            stmt = select(User).where(User.email == "demo@example.com")
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
+            if user is None:
+                from app.core.security import hash_password
+                user = User(
+                    email="demo@example.com",
+                    password_hash=hash_password("demopassword"),
+                    role=UserRole.ADMIN,
+                    is_active=True,
+                )
+                db.add(user)
+                await db.commit()
+                await db.refresh(user)
+            return user
 
-    try:
-        payload = decode_token(token)
-        if payload.get("type") != "access":
-            raise AuthenticationError("Invalid token type")
-        user_id = payload.get("sub")
-        if not user_id:
-            raise AuthenticationError("Could not validate credentials")
-    except Exception as e:
-        raise AuthenticationError("Could not validate credentials") from e
+        if settings.app_env.value == "local":
+            # For local development, automatically fall back to or create a dev admin user
+            stmt = select(User).where(User.email == "dev@example.com")
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
+            if user is None:
+                from app.core.security import hash_password
+                user = User(
+                    email="dev@example.com",
+                    password_hash=hash_password("devpassword"),
+                    role=UserRole.ADMIN,
+                    is_active=True,
+                )
+                db.add(user)
+                await db.commit()
+                await db.refresh(user)
+            return user
 
-    stmt = select(User).where(User.id == user_id)
-    result = await db.execute(stmt)
-    user = result.scalar_one_or_none()
-
-    if user is None:
-        raise AuthenticationError("User not found")
-
-    return user
+    raise AuthenticationError("Not authenticated")
 
 
 async def get_active_user(

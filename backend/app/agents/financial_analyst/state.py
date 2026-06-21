@@ -13,6 +13,7 @@ class AgentState(TypedDict):
     """LangGraph State representation for the Financial Analyst agent."""
     query: str
     company_id: uuid.UUID | None
+    report_id: uuid.UUID | None
     thread_id: str
     history: list[dict[str, str]]
     

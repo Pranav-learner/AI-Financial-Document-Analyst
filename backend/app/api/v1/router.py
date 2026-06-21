@@ -22,6 +22,7 @@ from app.api.v1.endpoints import (
     memo,
     metrics,
     rag,
+    rag_pipeline,
     reports,
     risks,
     search,
@@ -68,6 +69,7 @@ api_router.include_router(tone.router, tags=["tone"], dependencies=[Depends(Role
 
 # Advanced Retrieval & RAG (Phase 6)
 api_router.include_router(rag.router, prefix="/rag", tags=["rag"], dependencies=[Depends(RoleChecker(UserRole.VIEWER))])
+api_router.include_router(rag_pipeline.router, prefix="/rag", tags=["rag-diagnostics"], dependencies=[Depends(RoleChecker(UserRole.VIEWER))])
 
 # Financial Analyst Agent System (Phase 7)
 api_router.include_router(agent.router, prefix="/agent", tags=["agent"], dependencies=[Depends(RoleChecker(UserRole.VIEWER))])

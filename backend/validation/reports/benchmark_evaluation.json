@@ -4,7 +4,7 @@
   "passed": 9,
   "failed": 0,
   "warned": 0,
-  "duration_s": 1.314,
+  "duration_s": 2.134,
   "measurements": {
     "actual_order": [
       "DEMO-APX",
@@ -54,7 +54,7 @@
     {
       "name": "benchmark compare 200",
       "passed": true,
-      "detail": "HTTP 200 in 126ms",
+      "detail": "HTTP 200 in 137ms",
       "warn": false,
       "data": {}
     },
