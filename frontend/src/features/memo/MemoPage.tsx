@@ -6,7 +6,8 @@ import ErrorFallback from "@/design-system/patterns/ErrorFallback";
 import EmptyState from "@/components/EmptyState";
 import CitationBadge from "@/components/CitationBadge";
 import { useReports } from "@/hooks/useReports";
-import { useMemoDetails, useGenerateMemo, useMemoExport } from "@/hooks/useMemos";
+import { useMemoDetails, useGenerateMemo } from "@/hooks/useMemos";
+import { downloadMemoPdf } from "@/services/memoService";
 import { FileText, FileDown, Plus, X, Search, Info } from "lucide-react";
 import Button from "@/design-system/components/Button";
 
@@ -16,7 +17,7 @@ export default function MemoPage() {
 
   const [selectedReportId, setSelectedReportId] = useState("");
   const [memoId, setMemoId] = useState("");
-  const [exportFormat, setExportFormat] = useState<"markdown" | "json" | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Custom interactive citation details modal state
   const [activeCitation, setActiveCitation] = useState<{
@@ -30,7 +31,6 @@ export default function MemoPage() {
 
   const { data: memo, isLoading, isError, refetch } = useMemoDetails(memoId || undefined);
   const generateMutation = useGenerateMemo();
-  const exportQuery = useMemoExport(memoId || undefined, exportFormat || "markdown", !!exportFormat);
 
   const handleGenerate = async () => {
     if (!reportId) return;
@@ -52,9 +52,32 @@ export default function MemoPage() {
     }
   };
 
-  const handleExport = (format: "markdown" | "json") => {
-    setExportFormat(format);
+  const handleDownloadPdf = async () => {
+    if (!memoId) return;
+    setIsDownloading(true);
+    try {
+      const blob = await downloadMemoPdf(memoId);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      
+      // Clean filename
+      const companyName = memo?.title || "Investment Memo";
+      const filename = `${companyName.replace(/[\s\W]+/g, "_").toLowerCase()}.pdf`;
+      
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to download investment memo PDF.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
+
 
   if (isLoading) {
     return (
@@ -153,22 +176,14 @@ export default function MemoPage() {
             </div>
             <div className="flex gap-2">
               <Button
-                onClick={() => handleExport("markdown")}
-                variant="outline"
-                className="flex items-center gap-1.5 text-xs"
-                disabled={memo.status !== "COMPLETED"}
+                onClick={handleDownloadPdf}
+                variant="primary"
+                className="flex items-center gap-1.5 text-xs font-semibold px-4 py-2"
+                disabled={memo.status !== "COMPLETED" || isDownloading}
+                loading={isDownloading}
               >
                 <FileDown className="w-4 h-4" />
-                Export Markdown
-              </Button>
-              <Button
-                onClick={() => handleExport("json")}
-                variant="outline"
-                className="flex items-center gap-1.5 text-xs"
-                disabled={memo.status !== "COMPLETED"}
-              >
-                <FileDown className="w-4 h-4" />
-                Export JSON
+                {isDownloading ? "Downloading..." : "⬇ Download Investment Memo (PDF)"}
               </Button>
             </div>
           </div>
@@ -192,35 +207,6 @@ export default function MemoPage() {
             </div>
           )}
 
-          {/* Export Panel with loading spinner */}
-          {exportFormat && (
-            <div className="glass-panel p-5 bg-surface-50 border border-surface-200 animate-slide-up">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-xs font-bold text-brand-650 uppercase tracking-wider">
-                  Export Panel Output ({exportFormat})
-                </span>
-                <button
-                  onClick={() => setExportFormat(null)}
-                  className="p-1 rounded-lg text-surface-400 hover:text-surface-650 hover:bg-surface-200/50 transition-colors"
-                  type="button"
-                  aria-label="Close export panel"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              
-              {exportQuery.isLoading ? (
-                <div className="space-y-2 py-4">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                </div>
-              ) : (
-                <pre className="p-4 bg-surface-900 text-surface-100 rounded-lg overflow-x-auto text-xs font-mono max-h-60 border border-surface-850">
-                  {exportQuery.data?.exported_content}
-                </pre>
-              )}
-            </div>
-          )}
 
           {/* Executive Summary */}
           {memo.executive_summary && (

@@ -61,7 +61,7 @@ class ValidationClient:
         return f"{self.base_url}{self.prefix}{path}"
 
     def _headers(self, auth: bool, extra: dict[str, str] | None = None) -> dict[str, str]:
-        h: dict[str, str] = {}
+        h: dict[str, str] = {"X-Validation-Client": "true"}
         if auth and self._token:
             h["Authorization"] = f"Bearer {self._token}"
         if extra:

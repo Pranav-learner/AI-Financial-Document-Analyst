@@ -74,3 +74,4 @@ celery_app.conf.update(
     worker_max_tasks_per_child=100,      # restart worker child process after 100 tasks
     worker_max_memory_per_child=512000,  # restart worker child process if RAM exceeds 512MB
 )
+

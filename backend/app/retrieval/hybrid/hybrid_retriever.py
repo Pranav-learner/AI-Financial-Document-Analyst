@@ -144,9 +144,12 @@ class HybridRetrievalService:
     async def _filtered_search(
         self, query_vector, plan: FilterPlan, top_k: int
     ) -> list[SearchResult]:
-        await self.session.execute(
-            select(func.set_config("hnsw.ef_search", str(int(settings.hnsw_ef_search)), True))
-        )
+        try:
+            await self.session.execute(
+                select(func.set_config("hnsw.ef_search", str(int(settings.hnsw_ef_search)), True))
+            )
+        except Exception as exc:
+            log.warning("hybrid.ef_search_failed", ef_search=settings.hnsw_ef_search, error=str(exc))
         apply = self._base(plan)
         distance = DocumentChunk.embedding.cosine_distance(query_vector).label("distance")
         stmt = apply(select(DocumentChunk, distance)).order_by(distance).limit(top_k)

@@ -103,7 +103,7 @@ def run(client: ValidationClient | None = None) -> Suite:
                      f"HTTP {memo.status}, status={memo.json().get('status') if memo.status==200 else '-'}")
 
         # Stage 10: Agent response (best-effort — LLM may be rate-limited).
-        agent = client.request("POST", "/agent/chat", timeout=90, json={
+        agent = client.request("POST", "/agent/chat", timeout=300, json={
             "query": "What are the principal risks?", "thread_id": "e2e-smoke", "company_id": company_id,
         })
         agent_answered = agent.status == 200 and bool(agent.json().get("answer"))

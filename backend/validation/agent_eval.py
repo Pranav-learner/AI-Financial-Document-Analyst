@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 import uuid
 from pathlib import Path
 
@@ -55,7 +56,7 @@ def run(client: ValidationClient | None = None) -> Suite:
     suite = Suite("Agent Evaluation")
     own = client is None
     client = client or ValidationClient()
-    timeout = float(os.environ.get("AGENT_EVAL_TIMEOUT", "90"))
+    timeout = float(os.environ.get("AGENT_EVAL_TIMEOUT", "300"))
     try:
         client.ensure_auth()
         cases = json.loads(DATASET.read_text())["cases"]
@@ -69,7 +70,9 @@ def run(client: ValidationClient | None = None) -> Suite:
         answered = 0
         evidence_cases = 0
 
-        for case in cases:
+        for idx, case in enumerate(cases):
+            if idx > 0:
+                time.sleep(10)
             cid = case["id"]
             thread_id = f"agent-eval-{cid}-{uuid.uuid4().hex[:6]}"
             payload = {

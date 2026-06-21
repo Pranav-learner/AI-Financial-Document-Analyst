@@ -14,8 +14,10 @@ from __future__ import annotations
 from enum import Enum
 from functools import lru_cache
 
-from pydantic import Field, computed_field
+from pydantic import Field, computed_field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEFAULT_DB_SYNC = "postgresql+psycopg://analyst:analyst@localhost:5432/financial_analyst"
 
 
 class Environment(str, Enum):
@@ -62,6 +64,34 @@ class Settings(BaseSettings):
     db_max_overflow: int = 20
     db_echo: bool = False
 
+    @model_validator(mode="after")
+    def _normalize_db_urls(self) -> "Settings":
+        """Make a single `DATABASE_URL` sufficient everywhere.
+
+        Managed hosts (e.g. Render) expose only one connection string, often as
+        ``postgres://…`` with no driver. The async engine needs ``+asyncpg`` and
+        Alembic/Celery need a ``+psycopg`` sync URL. Normalize the async URL and
+        derive the sync URL from it whenever ``DATABASE_URL_SYNC`` wasn't set —
+        so deploys don't 500 on a localhost fallback or a missing driver.
+        """
+        def _with_driver(url: str, driver: str) -> str:
+            if url.startswith("postgres://"):
+                return url.replace("postgres://", f"postgresql+{driver}://", 1)
+            if url.startswith("postgresql://"):
+                return url.replace("postgresql://", f"postgresql+{driver}://", 1)
+            if "+asyncpg" in url:
+                return url.replace("+asyncpg", f"+{driver}")
+            if "+psycopg" in url:
+                return url.replace("+psycopg", f"+{driver}")
+            return url
+
+        self.database_url = _with_driver(self.database_url, "asyncpg")
+        if self.database_url_sync == _DEFAULT_DB_SYNC:
+            self.database_url_sync = _with_driver(self.database_url, "psycopg")
+        else:
+            self.database_url_sync = _with_driver(self.database_url_sync, "psycopg")
+        return self
+
     # ---- Redis / Celery ----
     redis_url: str = "redis://localhost:6379/0"
     celery_broker_url: str = "redis://localhost:6379/1"
@@ -69,7 +99,7 @@ class Settings(BaseSettings):
 
     # ---- LLM / Embeddings ----
     gemini_api_key: str = ""
-    gemini_llm_model: str = "gemini-2.5-pro"
+    gemini_llm_model: str = "gemini-2.5-flash"
     # Phase 2A: finalized. `gemini-embedding-001` (GA) returns 3072-dim vectors
     # natively; we request a Matryoshka-truncated 768-dim output (then re-normalize)
     # so the column stays within pgvector's 2000-dim HNSW/IVFFlat index limit for

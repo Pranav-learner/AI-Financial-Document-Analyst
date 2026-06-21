@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import json
 import uuid
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Response
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,7 +13,10 @@ from app.api.deps import RoleChecker
 from app.services.rate_limiter import RateLimitCheck
 from app.services.cache_service import CacheService, cache_endpoint
 from app.core.exceptions import NotFoundError, ValidationError
-from app.db.session import get_db
+from app.db.session import get_db, SyncSessionLocal
+from app.services.pdf_generator import PDFMemoGenerator
+from app.memo.memo_package_builder import MemoPackageBuilder
+
 from app.models.memo import InvestmentMemo, MemoSection
 from app.models.enums import MemoStatus, UserRole
 from app.memo.memo_models import (
@@ -220,3 +224,59 @@ async def export_memo(
         format=format,
         exported_content=exported_content
     )
+
+
+@router.get(
+    "/{memo_id}/pdf",
+    summary="Export generated memo as a publication-grade PDF document",
+)
+async def export_memo_pdf(
+    memo_id: uuid.UUID,
+) -> Response:
+    """Generates and downloads a professional, publication-quality A4 PDF of the investment memo."""
+    def generate_pdf_sync(m_id: uuid.UUID):
+        with SyncSessionLocal() as session:
+            # 1. Fetch memo
+            stmt = select(InvestmentMemo).where(InvestmentMemo.id == m_id)
+            memo = session.scalar(stmt)
+            if not memo:
+                raise NotFoundError("Investment memo not found", details={"memo_id": str(m_id)})
+            
+            if memo.status != MemoStatus.COMPLETED:
+                raise ValidationError(
+                    f"Cannot export PDF for memo in status '{memo.status}'. Memo must be COMPLETED.",
+                    details={"memo_id": str(m_id)}
+                )
+            
+            # 2. Reconstruct package
+            package_builder = MemoPackageBuilder(session)
+            package = package_builder.build(
+                company_id=memo.company_id,
+                report_id=memo.report_id,
+                benchmark_run_id=memo.benchmark_run_id
+            )
+            
+            # 3. Generate PDF bytes
+            pdf_gen = PDFMemoGenerator(memo, package)
+            return pdf_gen.build_pdf(), memo.title
+
+    try:
+        pdf_bytes, title = await run_in_threadpool(generate_pdf_sync, memo_id)
+    except NotFoundError as exc:
+        raise exc
+    except ValidationError as exc:
+        raise exc
+    except Exception as exc:
+        raise ValidationError(f"Failed to generate PDF: {exc}", details={"memo_id": str(memo_id)})
+
+    # Return as attachment or inline download
+    filename = f"{title.replace(' ', '_').lower()}.pdf"
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}"'
+    }
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers=headers
+    )
+

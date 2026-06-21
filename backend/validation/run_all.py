@@ -76,6 +76,9 @@ def main() -> int:
 
     started = time.time()
     for name, fn in runners:
+        if name == "Agent Evaluation":
+            print("  Waiting 60s for API quota cooldown...")
+            time.sleep(60)
         print(bold(f"\n──── {name} ────"))
         try:
             suites.append(fn())

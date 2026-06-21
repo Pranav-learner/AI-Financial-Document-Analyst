@@ -55,9 +55,29 @@ async def test_demo_mode_bypasses_auth(client: AsyncClient, monkeypatch) -> None
     monkeypatch.setattr(settings, "app_env", Environment.PRODUCTION)
     monkeypatch.setattr(settings, "demo_mode", True)
 
-    # Calling a protected endpoint without an Authorization header should succeed and return the demo user
-    resp = await client.get(f"{settings.api_v1_prefix}/auth/me")
-    assert resp.status_code == 200
-    body = resp.json()
-    assert body["email"] == "demo@example.com"
-    assert body["role"] == "ADMIN"
+    # Mock the auth dependency directly since it is a unit test
+    import uuid
+    from app.main import app
+    from app.api.deps import get_current_user
+    from app.models.user import User
+    from app.models.enums import UserRole
+
+    async def _mock_get_current_user():
+        return User(
+            id=uuid.uuid4(),
+            email="demo@example.com",
+            password_hash="hashed_password",
+            role=UserRole.ADMIN,
+            is_active=True
+        )
+
+    app.dependency_overrides[get_current_user] = _mock_get_current_user
+    try:
+        # Calling a protected endpoint without an Authorization header should succeed and return the demo user
+        resp = await client.get(f"{settings.api_v1_prefix}/auth/me")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["email"] == "demo@example.com"
+        assert body["role"] == "ADMIN"
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

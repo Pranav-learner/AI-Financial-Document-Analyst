@@ -15,6 +15,7 @@ class ChatRequest(BaseModel):
     query: str
     thread_id: str
     company_id: uuid.UUID | None = None
+    report_id: uuid.UUID | None = None
 
 
 class CitationOut(BaseModel):

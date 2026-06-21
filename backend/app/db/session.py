@@ -10,6 +10,8 @@ A lightweight `ping()` is exposed for the readiness probe (/ready).
 
 from __future__ import annotations
 
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import create_engine, text
@@ -23,15 +25,48 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core.config import settings
 from app.core.logging import get_logger
 
+def _build_async_url_and_args() -> tuple[str, dict]:
+    """asyncpg rejects sslmode/channel_binding as URL query params — strip them
+    and pass ssl=True via connect_args instead (which asyncpg handles correctly).
+    """
+    raw_url = settings.database_url
+    parsed = urlparse(raw_url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+
+    connect_args: dict = {"prepared_statement_cache_size": 0}
+    needs_ssl = (
+        "sslmode=require" in raw_url
+        or "ssl=require" in raw_url
+        or ".neon.tech" in raw_url
+        or ".upstash.io" in raw_url
+    )
+
+    # Strip SSL/channel_binding params that asyncpg can't handle as URL query args
+    for key in ("sslmode", "channel_binding", "ssl"):
+        if key in params:
+            params.pop(key)
+            needs_ssl = True  # if it was explicitly in URL, we definitely need SSL
+
+    if needs_ssl:
+        connect_args["ssl"] = True
+
+    clean_query = urlencode(params, doseq=True)
+    clean_url = urlunparse(parsed._replace(query=clean_query))
+    return clean_url, connect_args
+
+
+_async_url, _async_connect_args = _build_async_url_and_args()
+
 # Single application-wide async engine (connection pool).
 engine = create_async_engine(
-    settings.database_url,
+    _async_url,
     echo=settings.db_echo,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
     pool_recycle=1800,
     pool_timeout=30,
     pool_pre_ping=True,
+    connect_args=_async_connect_args,
 )
 
 # Session factory — `expire_on_commit=False` so objects stay usable after commit.
@@ -109,14 +144,41 @@ async def verify_database_health() -> None:
 # engine across ad-hoc event loops, the worker uses a plain sync session
 # (psycopg driver, same as Alembic). The API layer remains fully async.
 # ---------------------------------------------------------------------------
+def _build_sync_url_and_args() -> tuple[str, dict]:
+    """psycopg3 does not accept sslmode/channel_binding as URL query params —
+    SQLAlchemy would forward them as Python kwargs to connect(), which rejects
+    them. Strip those params from the URL and pass sslmode via connect_args
+    instead (which psycopg3 forwards correctly to libpq).
+    """
+    raw_url = settings.database_url_sync
+    parsed = urlparse(raw_url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+
+    # Extract SSL-related params that psycopg3 can't handle as URL query args
+    connect_args: dict = {"prepare_threshold": None}
+    for key in ("sslmode", "channel_binding"):
+        if key in params:
+            value = params.pop(key)[0]
+            if key == "sslmode":
+                connect_args["sslmode"] = value
+            # channel_binding is not a valid psycopg3 connect kwarg — drop it
+
+    clean_query = urlencode(params, doseq=True)
+    clean_url = urlunparse(parsed._replace(query=clean_query))
+    return clean_url, connect_args
+
+
+_sync_url, _sync_connect_args = _build_sync_url_and_args()
+
 sync_engine = create_engine(
-    settings.database_url_sync,
+    _sync_url,
     echo=settings.db_echo,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
     pool_recycle=1800,
     pool_timeout=30,
     pool_pre_ping=True,
+    connect_args=_sync_connect_args,
 )
 
 SyncSessionLocal = sessionmaker(
