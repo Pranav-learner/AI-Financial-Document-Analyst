@@ -22,7 +22,7 @@ export default function AppLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Sticky Top Header */}
         <header
-          className="sticky top-0 z-30 h-16 bg-white dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700 px-6 flex items-center justify-between transition-colors duration-200"
+          className="sticky top-0 z-30 h-16 bg-white/80 dark:bg-surface-900/80 backdrop-blur-md border-b border-surface-200 dark:border-surface-700 px-6 flex items-center justify-between transition-colors duration-200"
           role="banner"
         >
           <div className="flex items-center gap-4">
